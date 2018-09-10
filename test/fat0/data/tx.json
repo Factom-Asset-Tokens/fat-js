@@ -1,0 +1,20 @@
+{
+  "input": {
+    "address": "FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM",
+    "amount": 100
+  },
+  "output": {
+    "address": "FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM",
+    "amount": 100
+  },
+  "rcd": "011eddd2b3cfb40c581c2afdf675c60a39baeab4cbe75e2ff8b0dc808de6a67cfe",
+  "txSalt": 88395950515565,
+  "txNonce": 3119868535,
+  "marshalBinarySig": "020000b9f56a7701010064d381a44afa76ad5ab8f0d82adb27d6ffa031302cc3bb281c86b1b3dfabde395e64d381a44afa76ad5ab8f0d82adb27d6ffa031302cc3bb281c86b1b3dfabde395e",
+  "signature": "8d4091f55eb6383514cbc569ab174469d7c4b17929bfe87a8d7879536c2eb3b1e446d0d97eb6267014da4630117c093cb0f72641b1c370351899509ed019e80c",
+  "entryHash": "e1a71b335c3be54659f84e0d36c6c53d0a7e06a960f1cf5fef3af7faac413f2f",
+
+  "idSalt": "80d87a8bd5cf2a3eca9037c2229f3701eed29360caa975531ef5fe476b1b70b5",
+  "idNonce": "96597acddfa91f58d5e20677063fedcb50dc32698f4b3f2dc2d89ea431f76b0b",
+  "idSignature": "e391d3dae910ed09cc738f880fac5d573577fdc929d58b059dc4070f6007a3f16084e3d8de1a93a6a894dc7f1261eaaad1e67e3b2b94c6f2aeba64a87b378803"
+}
