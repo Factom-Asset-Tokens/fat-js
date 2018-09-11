@@ -2,9 +2,9 @@
 
 # fat-js
 
-[![Travis (.com)](https://img.shields.io/travis/com/DBGrow/fat-js.svg?style=for-the-badge)](https://travis-ci.com/DBGrow/fat-js)
+[![Build Status](https://travis-ci.com/DBGrow/fat-js.svg?token=REedCkSxoVCAw1Krjc8q&branch=master)](https://travis-ci.com/DBGrow/fat-js)
 
-[![Coveralls github](https://img.shields.io/coveralls/github/DBGrow/fat-js.svg?style=for-the-badge)](https://coveralls.io/github/DBGrow/fat-js)
+[![Coverage Status](https://coveralls.io/repos/github/DBGrow/fat-js/badge.svg?branch=master&t=X5s8cd)](https://coveralls.io/github/DBGrow/fat-js?branch=master)
 
 [Factom Asset Token](https://github.com/DBGrow/FAT) implementation in JS :blue_heart:
 
