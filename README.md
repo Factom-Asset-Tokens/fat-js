@@ -4,6 +4,8 @@
 
 [![Travis (.com)](https://img.shields.io/travis/com/:user/:repo.svg?style=for-the-badge)](https://travis-ci.com/DBGrow/fat-js)
 
+[![Coveralls github](https://img.shields.io/coveralls/github/DBGrow/fat-js.svg?style=for-the-badge)](https://coveralls.io/github/DBGrow/fat-js)
+
 [Factom Asset Token](https://github.com/DBGrow/FAT) implementation in JS :blue_heart:
 
 Currently supports **FAT-0** & **FAT-1** token standards.
@@ -123,7 +125,7 @@ console.log(JSON.stringify(balances, undefined, 2)
 /* =>
 {
 "FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM": 100,
-"FA2ZrcG8xkwWWNfdMRw5pGNjMPEkLaxRGqacvzfLS6TGHEHZqAA4 " : 1,
+"FA2ZrcG8xkwWWNfdMRw5pGNjMPEkLaxRGqacvzfLS6TGHEHZqAA4 " : 1.00938,
 ...
 }
 */
@@ -161,7 +163,7 @@ console.log(JSON.stringify(stats, undefined, 2);
 ```javascript
 //sendTransaction(token ID, from private key, to public address, amount, EC address)
 
-let transaction = await FAT1.sendTransaction('AQQW', 'Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ', 'FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM', 100, 'Es3k4L7La1g7CY5zVLer21H3JFkXgCBCBx8eSM2q9hLbevbuoL6a');
+let transaction = await FAT0.sendTransaction('AQQW', 'Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ', 'FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM', 100, 'Es3k4L7La1g7CY5zVLer21H3JFkXgCBCBx8eSM2q9hLbevbuoL6a');
 ```
 
 
@@ -181,14 +183,14 @@ let transaction = await testToken.sendTransaction('Fs1q7FHcW4Ti9tngdGAbA3CxMjhyX
 Issue a token with ID `AQQW`, trade symbol `AQQW` , and display name `Test FAT-0 AQQW`
 
 ```javascript
-const FAT1IssuanceBuilder = FAT1.IssuanceBuilder;
-var let = new FAT1IssuanceBuilder('AQQW')
+const FAT0IssuanceBuilder = FAT0.IssuanceBuilder;
+var let = new FAT0IssuanceBuilder('AQQW')
 .setSymbol('AQQW')
 .setName('Test FAT-0 AQQW')          .setIssuerIdentity('888888ab72e748840d82c39213c969a11ca6cb026f1d3da39fd82b95b3c1fced')
 .setSK1('sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu')
 .setSupply(1000)               .setCoinbaseTransaction('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM', 100) //send 100 tokens to a public factoid address
 
-let issuanceEntryAndCoinbaseTx = await FAT1.issue(issuance, EC);
+let issuanceEntryAndCoinbaseTx = await FAT0.issue(issuance, EC);
 ```
 
 
