@@ -222,7 +222,7 @@ class FAT0 extends FAT {
         }
 
         //check digital identity exists
-        let identity = await util.getFactomIdentityManager().getIdentityInformation(issuanceParams.rootChainId);
+        let identity = await util.getFactomIdentityManager(factomParams).getIdentityInformation(issuanceParams.rootChainId);
         let identityEntries = await util.getFactomCli(factomParams).getAllEntriesOfChain(issuanceParams.rootChainId);
 
         if (!identity) throw new Error('Identity with root ID ' + issuanceParams.rootChainId + ' does not exist');

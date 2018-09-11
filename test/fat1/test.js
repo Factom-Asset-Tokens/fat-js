@@ -21,13 +21,12 @@ describe('FAT-1 Tests', function () {
     let testToken;
 
     it('Initialization', async function () {
-        /*new FAT1(testTokenId).then(function (token) {
-             testToken = token;
-             done();
-         }).catch(function (err) {
-             throw err;
-        })*/
-        testToken = await new FAT1(testTokenId);
+        testToken = await new FAT1(testTokenId, { //see https://www.npmjs.com/package/factom#instantiate-factomcli
+            factomd: {
+                host: '0.testnet.factom.dbgrow.com',
+                port: 8088
+            }
+        });
     });
 
     describe('Transaction Validation', function () {
@@ -181,11 +180,16 @@ describe('FAT-1 Tests', function () {
     });
 
     describe('API Write Methods', function () {
-        it('Send A Transaction (instance)', async function () {
+        it('Send A Transaction', async function () {
             this.timeout(60000);
 
             //transfer tokens with ID 0 from FA3umTvVhkcysBewF1sGAMeAeKDdG7kTQBbtf5nwuFUGwrNa5kAr to itself
-            let transaction = await FAT1.sendTransaction(testTokenId, 'Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ', 'FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM', ['0'], ES);
+            let transaction = await FAT1.sendTransaction(testTokenId, 'Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ', 'FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM', ['0'], ES, { //see https://www.npmjs.com/package/factom#instantiate-factomcli
+                factomd: {
+                    host: '0.testnet.factom.dbgrow.com',
+                    port: 8088
+                }
+            });
             assert(transaction, 'Failed to return a transaction');
             assert(transaction.entryHash, 'Entry Hash of transaction was not included');
             assert(testToken.validateTransaction(transaction), 'Failed to validate sent transaction');
@@ -216,7 +220,12 @@ describe('FAT-1 Tests', function () {
                 .setCoinbaseTransaction('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM', ['0']) //send token with id '0' to a public factoid address
                 .setTokens(tokens);
 
-            let issuanceEntryAndCoinbaseTx = await FAT1.issue(issuance, ES);
+            let issuanceEntryAndCoinbaseTx = await FAT1.issue(issuance, ES, { //see https://www.npmjs.com/package/factom#instantiate-factomcli
+                factomd: {
+                    host: '0.testnet.factom.dbgrow.com',
+                    port: 8088
+                }
+            });
 
             assert(issuanceEntryAndCoinbaseTx, 'Issuance Entry and Coinbase Tx Entry were not returned');
 

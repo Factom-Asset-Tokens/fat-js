@@ -17,7 +17,12 @@ const emptyAddress = fctAddressUtils.keyToPublicFctAddress(pk.getPublic()).toStr
 
 describe('FAT-0 Tests', async function () {
 
-    let testToken = await new FAT0('AQQW');
+    let testToken = await new FAT0('AQQW', {
+        factomd: {
+            host: '0.testnet.factom.dbgrow.com',
+            port: 8088
+        }
+    });
 
     describe('Transaction Validation', function () {
 
@@ -203,7 +208,12 @@ describe('FAT-0 Tests', async function () {
 
             console.log('Issuing FAT0: ' + tokenId);
 
-            let issuanceEntryAndCoinbaseTx = await FAT0.issue(issuance, ES);
+            let issuanceEntryAndCoinbaseTx = await FAT0.issue(issuance, ES,{
+                factomd: {
+                    host: '0.testnet.factom.dbgrow.com',
+                    port: 8088
+                }
+            });
 
             assert(issuanceEntryAndCoinbaseTx, 'Issuance Entry and Coinbase Tx Entry were not returned');
 

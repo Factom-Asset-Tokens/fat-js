@@ -4,39 +4,13 @@ const aesKey = 'ifjkwnfu487348fn3mu4f298m3fm23f923mfn23bf';
 const fctIdentityUtils = require('factom-identity-lib/src/crypto');
 
 const {FactomCli} = require('factom');
-var cli = new FactomCli({
-    factomd: {
-        host: 'localhost',
-        port: 8088
-        // host: '0.testnet.factom.dbgrow.com',
-        // port: 8088
-    }
-});
 
 const {Entry} = require('factom/src/entry');
 const {Chain} = require('factom/src/chain');
 
 const {FactomIdentityManager} = require('factom-identity-lib');
-const manager = new FactomIdentityManager({
-    host: 'localhost',
-    port: 8088,
-    // host: '0.testnet.factom.dbgrow.com',
-    // port: 8088
-});
 
 const {FactomdCache} = require('factomd-cache');
-
-//default settings: FactomdAPI on localhost:8088, localhost wallet on port 8089
-var factomdCache = new FactomdCache({
-    factomdParams: { //see https://www.npmjs.com/package/factom#instantiate-factomcli
-        factomd: {
-            host: 'localhost',
-            port: 8088
-            // host: '0.testnet.factom.dbgrow.com',
-            // port: 8088
-        }
-    }
-});
 
 const factomCrypto = require('factom-identity-lib/src/crypto');
 
@@ -69,9 +43,17 @@ module.exports.getFactomCli = function (factomParams) {
     else return new FactomCli();
 };
 
-module.exports.getFactomIdentityManager = function () {
-    return manager;
+module.exports.getFactomIdentityManager = function (factomParams) {
+    if (factomParams) return new FactomIdentityManager(factomParams);
+    else return new FactomIdentityManager();
 };
+
+
+module.exports.getFactomdCache = function (factomParams) {
+    if (factomParams) return new FactomdCache(factomParams);
+    else return new FactomdCache();
+};
+
 
 const min = 10000000000000;
 const max = 99999999999999;
@@ -79,13 +61,8 @@ module.exports.getNonceInt = function getNonceInt() {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-
-module.exports.getFactomdCache = function () {
-    return factomdCache;
-};
-
-module.exports.getTokenType = async function (tokenId) {
-    let issuanceEntry = await cli.getFirstEntry(module.exports.getIssuanceChainId(tokenId));
+module.exports.getTokenType = async function (tokenId, factomParams) {
+    let issuanceEntry = await module.exports.getFactomCli(factomParams).getFirstEntry(module.exports.getIssuanceChainId(tokenId));
 
     issuanceEntry = JSON.parse(aes256.decrypt(aesKey, issuanceEntry.content.toString()));
 

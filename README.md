@@ -2,7 +2,7 @@
 
 # fat-js
 
-![Travis (.com)](https://img.shields.io/travis/com/:user/:repo.svg?style=for-the-badge)
+[![Travis (.com)](https://img.shields.io/travis/com/:user/:repo.svg?style=for-the-badge)](https://travis-ci.com/DBGrow/fat-js)
 
 [Factom Asset Token](https://github.com/DBGrow/FAT) implementation in JS :blue_heart:
 
@@ -15,7 +15,9 @@ Currently supports **FAT-0** & **FAT-1** token standards.
 package.json:
 
 ```
-"fat-js": "git+https://<github_token>:x-oauth-basic@github.com/DBGrow/fat-js.git"
+"dependencies":{
+	"fat-js": "git+https://<github_token>:x-oauth-basic@github.com/DBGrow/fat-js.git"
+}
 ```
 
 or include directly on project path via clone
@@ -189,3 +191,8 @@ var let = new FAT1IssuanceBuilder('AQQW')
 let issuanceEntryAndCoinbaseTx = await FAT1.issue(issuance, EC);
 ```
 
+
+
+## Legal
+
+Icons by [Icons8](https://icons8.com)
