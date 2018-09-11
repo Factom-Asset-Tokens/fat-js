@@ -2,7 +2,7 @@
 
 # fat-js
 
-[![Travis (.com)](https://img.shields.io/travis/com/:user/:repo.svg?style=for-the-badge)](https://travis-ci.com/DBGrow/fat-js)
+[![Travis (.com)](https://img.shields.io/travis/com/DBGrow/fat-js.svg?style=for-the-badge)](https://travis-ci.com/DBGrow/fat-js)
 
 [![Coveralls github](https://img.shields.io/coveralls/github/DBGrow/fat-js.svg?style=for-the-badge)](https://coveralls.io/github/DBGrow/fat-js)
 
