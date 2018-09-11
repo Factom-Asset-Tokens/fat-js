@@ -18,8 +18,8 @@ const {FAT1IssuanceBuilder} = require('./FAT1IssuanceBuilder');
 
 class FAT1 extends FAT {
 
-    constructor(tokenId) {
-        super(tokenId);
+    constructor(tokenId,factomParams) {
+        super(tokenId, factomParams);
         this._type = 'FAT-1';
         if (!this._tokenIdFilter) this._tokenIdFilter = new BloomFilter(
             32 * 256, // number of bits to allocate.

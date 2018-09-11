@@ -50,7 +50,7 @@ module.exports.getFactomIdentityManager = function (factomParams) {
 
 
 module.exports.getFactomdCache = function (factomParams) {
-    if (factomParams) return new FactomdCache(factomParams);
+    if (factomParams) return new FactomdCache({factomdParams: factomParams});
     else return new FactomdCache();
 };
 
@@ -68,7 +68,7 @@ module.exports.getTokenType = async function (tokenId, factomParams) {
 
     if (!validateFATIssuanceFields(issuanceEntry)) throw new Error('Issuance entry was invalid!(this is not a FAT token)')
 
-    let identity = await module.exports.getFactomIdentityManager().getIdentityInformation(issuanceEntry.issuer);
+    let identity = await module.exports.getFactomIdentityManager(factomParams).getIdentityInformation(issuanceEntry.issuer);
 
     if (!identity) throw new Error('Identity not found by root chiain ID');
 

@@ -52,14 +52,9 @@ class BaseFAT {
         if (factomParams) {
             this._factomParams = factomParams;
             this._cli = new FactomCli(factomParams);
-        }
+        } else this._cli = new FactomCli();
 
-        else this._cli = new FactomCli({
-            factomd: {
-                host: 'localhost',
-                port: 8088
-            }
-        });
+        this._cache = util.getFactomdCache(factomParams);
 
         return init(this); //initial async setup to run once
     }
@@ -167,7 +162,7 @@ class BaseFAT {
 
     //cleanup/other
     close() {
-        util.getFactomdCache().close();
+        this._cache.close();
     }
 
     static generateTransaction() {
@@ -222,7 +217,7 @@ async function init(self) {
     let issuanceEntry = parse(issuanceEntries[0]);
 
     //get the issuer's digital identity rootId from issuance entry
-    self._identity = await util.getFactomIdentityManager().getIdentityInformation(issuanceEntry.issuer);
+    self._identity = await util.getFactomIdentityManager(self._factomParams).getIdentityInformation(issuanceEntry.issuer);
 
     //check preimage is found and correct
     let identityEntries = await self._cli.getAllEntriesOfChain(issuanceEntry.issuer);
@@ -250,7 +245,7 @@ async function init(self) {
     });
     self._issuances.unshift(issuanceEntry);
 
-    let transactions = await util.getFactomdCache().cacheChain(self._transactionChainId);
+    let transactions = await self._cache.cacheChain(self._transactionChainId);
     self._transactions = await new Promise((resolve, reject) => {
         async.reduce(transactions, [], function (results, tx, callback) {
             tx = self.parseTransaction(tx);
@@ -266,7 +261,7 @@ async function init(self) {
     });
 
     //listen for new transactions, fire events
-    util.getFactomdCache().on('new-entries', self._transactionChainId, function (transactionEntries) {
+    self._cache.on('new-entries', self._transactionChainId, function (transactionEntries) {
 
         transactionEntries = transactionEntries.filter(function (tx) {
             tx = parse(tx);

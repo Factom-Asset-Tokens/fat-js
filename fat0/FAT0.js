@@ -19,8 +19,8 @@ const {FAT0IssuanceBuilder} = require('./FAT0IssuanceBuilder');
 
 class FAT0 extends FAT {
 
-    constructor(tokenId) {
-        super(tokenId);
+    constructor(tokenId, factomParams) {
+        super(tokenId, factomParams);
         this._type = 'FAT-0';
     }
 

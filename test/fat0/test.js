@@ -100,6 +100,7 @@ describe('FAT-0 Tests', async function () {
         });
 
         it('Get Transactions', function () {
+            this.timeout(60000);
             const transactions =
                 testToken.getTransactions();
 
@@ -113,6 +114,7 @@ describe('FAT-0 Tests', async function () {
         });
 
         it('Get Transaction', function () {
+            this.timeout(60000);
             let tx = testToken.getTransaction('e1a71b335c3be54659f84e0d36c6c53d0a7e06a960f1cf5fef3af7faac413f2f');
 
             assert(tx !== undefined, 'Failed to return a known transaction');
@@ -153,6 +155,8 @@ describe('FAT-0 Tests', async function () {
         });
 
         it('Get Transaction History Of Address', function () {
+            this.timeout(60000);
+
             let transactions = testToken.getTransactionsOfAddress('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
 
             assert(Array.isArray(transactions), 'Transaction history was not an array');
