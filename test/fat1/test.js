@@ -129,6 +129,34 @@ describe('FAT-1 Tests', function () {
             assert(testToken.validateTransaction(tx), 'Failed to validate known transaction');
         });
 
+        it('Get Transaction History of Token', function () {
+            let transactions = testToken.getTransactionsOfToken('0');
+
+            assert(Array.isArray(transactions), 'Transaction history was not an array');
+            assert(transactions.length > 0, 'Transaction history was not valid, no transactions returned');
+            assert(transactions.every(function (tx) {
+                return testToken.validateTransaction(tx)
+            }), 'Library returns invalid transactions from API call');
+
+            assert.throws(() => testToken.getTransactionsOfToken(emptyAddress));
+        });
+
+        it('Get Token', function () {
+            let token = testToken.getToken('0');
+
+            assert(token !== undefined, 'Failed to return a token');
+
+
+            assert(token.transactions !== undefined, 'Failed to return a token');
+            assert(Array.isArray(token.transactions), 'Transaction history was not an array');
+            assert(token.transactions.length > 0, 'Transaction history was not valid, no transactions returned');
+            assert(token.transactions.every(function (tx) {
+                return testToken.validateTransaction(tx)
+            }), 'Library returns invalid transactions from API call');
+
+            assert.throws(() => testToken.getToken(emptyAddress));
+        });
+
         it('Get Balances', function () {
             const balances =
                 testToken.getBalances();
@@ -148,6 +176,7 @@ describe('FAT-1 Tests', function () {
         it('Get Balance Of Address', function () {
             //balance of known non-empty address
             let balance = testToken.getBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
+
             assert(balance !== undefined, 'Balance was not included');
             assert(Array.isArray(balance), 'Balance was not an Array');
             assert(balance.length > 0, 'Balance of known address should be greater than 0');

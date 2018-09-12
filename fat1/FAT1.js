@@ -257,6 +257,24 @@ class FAT1 extends FAT {
         return stats;
     }
 
+    getToken(tokenId) {
+        let issuance = this._issuances.find(issuance => issuance.tokens.find(token => token.id === tokenId));
+        let timestamp = issuance.timestamp;
+        let entryHash = issuance.entryHash;
+        let token = issuance.tokens.find(token => token.id === tokenId);
+        if (!token) throw new Error('Token with ID ' + tokenId + ' not found!')
+
+        token.timestamp = timestamp;
+        token.issuanceEntryHash = entryHash;
+        token.transactions = this.getTransactionsOfToken(tokenId);
+        return token;
+    }
+
+    getTransactionsOfToken(tokenId) {
+        let txs = this.getTransactions().filter(tx => tx.tokenIds.find(id => tokenId === id));
+        if (txs.length === 0) throw new Error('Token with ID ' + tokenId + ' not found');
+        return txs;
+    }
 
     //write methods
     static async issue(issuanceBuilder, ES, factomParams) {
