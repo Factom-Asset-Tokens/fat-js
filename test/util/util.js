@@ -12,7 +12,7 @@ describe('Utils', function () {
 
     it('Get Token Type', async function () {
         this.timeout(60000);
-        let type = await util.getTokenType('mytoken', {
+        let type = await util.getTokenType('AQQW', {
             factomd: {
                 host: '0.testnet.factom.dbgrow.com',
                 port: 8088
@@ -20,7 +20,7 @@ describe('Utils', function () {
         });
         assert(type === 'FAT-0', 'Token Type was incorrect. Expecting FAT-0 for token mytoken');
 
-        type = await util.getTokenType('greple', {
+        type = await util.getTokenType('FJLC', {
             factomd: {
                 host: '0.testnet.factom.dbgrow.com',
                 port: 8088

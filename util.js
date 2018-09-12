@@ -72,22 +72,13 @@ module.exports.getTokenType = async function (tokenId, factomParams) {
 
     if (!identity) throw new Error('Identity not found by root chiain ID');
 
-    //validate this token
-    if (!fctIdentityUtils.verify(Buffer.from(issuanceEntry.idKey, 'hex'), Buffer.from(issuanceEntry.nonce, 'hex'), Buffer.from(issuanceEntry.signature, 'hex'))) throw new Error('Issuance entry was invalid!');
-
     return issuanceEntry.type;
-
 };
 
 //basic validation to enforce field inclusion
 function validateFATIssuanceFields(issuance) {
-    return issuance.issuer &&
-        issuance.idKey &&
-        issuance.salt &&
-        issuance.nonce &&
-        issuance.signature &&
-        ['FAT-0', 'FAT-1'].includes(issuance.type) &&
-        issuance.supply
+    return issuance.issuer !== undefined &&
+        issuance.type !== undefined
 }
 
 
