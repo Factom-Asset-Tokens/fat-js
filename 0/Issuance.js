@@ -13,7 +13,9 @@ class IssuanceBuilder {
         this._tokenId = tokenId;
 
         if (!factomCryptoValidation.isValidSk1(sk1)) throw new Error("Supplied key is not a valid sk1 private key");
-        this.sk1 = sk1;
+        this._sk1 = sk1;
+
+        this._type = 'FAT-0'
     }
 
     name(name) {
@@ -61,7 +63,7 @@ class Issuance {
     constructor(builder) {
 
         if (builder instanceof IssuanceBuilder) {
-
+            this.type = builder._type;
             this.name = builder._name;
             this.symbol = builder._symbol;
             this.supply = builder._supply;
@@ -75,6 +77,7 @@ class Issuance {
             this.extIds = [fctIdentityCrypto.sign(builder._sk1, util.getTransactionChainId(builder._tokenId, builder._rootChainId) + this.content)];
 
         } else if (typeof builder === 'object') {
+            this.type = builder.type;
             this.name = builder.name;
             this.symbol = builder.symbol;
             this.supply = builder.supply;

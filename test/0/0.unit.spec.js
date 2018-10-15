@@ -72,12 +72,19 @@ describe('Unit Spec', function () {
 
         it('Transaction Builder Coinbase Transaction', function () {
 
+
         });
     });
 
     describe('Issuance Builder', function () {
 
         it('Constructor', function () {
+
+            let issuance = new IssuanceBuilder("888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "mytoken", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
+                .supply(1000000)
+                .name('Test Token')
+                .symbol('TTK')
+                .build()
 
         });
     });
@@ -91,7 +98,12 @@ describe('Unit Spec', function () {
         });
 
         it('Basic RPC Spec', function () {
-            let RPC = new RPCBuilder().build();
+            let RPC = new RPCBuilder()
+                .host('fatnode.mysite.com')
+                .port(1234)
+                .version('v0')
+                .auth('my-user', 'my-pass')
+                .build();
 
             //token RPC
             assert(RPC['getTokenRPC'] !== undefined, "Token RPC Method was not defined");
@@ -101,7 +113,7 @@ describe('Unit Spec', function () {
         });
 
         it('Basic Token RPC Spec', function () {
-            let TokenRPC = new RPCBuilder().build().getTokenRPC(`888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762`, 'mytoken');
+            let TokenRPC = new RPCBuilder().build().getTokenRPC("888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", 'mytoken');
             assert(TokenRPC['getBalance'] !== undefined, "getBalance method was not defined");
             assert(typeof TokenRPC['getBalance'] === 'function', "getBalance method was not a function");
 

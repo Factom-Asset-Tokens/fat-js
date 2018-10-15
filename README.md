@@ -6,9 +6,9 @@
 
 [![Coverage Status](https://coveralls.io/repos/github/DBGrow/fat-js/badge.svg?branch=master&t=X5s8cd)](https://coveralls.io/github/DBGrow/fat-js?branch=master)
 
-[Factom Asset Token](https://github.com/DBGrow/FAT) implementation in JS :blue_heart:
+[Factom Asset Token](https://github.com/DBGrow/FAT) Client and RPC implementation in JS :blue_heart:
 
-Currently supports **FAT-0** & **FAT-1** token standards.
+Currently supports **FAT-0** token standard.
 
 
 
@@ -16,87 +16,117 @@ Currently supports **FAT-0** & **FAT-1** token standards.
 
 package.json:
 
-```
+```json
 "dependencies":{
-	"fat-js": "git+https://<github_token>:x-oauth-basic@github.com/DBGrow/fat-js.git"
+	"fat-js": "0.0.0"
 }
 ```
 
-or include directly on project path via clone
+or
 
+CLI:
 
-
-## FAT-0
-
-### Initialization
-
-```javascript
-const {FAT0} = require('fat-js/fat0/FAT0');
-
-//Get the token for FAT-0 token with ID: AQQW
-let testToken = await new FAT0('AQQW');
-
-//after the constructor has been completed the token is synced and ready to go
+```
+npm install fat-js
 ```
 
 
 
-### Get Issuance Entry
+## Browser Bundle
+
+A browser friendly bundle of the current fat-js version can be found at `browser/bundle.js`
+
+To build the bundle from source, simply navigate to the root of the fat-js project and run:
+
+```bash
+npm run build
+```
+
+A fresh `bundle.js` will be built in the  `browser` directory.
+
+
+
+## Instantiate FAT RPC
 
 ```javascript
-let issuance = testToken.getIssuance();
+let rpc = new RPCBuilder()
+    .host('fatnode.mysite.com')
+    .port(1234)
+    .version('v0')
+    .auth('my-user', 'my-pass')
+    .build();
+ 
+//get the RPC client for a token: <tokenId> <issuer Root Chain ID>
+let tokenRPC = rpc.getTokenRPC('mytoken','888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762')
+```
 
-console.log(JSON.stringify(issuance,undefined,2)) 
-/*=>
-{
-  "type": "FAT-0",
-  "issuer": "888888dd9e60c1f0216f753caf5c9b5be4c9ca69db27a6c33d30dce3fe5ee709",
-  "supply": 10000000,
-  "name": "Example Token",
-  "symbol": "EXT",
-   "salt": "874220a808090fb736f345dd5d67ac26eab94c9c9f51b708b05cdc4d42f65aae",
-  "idNonce": "cc4fee39dcdcfc1999ab07689230321acdd83fcd0ace521107041ef354b9cfb5",
-  "idSignature": "33467893a440561d96ae27798dc8be291e1ce264d3c6f36f33a0d983e745f1d87db61c77946fe57db3e185f548d51da85106dfec592383a556091dd45f384b0c"
+
+
+## FAT Token RPC Calls
+
+### Get Issuance
+
+```javascript
+//using async/await
+let issuance = await tokenRpc.getIssuance();
+
+//or using promises
+tokenRpc.getIssuance().then(function(issuance){
+    
+}).catch(function(err){
+    console.error(err);
+});
+
+console.log(JSON.stringify(issuance.toObject(), undefined, 2));
+/* =>
+{  
+      "type":"FAT-0",
+      "supply":10000000,
+      "name":"Example Token",
+      "symbol":"EXT",
+      "salt":"874220a808090fb736f345dd5d67ac26eab94c9c9f51b708b05cdc4d42f65aae"
 }
 */
 ```
 
 
 
-### Get A Transaction by EntryHash
+### Get Transaction
 
 ```javascript
-  let tx = testToken.getTransaction('e1a71b335c3be54659f84e0d36c6c53d0a7e06a960f1cf5fef3af7faac413f2f');
+let transaction = await tokenRpc.getTransaction('d9b6ca250c97fdbe48eb3972a7d4b906aac54f2048982acfcb6019bc2a018be9');
 
-console.log(JSON.stringify(issuance, undefined, 2)) 
-/*=>
+console.log(JSON.stringify(transaction.toObject(), undefined, 2));
+/* =>
 {
-  "input": {
-    "address": "FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM",
-    "amount": 100
-  },
-  "output": {
-    "address": "FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM",
-    "amount": 100
-  },
-  "rcd": "011eddd2b3cfb40c581c2afdf675c60a39baeab4cbe75e2ff8b0dc808de6a67cfe",
-  "txSalt": 88395950515565,
-  "txNonce": 3119868535,
-  "marshalBinarySig": "020000b9f56a7701010064d381a44afa76ad5ab8f0d82adb27d6ffa031302cc3bb281c86b1b3dfabde395e64d381a44afa76ad5ab8f0d82adb27d6ffa031302cc3bb281c86b1b3dfabde395e",
-  "signature": "8d4091f55eb6383514cbc569ab174469d7c4b17929bfe87a8d7879536c2eb3b1e446d0d97eb6267014da4630117c093cb0f72641b1c370351899509ed019e80c",
-  "timestamp": 1536612540,
-  "entryHash": "e1a71b335c3be54659f84e0d36c6c53d0a7e06a960f1cf5fef3af7faac413f2f"
+      "inputs:":[  
+         {  
+            "address":"FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC",
+            "amount":100
+         },
+         {  
+            "address":"FA2y6VYYPR9Y9Vyy1ZuZqWWRXGXLeuvsLWGkDxq3Ed7yc11dbBKV",
+            "amount":50
+         }
+      ],
+      "outputs:":[  
+         {  
+            "address":"FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM",
+            "amount":150
+         }
+      ],
+      "milliTimestamp":1537450868,
+      "salt":"80d87a8bd5cf2a3eca9037c2229f3701eed29360caa975531ef5fe476b1b70b5"
 }
 */
 ```
 
 
 
-### Get All Transactions
+### Get Transactions
 
 ```javascript
- let transactions =
-                testToken.getTransactions();
+let transaction = await tokenRpc.getTransactions();
 ```
 
 
@@ -104,97 +134,69 @@ console.log(JSON.stringify(issuance, undefined, 2))
 ### Get Balance
 
 ```javascript
-let balance = testToken.getBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
+let balance = await tokenRpc.getBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
 
-console.log(balance) 
+console.log(balance);
 /* =>
-100
+150
 */
 ```
 
 
 
-### Get All Balances
-
-Return a map of all addresses and their balances
+### Get Stats
 
 ```javascript
-let balances = testToken.getBalances();
+let stats = await tokenRpc.getStats();
 
-console.log(JSON.stringify(balances, undefined, 2) 
+console.log(JSON.stringify(stats, undefined, 2));
 /* =>
 {
-"FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM": 100,
-"FA2ZrcG8xkwWWNfdMRw5pGNjMPEkLaxRGqacvzfLS6TGHEHZqAA4 " : 1.00938,
-...
+        "supply":10000000,
+        "circulatingSupply":8113,
+        "transactions":18429,
+        "issuanceTimestamp": 1518286500,
+        "lastTransactionTimestamp": 1539212767
 }
 */
 ```
 
 
 
-### Get Transaction History of Address
+## Construct FAT-0 Transaction
+
+### Transaction Builder
+
+All FAT-0 Transaction Builder Options
 
 ```javascript
- let transactions = testToken.getTransactionsOfAddress('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
+let tx = new TransactionBuilder()
+	.input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 75)
+	.input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 75)
+	.output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
+	.milliTimestamp(12345812737123)
+    .salt("superrandom1928498fj2")
+	.build();
 ```
 
 
 
-### Get Token Stats
+## Issuance Builder
+
+All FAT-0 Issuance Builder Options
 
 ```javascript
-let stats = testToken.getStats();
-console.log(JSON.stringify(stats, undefined, 2); 
-/* =>
-{
-  "supply": 1000,
-  "circulatingSupply": 100,
-  "transactionCount": 54,
-  "issuanceTimestamp": 1536278460
-}
-*/
-```
-
-
-
-### Send A Transaction (Static)
-
-```javascript
-//sendTransaction(token ID, from private key, to public address, amount, EC address)
-
-let transaction = await FAT0.sendTransaction('AQQW', 'Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ', 'FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM', 100, 'Es3k4L7La1g7CY5zVLer21H3JFkXgCBCBx8eSM2q9hLbevbuoL6a');
-```
-
-
-
-### Send A Transaction (Instance)
-
-```javascript
-//sendTransaction(from private key, to public address, amount, EC address)
-
-let transaction = await testToken.sendTransaction('Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ', 'FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM', 100, 'Es3k4L7La1g7CY5zVLer21H3JFkXgCBCBx8eSM2q9hLbevbuoL6a');
-```
-
-
-
-### Issue A Token
-
-Issue a token with ID `AQQW`, trade symbol `AQQW` , and display name `Test FAT-0 AQQW`
-
-```javascript
-const FAT0IssuanceBuilder = FAT0.IssuanceBuilder;
-var let = new FAT0IssuanceBuilder('AQQW')
-.setSymbol('AQQW')
-.setName('Test FAT-0 AQQW')          .setIssuerIdentity('888888ab72e748840d82c39213c969a11ca6cb026f1d3da39fd82b95b3c1fced')
-.setSK1('sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu')
-.setSupply(1000)               .setCoinbaseTransaction('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM', 100) //send 100 tokens to a public factoid address
-
-let issuanceEntryAndCoinbaseTx = await FAT0.issue(issuance, EC);
+let issuance = new IssuanceBuilder("888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "mytoken", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
+                .supply(1000000)
+                .name('Test Token')
+                .symbol('TTK')
+                .build()
 ```
 
 
 
 ## Legal
+
+[MIT Licensed](LICENSE.md)
 
 Icons by [Icons8](https://icons8.com)

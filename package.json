@@ -1,8 +1,8 @@
 {
   "name": "fat-js",
-  "private": true,
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "Factom Asset Token (FAT) RPC Library in JS",
+  "main": "index.js",
   "scripts": {
     "test": "nyc mocha test/test.js",
     "build": "browserify index.js -o browser/bundle.js"
@@ -10,7 +10,7 @@
   "directories": {
     "test": "test"
   },
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "factom": "0.3.2",
     "factom-identity-lib": "0.1.3",
