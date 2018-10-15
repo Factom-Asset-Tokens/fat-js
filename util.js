@@ -6,21 +6,21 @@ const {Chain} = require('factom/src/chain');
 const factomCrypto = require('factom-identity-lib/src/crypto');
 
 //See FATIP-100 Chain ID Derivation Standard
-module.exports.getIssuanceChainId = function (tokenId, issuerId) {
+module.exports.getIssuanceChainId = function (tokenId, rootChainId) {
     return new Chain(Entry.builder()
         .extId(new Buffer("token"))
         .extId(new Buffer(tokenId))
         .extId(new Buffer("issuer"))
-        .extId(new Buffer(issuerId))
+        .extId(new Buffer(rootChainId))
         .build()).id.toString('hex')
 };
 
-module.exports.getTransactionChainId = function (tokenId, issuerId) {
+module.exports.getTransactionChainId = function (tokenId, rootChainId) {
     return new Chain(Entry.builder()
         .extId(new Buffer("token"))
         .extId(new Buffer(tokenId))
         .extId(new Buffer("issuer"))
-        .extId(new Buffer(issuerId))
+        .extId(new Buffer(rootChainId))
         .extId(new Buffer("transactions"))
         .build()).id.toString('hex')
 };

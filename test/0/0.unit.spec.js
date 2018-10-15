@@ -7,20 +7,12 @@ const fctIdentityUtils = require('factom-identity-lib/src/crypto');
 
 const ES = 'Es3k4L7La1g7CY5zVLer21H3JFkXgCBCBx8eSM2q9hLbevbuoL6a';
 
-const EdDSA = require('elliptic').eddsa;
-const ec = new EdDSA('ed25519');
-
-//get a random FCT address. probability of this being used is miniscule
-let pk = ec.keyFromSecret(require('crypto').randomBytes(256));
-const emptyAddress = fctAddressUtils.keyToPublicFctAddress(pk.getPublic()).toString('hex');
-
-let TransactionBuilder = require('../../0/Transaction').TransactionBuilder;
-let Transaction = require('../../0/Transaction').Transaction;
-
 //Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ', 'FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
-describe('FATIP-0', function () {
+describe('Unit Spec', function () {
 
     describe('Transaction Builder', function () {
+
+        let TransactionBuilder = require('../../0/Transaction').TransactionBuilder;
 
         it('Constructor', function () {
             let tx = new TransactionBuilder();
@@ -76,7 +68,6 @@ describe('FATIP-0', function () {
             assert(tx.getMilliTimestamp() === 1234, "milliTimestamp was different than expected");
             assert(tx.getSalt() === "abc", "salt was different than expected");
 
-            // console.log(JSON.stringify(tx, undefined, 2))
         });
 
         it('Transaction Builder Coinbase Transaction', function () {
@@ -89,11 +80,34 @@ describe('FATIP-0', function () {
         it('Constructor', function () {
 
         });
+    });
+
+    describe('RPC Builder', function () {
+
+        let RPCBuilder = require('../../rpc/RPC').RPCBuilder;
+
+        it('Constructor', function () {
+            new RPCBuilder();
+        });
+
+        it('Basic RPC Spec', function () {
+            let RPC = new RPCBuilder().build();
+
+            //token RPC
+            assert(RPC['getTokenRPC'] !== undefined, "Token RPC Method was not defined");
+            assert(typeof RPC['getTokenRPC'] === 'function', "Token RPC Method was not a function");
+
+
+        });
+
+        it('Basic Token RPC Spec', function () {
+            let TokenRPC = new RPCBuilder().build().getTokenRPC(`888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762`, 'mytoken');
+            assert(TokenRPC['getBalance'] !== undefined, "getBalance method was not defined");
+            assert(typeof TokenRPC['getBalance'] === 'function', "getBalance method was not a function");
+
+
+        });
+
     })
 
 });
-
-function getTestTransaction() {
-    const tx = require('./data/tx');
-    return Object.assign({}, tx);
-}

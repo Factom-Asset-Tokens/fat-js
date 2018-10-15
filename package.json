@@ -2,9 +2,10 @@
   "name": "fat-js",
   "private": true,
   "version": "0.1.0",
-  "description": "Factom Asset Token (FAT) RPC Library in JS"
+  "description": "Factom Asset Token (FAT) RPC Library in JS",
   "scripts": {
-    "test": "nyc mocha test/test.js"
+    "test": "nyc mocha test/test.js",
+    "build": "browserify index.js -o browser/bundle.js"
   },
   "directories": {
     "test": "test"
@@ -15,7 +16,8 @@
     "factom-identity-lib": "0.1.3",
     "djb2a": "1.0.0",
     "elliptic": "6.4.0",
-    "tweetnacl": "1.0.0"
+    "tweetnacl": "1.0.0",
+    "axios": "0.18.0"
   },
   "devDependencies": {
     "chai": "4.1.2",
