@@ -1,8 +1,19 @@
+const BaseRPCBuilder = require('../rpc/RPC').RPCBuilder;
 const BaseRPC = require('../rpc/RPC').RPC;
 const BaseTokenRPC = require('../rpc/RPC').TokenRPC;
 
 const Issuance = require('./Issuance').Issuance;
 const Transaction = require('./Transaction').Transaction;
+
+class RPCBuilder extends BaseRPCBuilder {
+    constructor(builder) {
+        super(builder);
+    }
+
+    build() {
+        return new RPC(this);
+    }
+}
 
 class RPC extends BaseRPC {
     constructor(builder) {
@@ -25,7 +36,7 @@ class TokenRPC extends BaseTokenRPC {
     }
 
 
-    async getTransactions(txId) {
+    async getTransaction(txId) {
         let transaction = await super.getTransaction(txId);
         return new Transaction(transaction);
     }
@@ -35,3 +46,8 @@ class TokenRPC extends BaseTokenRPC {
         return transactions.map(tx => new Transaction(tx));
     }
 }
+
+module.exports = {
+    RPCBuilder,
+    RPC
+};

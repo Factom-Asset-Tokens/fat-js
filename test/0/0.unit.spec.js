@@ -1,24 +1,18 @@
-const crypto = require('crypto');
 const assert = require('chai').assert;
 
-const fctAddressUtils = require('../../deps/factomjs-master/src/addresses');
 const fctAddrUtils = require('factom/src/addresses');
-const fctIdentityUtils = require('factom-identity-lib/src/crypto');
 
 const ES = 'Es3k4L7La1g7CY5zVLer21H3JFkXgCBCBx8eSM2q9hLbevbuoL6a';
 
 //Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ', 'FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
 describe('Unit Spec', function () {
 
+    let TransactionBuilder = require('../../0/Transaction').TransactionBuilder;
+
     describe('Transaction Builder', function () {
 
-        let TransactionBuilder = require('../../0/Transaction').TransactionBuilder;
 
-        it('Constructor', function () {
-            let tx = new TransactionBuilder();
-        });
-
-        it('Basic Transaction Spec', function () {
+        it('Transaction Spec', function () {
             let tx = new TransactionBuilder()
                 .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 150)
                 .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
@@ -38,26 +32,49 @@ describe('Unit Spec', function () {
             assert(tx.getOutputs().every(output => fctAddrUtils.isValidFctPublicAddress(output.address)), "Not every FCT Address in outputs was a valid public Factoid address");
             assert(tx.getOutputs().every(output => !isNaN(output.amount) && Number.isInteger(output.amount) && output.amount > 0), "Not every amount in outputs was a valid positive nonzero integer");
 
-            //millTimeStamp
+            //txId
+            assert(tx.getTxId() === undefined, "Generated transaction should not have a txId");
+
+            //millTimeStamp (autofill)
             assert(tx.getMilliTimestamp() !== undefined, "Timestamp was not included automatically in built transaction");
             assert(!isNaN(tx.getMilliTimestamp()), "Timestamp included was not a number");
             assert(tx.getMilliTimestamp() < new Date().getTime(), "Timestamp autofilled was after present");
 
-            //salt: note a salt is not mandatory as per FAT-0. It is optional but strongly recommended
+            //salt (autofill): note a salt is not mandatory as per FAT-0. It is optional but strongly recommended
             assert(tx.getSalt() !== undefined, "salt was not included automatically in built transaction");
             assert(typeof tx.getSalt() === 'string', "salt included was not a string");
             assert(tx.getSalt().length === 64, "salt included was not 64 bytes in length (" + tx.getSalt().length + ")");
 
-            //extIds
-
             //content
+            assert(typeof tx.getContent() === 'string', "tx content was not as string");
 
+            //to tx object & validate object fields
+            assert(typeof  tx.toObject() === 'object', "tx object was not an object");
+
+            //check coinbase
+            assert(tx.isCoinbase() === false, "generated tx should not be a coinbase transaction");
+
+            //extIds
+            assert(Array.isArray(tx.getExtIds()), "tx ExtIds were not an array");
+            assert(tx.getExtIds() % 2 === 0, "tx ExtIds were not even (odd = coinbase tx)");
+
+            //check validity
+            assert(tx.isValid(), "Transaction generated was invalid");
+
+            //build tx from other builder
+            tx = new TransactionBuilder(new TransactionBuilder(tx)
+                .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 150)
+                .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150))
+                .build();
+
+            assert(tx.isValid(), "tx builder constructed from other builder generated invalid TX");
         });
 
         it('All Transaction Builder Inputs', function () {
             let tx = new TransactionBuilder()
                 .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 75)
-                .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 75)
+                .coinbaseInput(75)
+                .setIssuerInformation('888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762', "mytoken", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
                 .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
                 .milliTimestamp(1234)
                 .salt("abc")
@@ -67,7 +84,7 @@ describe('Unit Spec', function () {
             assert(tx.outputs.length === 1, "Outputs length was different than expected");
             assert(tx.getMilliTimestamp() === 1234, "milliTimestamp was different than expected");
             assert(tx.getSalt() === "abc", "salt was different than expected");
-
+            assert(tx.isCoinbase() === true, "Failed to detect a coinbase transaction")
         });
 
         it('Transaction Builder Coinbase Transaction', function () {
@@ -78,13 +95,38 @@ describe('Unit Spec', function () {
 
     describe('Issuance Builder', function () {
 
-        it('Constructor', function () {
+        let IssuanceBuilder = require('../../0/Issuance').IssuanceBuilder;
+
+
+        it('Issuance Spec', function () {
+
+            let tx = new TransactionBuilder()
+                .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 150)
+                .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
+                .build();
 
             let issuance = new IssuanceBuilder("888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "mytoken", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
-                .supply(1000000)
                 .name('Test Token')
                 .symbol('TTK')
-                .build()
+                .supply(1000000)
+                .salt('09c7c39bc38a86c')
+                .coinbase(tx)
+                .build();
+
+
+            assert(issuance.getRootChainId() === '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762', "Unexpected root chain ID");
+            assert(issuance.getType() === 'FAT-0', "Unexpected token type");
+            assert(issuance.getName() === 'Test Token', "Unexpected token Name");
+            assert(issuance.getSymbol() === 'TTK', "Unexpected token Symbol");
+            assert(issuance.getSupply() === 1000000, "Unexpected issuance token supply");
+            assert(issuance.getSalt() === '09c7c39bc38a86c', "Unexpected issuance Salt");
+            assert(typeof issuance.toObject() === 'object', "unexpected type for issuance object");
+
+            //Initial issuance specific
+            assert(issuance.getTokenId() === 'mytoken', "Unexpected Token ID");
+            assert(issuance.getExtIds().length === 1, "Unexpected ExtIds Length");
+
+            //check issuance validity
 
         });
     });
@@ -108,7 +150,6 @@ describe('Unit Spec', function () {
             //token RPC
             assert(RPC['getTokenRPC'] !== undefined, "Token RPC Method was not defined");
             assert(typeof RPC['getTokenRPC'] === 'function', "Token RPC Method was not a function");
-
 
         });
 

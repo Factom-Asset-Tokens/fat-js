@@ -36,7 +36,7 @@ npm install fat-js
 
 A browser friendly bundle of the current fat-js version can be found at `browser/bundle.js`
 
-To build the bundle from source, simply navigate to the root of the fat-js project and run:
+To build the bundle from source ensure you have browserify installed, and simply navigate to the root of the fat-js project and run:
 
 ```bash
 npm run build
@@ -49,6 +49,7 @@ A fresh `bundle.js` will be built in the  `browser` directory.
 ## Instantiate FAT RPC
 
 ```javascript
+const RPCBuilder = require('fat-js').RPCBuilder
 let rpc = new RPCBuilder()
     .host('fatnode.mysite.com')
     .port(1234)
@@ -170,6 +171,7 @@ console.log(JSON.stringify(stats, undefined, 2));
 All FAT-0 Transaction Builder Options
 
 ```javascript
+const RPCBuilder = require('fat-js').FAT0.TransactionBuilder
 let tx = new TransactionBuilder()
 	.input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 75)
 	.input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 75)
@@ -186,6 +188,7 @@ let tx = new TransactionBuilder()
 All FAT-0 Issuance Builder Options
 
 ```javascript
+const RPCBuilder = require('fat-js').FAT0.IssuanceBuilder
 let issuance = new IssuanceBuilder("888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "mytoken", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
                 .supply(1000000)
                 .name('Test Token')

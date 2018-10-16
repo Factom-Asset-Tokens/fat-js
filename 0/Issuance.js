@@ -1,7 +1,10 @@
+const crypto = require('crypto');
+const util = require('../util');
 const factomCryptoValidation = require('factom-identity-lib/src/validation');
 const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
 const fctIdentityUtil = require('factom-identity-lib/src/validation');
 const Transaction = require('./Transaction').Transaction;
+
 
 class IssuanceBuilder {
 
@@ -63,34 +66,77 @@ class Issuance {
     constructor(builder) {
 
         if (builder instanceof IssuanceBuilder) {
-            this.type = builder._type;
-            this.name = builder._name;
-            this.symbol = builder._symbol;
-            this.supply = builder._supply;
-            this.salt = builder._salt || crypto.randomBytes(32).toString('hex');
+            this._type = builder._type;
+            this._name = builder._name;
+            this._symbol = builder._symbol;
+            this._supply = builder._supply;
+            this._salt = builder._salt || crypto.randomBytes(32).toString('hex');
 
-            this.content = JSON.stringify(this);
+            this._content = JSON.stringify(this);
+
+            this._tokenId = builder._tokenId;
+            this._rootChainId = builder._rootChainId;
 
             this._transactions = builder._transactions || [];
 
             //handle issuance signing
-            this.extIds = [fctIdentityCrypto.sign(builder._sk1, util.getTransactionChainId(builder._tokenId, builder._rootChainId) + this.content)];
+            this._extIds = [fctIdentityCrypto.sign(builder._sk1, util.getTransactionChainId(builder._tokenId, builder._rootChainId) + this._content)];
 
         } else if (typeof builder === 'object') {
-            this.type = builder.type;
-            this.name = builder.name;
-            this.symbol = builder.symbol;
-            this.supply = builder.supply;
-            this.salt = builder.salt;
-            this.content = JSON.stringify(this);
-            this.extIds = builder.extIds;
+            this._type = builder.type;
+            this._name = builder.name;
+            this._symbol = builder.symbol;
+            this._supply = builder._supply;
+            this._salt = builder.salt;
+            this._content = JSON.stringify(this);
+            this._extIds = builder._extIds;
         }
 
         Object.freeze(this);
     }
 
+    getTokenId() {
+        return this._tokenId;
+    }
+
+    getRootChainId() {
+        return this._rootChainId;
+    }
+
+    getTransactions() {
+        return this._transactions;
+    }
+
+    getType() {
+        return this._type;
+    }
+
+    getName() {
+        return this._name;
+    }
+
+    getSymbol() {
+        return this._symbol;
+    }
+
+    getSupply() {
+        return this._supply;
+    }
+
+    getSalt() {
+        return this._salt;
+    }
+
+    getContent() {
+        return this._content;
+    }
+
+    getExtIds() {
+        return this._extIds;
+    }
+
     toObject() {
-        return JSON.parse(this.content);
+        return JSON.parse(this._content);
     }
 }
 

@@ -1,9 +1,11 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const crypto = require('crypto');
+const util = require('../util');
 const factomCryptoValidation = require('factom-identity-lib/src/validation');
-const factomAddressValidation = require('factom/src/addresses');
 const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
 const fctIdentityUtil = require('factom-identity-lib/src/validation');
 const Transaction = require('./Transaction').Transaction;
+
 
 class IssuanceBuilder {
 
@@ -15,7 +17,9 @@ class IssuanceBuilder {
         this._tokenId = tokenId;
 
         if (!factomCryptoValidation.isValidSk1(sk1)) throw new Error("Supplied key is not a valid sk1 private key");
-        this.sk1 = sk1;
+        this._sk1 = sk1;
+
+        this._type = 'FAT-0'
     }
 
     name(name) {
@@ -63,33 +67,77 @@ class Issuance {
     constructor(builder) {
 
         if (builder instanceof IssuanceBuilder) {
+            this._type = builder._type;
+            this._name = builder._name;
+            this._symbol = builder._symbol;
+            this._supply = builder._supply;
+            this._salt = builder._salt || crypto.randomBytes(32).toString('hex');
 
-            this.name = builder._name;
-            this.symbol = builder._symbol;
-            this.supply = builder._supply;
-            this.salt = builder._salt || crypto.randomBytes(32).toString('hex');
+            this._content = JSON.stringify(this);
 
-            this.content = JSON.stringify(this);
+            this._tokenId = builder._tokenId;
+            this._rootChainId = builder._rootChainId;
 
             this._transactions = builder._transactions || [];
 
             //handle issuance signing
-            this.extIds = [fctIdentityCrypto.sign(builder._sk1, util.getTransactionChainId(builder._tokenId, builder._rootChainId) + this.content)];
+            this._extIds = [fctIdentityCrypto.sign(builder._sk1, util.getTransactionChainId(builder._tokenId, builder._rootChainId) + this._content)];
 
         } else if (typeof builder === 'object') {
-            this.name = builder.name;
-            this.symbol = builder.symbol;
-            this.supply = builder.supply;
-            this.salt = builder.salt;
-            this.content = JSON.stringify(this);
-            this.extIds = builder.extIds;
+            this._type = builder.type;
+            this._name = builder.name;
+            this._symbol = builder.symbol;
+            this._supply = builder._supply;
+            this._salt = builder.salt;
+            this._content = JSON.stringify(this);
+            this._extIds = builder._extIds;
         }
 
         Object.freeze(this);
     }
 
+    getTokenId() {
+        return this._tokenId;
+    }
+
+    getRootChainId() {
+        return this._rootChainId;
+    }
+
+    getTransactions() {
+        return this._transactions;
+    }
+
+    getType() {
+        return this._type;
+    }
+
+    getName() {
+        return this._name;
+    }
+
+    getSymbol() {
+        return this._symbol;
+    }
+
+    getSupply() {
+        return this._supply;
+    }
+
+    getSalt() {
+        return this._salt;
+    }
+
+    getContent() {
+        return this._content;
+    }
+
+    getExtIds() {
+        return this._extIds;
+    }
+
     toObject() {
-        return JSON.parse(this.content);
+        return JSON.parse(this._content);
     }
 }
 
@@ -97,12 +145,23 @@ module.exports = {
     IssuanceBuilder,
     Issuance
 };
-},{"./Transaction":3,"factom-identity-lib/src/crypto":49,"factom-identity-lib/src/validation":50,"factom/src/addresses":56}],2:[function(require,module,exports){
+},{"../util":81,"./Transaction":3,"crypto":136,"factom-identity-lib/src/crypto":49,"factom-identity-lib/src/validation":50}],2:[function(require,module,exports){
+const BaseRPCBuilder = require('../rpc/RPC').RPCBuilder;
 const BaseRPC = require('../rpc/RPC').RPC;
 const BaseTokenRPC = require('../rpc/RPC').TokenRPC;
 
 const Issuance = require('./Issuance').Issuance;
 const Transaction = require('./Transaction').Transaction;
+
+class RPCBuilder extends BaseRPCBuilder {
+    constructor(builder) {
+        super(builder);
+    }
+
+    build() {
+        return new RPC(this);
+    }
+}
 
 class RPC extends BaseRPC {
     constructor(builder) {
@@ -125,7 +184,7 @@ class TokenRPC extends BaseTokenRPC {
     }
 
 
-    async getTransactions(txId) {
+    async getTransaction(txId) {
         let transaction = await super.getTransaction(txId);
         return new Transaction(transaction);
     }
@@ -135,6 +194,11 @@ class TokenRPC extends BaseTokenRPC {
         return transactions.map(tx => new Transaction(tx));
     }
 }
+
+module.exports = {
+    RPCBuilder,
+    RPC
+};
 },{"../rpc/RPC":80,"./Issuance":1,"./Transaction":3}],3:[function(require,module,exports){
 (function (Buffer){
 const crypto = require('crypto');
@@ -146,7 +210,7 @@ const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
 const util = require('../util');
 
 const RCD_TYPE_1 = Buffer.from('01', 'hex');
-const COINBASE_ADDRESS_PUBLIC = 'FA1y5ZGuHSLmf2TqNf6hVMkPiNGyQpQDTFJvDLRkKQaoPo4bmbgu';
+const COINBASE_ADDRESS_PUBLIC = 'FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC';
 const COINBASE_ADDRESS_PRIVATE = 'Fs1KWJrpLdfucvmYwN2nWrwepLn8ercpMbzXshd1g8zyhKXLVLWj';
 
 class TransactionBuilder {
@@ -175,6 +239,7 @@ class TransactionBuilder {
 
     coinbaseInput(amount) {
         this.input(COINBASE_ADDRESS_PRIVATE, amount);
+        return this;
     }
 
     setIssuerInformation(rootChainId, tokenId, sk1) {
@@ -183,6 +248,7 @@ class TransactionBuilder {
         this._rootChainId = rootChainId;
         this._sk1 = sk1;
         this._tokenId = tokenId;
+        return this;
     }
 
     output(fa, amount) {
@@ -190,7 +256,7 @@ class TransactionBuilder {
         if (isNaN(amount) || !Number.isInteger(amount) || amount < 1) throw new Error("Input amount must be a positive nonzero integer");
 
         this._outputs.push({address: fa, amount: amount});
-        return this
+        return this;
     }
 
     milliTimestamp(timestamp) {
@@ -232,8 +298,8 @@ class Transaction {
             this.extIds = [];
 
             if (builder._keys.length > 0) {
-                rcds = builder._keys.map(key => Buffer.concat([RCD_TYPE_1, Buffer.from(key.publicKey)]));
-                signatures = builder._keys.map(key => Buffer.from(nacl.detached(Buffer.from(this.content), key.secretKey)));
+                this.rcds = builder._keys.map(key => Buffer.concat([RCD_TYPE_1, Buffer.from(key.publicKey)]));
+                this.signatures = builder._keys.map(key => Buffer.from(nacl.detached(Buffer.from(this.content), key.secretKey)));
                 for (let i = 0; i < rcds.length; i++) {
                     this.extIds.push(rcds[i]);
                     this.extIds.push(signatures[i]);
@@ -246,8 +312,8 @@ class Transaction {
                 this.extIds.push(fctIdentityCrypto.sign(builder._sk1, util.getTransactionChainId(builder._tokenId, builder._rootChainId) + this.content));
             }
 
-            validateRcds(this.inputs, rcds);
-            validateSignatures(Buffer.from(this.content), rcds, signatures);
+            validateRcds(this.inputs, this.rcds);
+            validateSignatures(Buffer.from(this.content), this.rcds, this.signatures);
         } else if (typeof builder === 'object') {
             this.txId = builder.txId;
             this.inputs = builder.inputs;
@@ -255,6 +321,18 @@ class Transaction {
             this.milliTimestamp = builder.milliTimestamp;
             this.salt = builder.salt;
             this.extIds = builder.extIds;
+
+            let extIdsCopy = Array.from(this.extIds);
+
+            //if there's a coinbase sig on the end, pop it off (FATIP-101)
+            if (extIdsCopy.length % 2 !== 0) extIdsCopy.pop();
+
+            while (extIdsCopy.length > 0) {
+                this.rcds.push(extIdsCopy[0]);
+                extIdsCopy.pop();
+                this.signatures.push(extIdsCopy[0]);
+                extIdsCopy.pop();
+            }
 
             this.content = JSON.stringify({
                 inputs: this.inputs,
@@ -296,7 +374,17 @@ class Transaction {
     }
 
     isCoinbase() {
-        return this.inputs.find(input => input.address === COINBASE_ADDRESS_PUBLIC) !== undefined
+        return this.inputs.find(input => input.address === COINBASE_ADDRESS_PUBLIC) !== undefined;
+    }
+
+    isValid() {
+        try {
+            validateRcds(this.inputs, this.rcds);
+            validateSignatures(Buffer.from(this.content), this.rcds, this.signatures);
+            return true;
+        } catch (e) {
+            return false;
+        }
     }
 
     toObject() {
@@ -346,11 +434,16 @@ module.exports = {
 };
 }).call(this,require("buffer").Buffer)
 },{"../util":81,"buffer":128,"crypto":136,"factom-identity-lib/src/crypto":49,"factom-identity-lib/src/validation":50,"factom/src/addresses":56,"factom/src/util":60,"tweetnacl/nacl-fast":79}],4:[function(require,module,exports){
-require('./rpc/RPC');
-
-require('./0/RPC');
-require('./0/Transaction');
-require('./0/Issuance');
+module.exports = {
+    RPCBuilder: require('./rpc/RPC').RPCBuilder,
+    FAT0: {
+        RPCBuilder: require('./0/RPC'), //FAT-0 specific type casting
+        Transaction: require('./0/Transaction').Transaction,
+        TransactionBuilder: require('./0/Transaction').TransactionBuilder,
+        Issuance: require('./0/Issuance').Issuance,
+        IssuanceBuilder: require('./0/Issuance').IssuanceBuilder,
+    }
+};
 },{"./0/Issuance":1,"./0/RPC":2,"./0/Transaction":3,"./rpc/RPC":80}],5:[function(require,module,exports){
 module.exports = require('./lib/axios');
 },{"./lib/axios":7}],6:[function(require,module,exports){

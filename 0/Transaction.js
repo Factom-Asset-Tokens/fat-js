@@ -7,7 +7,7 @@ const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
 const util = require('../util');
 
 const RCD_TYPE_1 = Buffer.from('01', 'hex');
-const COINBASE_ADDRESS_PUBLIC = 'FA1y5ZGuHSLmf2TqNf6hVMkPiNGyQpQDTFJvDLRkKQaoPo4bmbgu';
+const COINBASE_ADDRESS_PUBLIC = 'FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC';
 const COINBASE_ADDRESS_PRIVATE = 'Fs1KWJrpLdfucvmYwN2nWrwepLn8ercpMbzXshd1g8zyhKXLVLWj';
 
 class TransactionBuilder {
@@ -36,6 +36,7 @@ class TransactionBuilder {
 
     coinbaseInput(amount) {
         this.input(COINBASE_ADDRESS_PRIVATE, amount);
+        return this;
     }
 
     setIssuerInformation(rootChainId, tokenId, sk1) {
@@ -44,6 +45,7 @@ class TransactionBuilder {
         this._rootChainId = rootChainId;
         this._sk1 = sk1;
         this._tokenId = tokenId;
+        return this;
     }
 
     output(fa, amount) {
@@ -51,7 +53,7 @@ class TransactionBuilder {
         if (isNaN(amount) || !Number.isInteger(amount) || amount < 1) throw new Error("Input amount must be a positive nonzero integer");
 
         this._outputs.push({address: fa, amount: amount});
-        return this
+        return this;
     }
 
     milliTimestamp(timestamp) {
@@ -93,8 +95,8 @@ class Transaction {
             this.extIds = [];
 
             if (builder._keys.length > 0) {
-                rcds = builder._keys.map(key => Buffer.concat([RCD_TYPE_1, Buffer.from(key.publicKey)]));
-                signatures = builder._keys.map(key => Buffer.from(nacl.detached(Buffer.from(this.content), key.secretKey)));
+                this.rcds = builder._keys.map(key => Buffer.concat([RCD_TYPE_1, Buffer.from(key.publicKey)]));
+                this.signatures = builder._keys.map(key => Buffer.from(nacl.detached(Buffer.from(this.content), key.secretKey)));
                 for (let i = 0; i < rcds.length; i++) {
                     this.extIds.push(rcds[i]);
                     this.extIds.push(signatures[i]);
@@ -107,8 +109,8 @@ class Transaction {
                 this.extIds.push(fctIdentityCrypto.sign(builder._sk1, util.getTransactionChainId(builder._tokenId, builder._rootChainId) + this.content));
             }
 
-            validateRcds(this.inputs, rcds);
-            validateSignatures(Buffer.from(this.content), rcds, signatures);
+            validateRcds(this.inputs, this.rcds);
+            validateSignatures(Buffer.from(this.content), this.rcds, this.signatures);
         } else if (typeof builder === 'object') {
             this.txId = builder.txId;
             this.inputs = builder.inputs;
@@ -116,6 +118,18 @@ class Transaction {
             this.milliTimestamp = builder.milliTimestamp;
             this.salt = builder.salt;
             this.extIds = builder.extIds;
+
+            let extIdsCopy = Array.from(this.extIds);
+
+            //if there's a coinbase sig on the end, pop it off (FATIP-101)
+            if (extIdsCopy.length % 2 !== 0) extIdsCopy.pop();
+
+            while (extIdsCopy.length > 0) {
+                this.rcds.push(extIdsCopy[0]);
+                extIdsCopy.pop();
+                this.signatures.push(extIdsCopy[0]);
+                extIdsCopy.pop();
+            }
 
             this.content = JSON.stringify({
                 inputs: this.inputs,
@@ -157,7 +171,17 @@ class Transaction {
     }
 
     isCoinbase() {
-        return this.inputs.find(input => input.address === COINBASE_ADDRESS_PUBLIC) !== undefined
+        return this.inputs.find(input => input.address === COINBASE_ADDRESS_PUBLIC) !== undefined;
+    }
+
+    isValid() {
+        try {
+            validateRcds(this.inputs, this.rcds);
+            validateSignatures(Buffer.from(this.content), this.rcds, this.signatures);
+            return true;
+        } catch (e) {
+            return false;
+        }
     }
 
     toObject() {
