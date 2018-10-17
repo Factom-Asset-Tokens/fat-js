@@ -154,7 +154,7 @@ describe('Unit Spec', function () {
         });
 
         it('Basic Token RPC Spec', function () {
-            let TokenRPC = new RPCBuilder().build().getTokenRPC("888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", 'mytoken');
+            let TokenRPC = new RPCBuilder().build().getTokenRPC('mytoken', "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762");
             assert(TokenRPC['getBalance'] !== undefined, "getBalance method was not defined");
             assert(typeof TokenRPC['getBalance'] === 'function', "getBalance method was not a function");
 

@@ -46,7 +46,11 @@ class RPC {
     }
 
     getTokenRPC(tokenId, rootChainId) {
-        return new TokenRPC(this, rootChainId, tokenId);
+        return new TokenRPC(this, tokenId, rootChainId);
+    }
+
+    async getTrackedTokens() {
+        return call(this, 'get-daemon-tokens', generateTokenRPCParams(this));
     }
 }
 
@@ -112,7 +116,7 @@ async function call(rpc, method, params) {
 
     //TODO: Basic Auth
 
-    return axios.post(rpc._host + ':' + rpc._port + '/' + rpc._version, {
+    return axios.post('http://' + rpc._host + ':' + rpc._port + '/' + rpc._version, {
         jsonrpc: '2.0',
         id: Math.floor(Math.random() * 10000),
         method: method,
