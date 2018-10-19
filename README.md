@@ -116,7 +116,7 @@ console.log(JSON.stringify(transaction.toObject(), undefined, 2));
             "amount":150
          }
       ],
-      "milliTimestamp":1537450868,
+      "blockheight":1537450868,
       "salt":"80d87a8bd5cf2a3eca9037c2229f3701eed29360caa975531ef5fe476b1b70b5"
 }
 */
@@ -176,7 +176,7 @@ let tx = new TransactionBuilder()
 	.input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 75)
 	.input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 75)
 	.output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
-	.milliTimestamp(12345812737123)
+	.blockheight(12345812737123)
     .salt("superrandom1928498fj2")
 	.build();
 ```

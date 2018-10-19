@@ -40,7 +40,7 @@ class RPC {
         if (!builder instanceof RPCBuilder) throw new Error("Must include an rpc builder");
         this._host = builder._host || 'localhost';
         this._port = builder._port || 8078;
-        this._version = builder._version || 'v0';
+        this._version = builder._version || 'v1';
         this._username = builder._username;
         this._password = builder._password;
     }
@@ -49,8 +49,12 @@ class RPC {
         return new TokenRPC(this, tokenId, rootChainId);
     }
 
-    async getTrackedTokens() {
-        return call(this, 'get-daemon-tokens', generateTokenRPCParams(this));
+    getTrackedTokens() {
+        return call(this, 'get-daemon-tokens');
+    }
+
+    getVersion() {
+        return call(this, 'version');
     }
 }
 
@@ -66,62 +70,65 @@ class TokenRPC {
         this._rootChainId = rootChainId;
     }
 
-    async getIssuance() {
-        let response = await call(this._rpc, 'get-issuance', generateTokenRPCParams(this));
-        return response.result;
+    getIssuance() {
+        return call(this._rpc, 'get-issuance', generateTokenRPCParams(this));
     }
 
-    async getTransaction(txId) {
-        if (txId.length !== 32) throw new Error("You must include a valid 32 Byte tx ID (entryhash)");
-        let response = await call(this._rpc, 'get-transaction', generateTokenRPCParams(this, {'tx-id': txId}));
-        return response.result;
+    getTransaction(txId) {
+        if (txId.length !== 64) throw new Error("You must include a valid 32 Byte tx ID (entryhash)");
+        return call(this._rpc, 'get-transaction', generateTokenRPCParams(this, {'tx-id': txId}));
     }
 
-    async getTransactions(txId, fa, start, limit) {
-        if (txId !== undefined && txId.length !== 32) throw new Error("You must include a valid 32 Byte tx ID (entryhash)");
-        if (!fctAddressUtil.isValidFctPublicAddress(fa)) throw new Error("You must include a valid public Factoid address");
-        let response = await call(this._rpc, 'get-transactions', generateTokenRPCParams(this, {
+    getTransactions(txId, fa, start, limit) {
+        if (txId && txId.length !== 32) throw new Error("You must include a valid 32 Byte tx ID (entryhash)");
+        if (fa && !fctAddressUtil.isValidFctPublicAddress(fa)) throw new Error("You must include a valid public Factoid address");
+        return call(this._rpc, 'get-transactions', generateTokenRPCParams(this, {
             'tx-id': txId,
-            fa: fa,
+            'fa-address': fa,
             start: start,
             limit: limit
         }));
-        return response.result;
     }
 
-    async getBalance(fa) {
+    getBalance(fa) {
         if (!fctAddressUtil.isValidFctPublicAddress(fa)) throw new Error("You must include a valid public Factoid address");
-        let response = await call(this._rpc, 'get-balance', generateTokenRPCParams(this, {'fa-address': fa}));
-        return response.result;
+        return call(this._rpc, 'get-balance', generateTokenRPCParams(this, {'fa-address': fa}));
     }
 
-    async getStats() {
-        let response = await call(this._rpc, 'get-stats', generateTokenRPCParams(this));
-        return response.result;
+    getStats() {
+        return call(this._rpc, 'get-stats', generateTokenRPCParams(this));
     }
 
     //non-fungible
-    async getToken(tokenId) {
-        let response = await call(this._rpc, 'get-token', generateTokenRPCParams(this, {'nf-id': tokenId}));
-        return response.result;
+    getToken(tokenId) {
+        return call(this._rpc, 'get-token', generateTokenRPCParams(this, {'nf-token-id': tokenId}));
     }
 }
 
 function generateTokenRPCParams(tokenRPC, params) {
-    return Object.assign({'token-id': tokenRPC._tokenId, 'issuer-id': tokenRPC._rootChainId}, params ? params : {});
+    return Object.assign({
+        'token-id': tokenRPC._tokenId,
+        'issuer-id': tokenRPC._rootChainId
+    }, params);
 }
 
 async function call(rpc, method, params) {
     if (!rpc instanceof RPC) throw new Error("Must include a valid RPC instance to call endpoint");
 
-    //TODO: Basic Auth
+    //TODO: Basic HTTP Auth
 
-    return axios.post('http://' + rpc._host + ':' + rpc._port + '/' + rpc._version, {
+    let response = await axios.post('http://' + rpc._host + ':' + rpc._port + '/' + rpc._version, {
         jsonrpc: '2.0',
         id: Math.floor(Math.random() * 10000),
         method: method,
         params: params
     });
+
+    const data = response.data;
+
+    if (data.error !== undefined) throw new Error(JSON.stringify(data.error));
+
+    return data.result;
 }
 
 module.exports = {

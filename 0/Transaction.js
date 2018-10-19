@@ -16,7 +16,7 @@ class TransactionBuilder {
             this._keys = builder._keys;
             this._inputs = builder._inputs;
             this._outputs = builder._outputs;
-            this._milliTimestamp = builder._milliTimestamp;
+            this._blockheight = builder._blockheight;
             this._salt = builder._salt;
         } else {
             this._keys = [];
@@ -39,15 +39,6 @@ class TransactionBuilder {
         return this;
     }
 
-    setIssuerInformation(rootChainId, tokenId, sk1) {
-        if (!fctIdentityUtil.isValidIdentityChainId(rootChainId)) throw new Error("You must include a valid Root Chain ID to create a coinbase transaction");
-        if (!fctIdentityUtil.isValidSk1(sk1)) throw new Error("You must include a valid SK1 Key to sign a coinbase transaction");
-        this._rootChainId = rootChainId;
-        this._sk1 = sk1;
-        this._tokenId = tokenId;
-        return this;
-    }
-
     output(fa, amount) {
         if (!fctAddressUtil.isValidFctPublicAddress(fa)) throw new Error("Input address must be a valid public Factoid address");
         if (isNaN(amount) || !Number.isInteger(amount) || amount < 1) throw new Error("Input amount must be a positive nonzero integer");
@@ -56,9 +47,18 @@ class TransactionBuilder {
         return this;
     }
 
-    milliTimestamp(timestamp) {
-        if (isNaN(timestamp) || !Number.isInteger(timestamp)) throw new Error("Timestamp must be a positive nonzero integer");
-        this._milliTimestamp = timestamp;
+    setIssuerInformation(rootChainId, tokenId, sk1) {
+        if (!fctIdentityUtil.isValidIdentityChainId(rootChainId)) throw new Error("You must include a valid Root Chain ID to create a coinbase transaction");
+        if (!fctIdentityUtil.isValidSk1(sk1)) throw new Error("You must include a valid SK1 Key to sign a coinbase transaction");
+        this._rootChainId = rootChainId;
+        this._sk1 = sk1;
+        this._tokenId = tokenId;
+        return this;
+    }
+    
+    blockheight(blockheight) {
+        if (isNaN(blockheight) || !Number.isInteger(blockheight)) throw new Error("Blockheight must be a positive nonzero integer");
+        this._blockheight = blockheight;
         return this;
     }
 
@@ -69,6 +69,8 @@ class TransactionBuilder {
     }
 
     build() {
+        if (!Number.isInteger(this._blockheight) || this._blockheight < 0) throw new Error("Blockheight is required, and must be an unsigned integer");
+
         if (this._inputs.length === 0 || this._outputs.length === 0) throw new Error("Must have at least one input and one output");
 
         const inputSum = this._inputs.reduce((input, sum) => input.amount + sum, 0);
@@ -87,7 +89,7 @@ class Transaction {
         if (builder instanceof TransactionBuilder) {
             this.inputs = builder._inputs;
             this.outputs = builder._outputs;
-            this.milliTimestamp = builder._milliTimestamp || new Date().getTime();
+            this.blockheight = builder._blockheight;
             this.salt = builder._salt || crypto.randomBytes(32).toString('hex');
 
             this.content = JSON.stringify(this);
@@ -115,7 +117,8 @@ class Transaction {
             this.txId = builder.txId;
             this.inputs = builder.inputs;
             this.outputs = builder.outputs;
-            this.milliTimestamp = builder.milliTimestamp;
+            this.blockheight = builder.blockheight;
+            this.timestamp = builder.timestamp;
             this.salt = builder.salt;
             this.extIds = builder.extIds;
 
@@ -134,7 +137,7 @@ class Transaction {
             this.content = JSON.stringify({
                 inputs: this.inputs,
                 outputs: this.outputs,
-                milliTimestamp: this.milliTimestamp,
+                milliTimestamp: this.timestamp,
                 salt: this.salt
             });
         }
@@ -150,8 +153,12 @@ class Transaction {
         return this.outputs;
     }
 
-    getMilliTimestamp() {
-        return this.milliTimestamp;
+    getTimestamp() {
+        return this.timestamp;
+    }
+
+    getBlockheight() {
+        return this.blockheight;
     }
 
     getSalt() {
