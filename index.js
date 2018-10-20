@@ -1,5 +1,9 @@
 module.exports = Object.assign({},
     require('./rpc/RPC'),
-    require('./0/Transaction'),
-    require('./0/Issuance'),
+    {
+        FAT0: {
+            Transaction: require('./0/Transaction'),
+            Issuance: require('./0/Issuance')
+        }
+    }
 );

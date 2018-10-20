@@ -2,6 +2,8 @@ const axios = require('axios');
 const fctIdentityUtil = require('factom-identity-lib/src/validation');
 const fctAddressUtil = require('factom/src/addresses');
 
+const FAT0TokenRPC = require('../0/TokenRPC');
+
 class RPCBuilder {
     constructor(builder) {
 
@@ -16,11 +18,6 @@ class RPCBuilder {
     port(port) {
         if (isNaN(port) || !Number.isInteger(port) || port < 0) throw new Error("Port must be an integer >= 0");
         this._port = port;
-        return this;
-    }
-
-    version(version) {
-        this._version = version;
         return this;
     }
 
@@ -40,13 +37,22 @@ class RPC {
         if (!builder instanceof RPCBuilder) throw new Error("Must include an rpc builder");
         this._host = builder._host || 'localhost';
         this._port = builder._port || 8078;
-        this._version = builder._version || 'v1';
         this._username = builder._username;
         this._password = builder._password;
     }
 
     getTokenRPC(tokenId, rootChainId) {
-        return new TokenRPC(this, tokenId, rootChainId);
+        return new BaseTokenRPC(this, tokenId, rootChainId);
+    }
+
+    getTypedTokenRPC(type, tokenId, rootChainId) {
+        switch (type) {
+            case 'FAT-0': {
+                return new FAT0TokenRPC(this, tokenId, rootChainId);
+            }
+            default:
+                throw new Error("Unsupported FAT token type " + type);
+        }
     }
 
     getTrackedTokens() {
@@ -58,7 +64,7 @@ class RPC {
     }
 }
 
-class TokenRPC {
+class BaseTokenRPC {
     constructor(rpc, tokenId, rootChainId) {
         if (!rpc instanceof RPC) throw new Error("Must include an RPc object of type RPC");
         this._rpc = rpc;
@@ -66,7 +72,7 @@ class TokenRPC {
         if (tokenId === undefined || typeof  tokenId !== 'string') throw new Error('Token is a required string');
         this._tokenId = tokenId;
 
-        if (!fctIdentityUtil.isValidIdentityChainId(rootChainId)) throw new Error("You must include a valid issuer identity Root Chain Id to issue a FAT token");
+        if (!fctIdentityUtil.isValidIdentityChainId(rootChainId)) throw new Error("You must include a valid issuer identity Root Chain Id construct BaseTokenRPC");
         this._rootChainId = rootChainId;
     }
 
@@ -117,7 +123,7 @@ async function call(rpc, method, params) {
 
     //TODO: Basic HTTP Auth
 
-    let response = await axios.post('http://' + rpc._host + ':' + rpc._port + '/' + rpc._version, {
+    let response = await axios.post('http://' + rpc._host + ':' + rpc._port + '/v1', {
         jsonrpc: '2.0',
         id: Math.floor(Math.random() * 10000),
         method: method,
@@ -134,5 +140,5 @@ async function call(rpc, method, params) {
 module.exports = {
     RPCBuilder,
     RPC,
-    TokenRPC
+    TokenRPC: BaseTokenRPC
 };

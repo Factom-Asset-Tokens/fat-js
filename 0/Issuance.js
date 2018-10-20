@@ -8,7 +8,7 @@ const Transaction = require('./Transaction').Transaction;
 
 class IssuanceBuilder {
 
-    constructor(rootChainId, tokenId, sk1) {
+    constructor(tokenId, rootChainId, sk1) {
         if (!fctIdentityUtil.isValidIdentityChainId(rootChainId)) throw new Error("You must include a valid issuer identity Root Chain Id to issue a FAT token");
         this._rootChainId = rootChainId;
 
@@ -86,10 +86,9 @@ class Issuance {
             this._type = builder.type;
             this._name = builder.name;
             this._symbol = builder.symbol;
-            this._supply = builder._supply;
+            this._supply = builder.supply;
             this._salt = builder.salt;
             this._content = JSON.stringify(this);
-            this._extIds = builder._extIds;
         }
 
         Object.freeze(this);

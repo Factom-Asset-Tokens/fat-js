@@ -99,7 +99,7 @@ describe('Unit Spec', function () {
     describe('Issuance Builder', function () {
 
         let IssuanceBuilder = require('../../0/Issuance').IssuanceBuilder;
-        
+
         it('Issuance Spec', function () {
 
             let tx = new TransactionBuilder()
@@ -108,14 +108,13 @@ describe('Unit Spec', function () {
                 .blockheight(159888)
                 .build();
 
-            let issuance = new IssuanceBuilder("888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "mytoken", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
+            let issuance = new IssuanceBuilder("mytoken", "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
                 .name('Test Token')
                 .symbol('TTK')
                 .supply(1000000)
                 .salt('09c7c39bc38a86c')
                 .coinbase(tx)
                 .build();
-
 
             assert(issuance.getRootChainId() === '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762', "Unexpected root chain ID");
             assert(issuance.getType() === 'FAT-0', "Unexpected token type");
@@ -146,7 +145,6 @@ describe('Unit Spec', function () {
             let RPC = new RPCBuilder()
                 .host('fatnode.mysite.com')
                 .port(1234)
-                .version('v0')
                 .auth('my-user', 'my-pass')
                 .build();
 
