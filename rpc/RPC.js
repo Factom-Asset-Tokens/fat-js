@@ -2,8 +2,6 @@ const axios = require('axios');
 const fctIdentityUtil = require('factom-identity-lib/src/validation');
 const fctAddressUtil = require('factom/src/addresses');
 
-const FAT0TokenRPC = require('../0/TokenRPC');
-
 class RPCBuilder {
     constructor(builder) {
 
@@ -111,6 +109,33 @@ class BaseTokenRPC {
     }
 }
 
+//Token Specific Token RPCs (Optional, wraps response in class from corresponding token type)
+let FAT0Transaction = require('../0/Transaction').Transaction;
+let FAT0Issuance = require('../0/Issuance').Issuance;
+
+class FAT0TokenRPC extends BaseTokenRPC {
+    constructor(rpc, rootChainId, tokenId) {
+        super(rpc, rootChainId, tokenId);
+    }
+
+    async getIssuance() {
+        let issuance = await super.getIssuance();
+        return new FAT0Issuance(issuance);
+    }
+
+    async getTransaction(txId) {
+        let transaction = await super.getTransaction(txId);
+        return new FAT0Transaction(transaction);
+    }
+
+    async getTransactions(txId, fa, start, limit) {
+        let transactions = await super.getTransactions(txId, fa, start, limit);
+        return transactions.map(tx => new FAT0Transaction(tx));
+    }
+}
+
+
+
 function generateTokenRPCParams(tokenRPC, params) {
     return Object.assign({
         'token-id': tokenRPC._tokenId,
@@ -139,6 +164,5 @@ async function call(rpc, method, params) {
 
 module.exports = {
     RPCBuilder,
-    RPC,
-    TokenRPC: BaseTokenRPC
+    BaseTokenRPC
 };

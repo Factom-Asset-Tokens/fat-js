@@ -98,7 +98,7 @@ class Issuance {
         return this._tokenId;
     }
 
-    getRootChainId() {
+    getIssuerIdentityRootChainId() {
         return this._rootChainId;
     }
 

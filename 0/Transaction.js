@@ -55,7 +55,7 @@ class TransactionBuilder {
         this._tokenId = tokenId;
         return this;
     }
-    
+
     blockheight(blockheight) {
         if (isNaN(blockheight) || !Number.isInteger(blockheight)) throw new Error("Blockheight must be a positive nonzero integer");
         this._blockheight = blockheight;
@@ -120,19 +120,6 @@ class Transaction {
             this.blockheight = builder.blockheight;
             this.timestamp = builder.timestamp;
             this.salt = builder.salt;
-            this.extIds = builder.extIds;
-
-            let extIdsCopy = Array.from(this.extIds);
-
-            //if there's a coinbase sig on the end, pop it off (FATIP-101)
-            if (extIdsCopy.length % 2 !== 0) extIdsCopy.pop();
-
-            while (extIdsCopy.length > 0) {
-                this.rcds.push(extIdsCopy[0]);
-                extIdsCopy.pop();
-                this.signatures.push(extIdsCopy[0]);
-                extIdsCopy.pop();
-            }
 
             this.content = JSON.stringify({
                 inputs: this.inputs,

@@ -116,7 +116,7 @@ describe('Unit Spec', function () {
                 .coinbase(tx)
                 .build();
 
-            assert(issuance.getRootChainId() === '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762', "Unexpected root chain ID");
+            assert(issuance.getIssuerIdentityRootChainId() === '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762', "Unexpected root chain ID");
             assert(issuance.getType() === 'FAT-0', "Unexpected token type");
             assert(issuance.getName() === 'Test Token', "Unexpected token Name");
             assert(issuance.getSymbol() === 'TTK', "Unexpected token Symbol");
