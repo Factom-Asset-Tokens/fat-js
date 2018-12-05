@@ -2,7 +2,7 @@ const axios = require('axios');
 const fctIdentityUtil = require('factom-identity-lib/src/validation');
 const fctAddressUtil = require('factom/src/addresses');
 
-class RPCBuilder {
+class CLIBuilder {
     constructor(builder) {
 
     }
@@ -26,13 +26,13 @@ class RPCBuilder {
     }
 
     build() {
-        return new RPC(this);
+        return new CLI(this);
     }
 }
 
-class RPC {
+class CLI {
     constructor(builder) {
-        if (!builder instanceof RPCBuilder) throw new Error("Must include an rpc builder");
+        if (!builder instanceof CLIBuilder) throw new Error("Must include an cli builder");
         this._host = builder._host || 'localhost';
         this._port = builder._port || 8078;
         this._username = builder._username;
@@ -40,13 +40,13 @@ class RPC {
     }
 
     getTokenRPC(tokenId, rootChainId) {
-        return new BaseTokenRPC(this, tokenId, rootChainId);
+        return new BaseTokenCLI(this, tokenId, rootChainId);
     }
 
     getTypedTokenRPC(type, tokenId, rootChainId) {
         switch (type) {
             case 'FAT-0': {
-                return new FAT0TokenRPC(this, tokenId, rootChainId);
+                return new FAT0TokenCLI(this, tokenId, rootChainId);
             }
             default:
                 throw new Error("Unsupported FAT token type " + type);
@@ -62,31 +62,31 @@ class RPC {
     }
 }
 
-class BaseTokenRPC {
+class BaseTokenCLI {
     constructor(rpc, tokenId, rootChainId) {
-        if (!rpc instanceof RPC) throw new Error("Must include an RPc object of type RPC");
+        if (!rpc instanceof CLI) throw new Error("Must include an RPc object of type CLI");
         this._rpc = rpc;
 
         if (tokenId === undefined || typeof  tokenId !== 'string') throw new Error('Token is a required string');
         this._tokenId = tokenId;
 
-        if (!fctIdentityUtil.isValidIdentityChainId(rootChainId)) throw new Error("You must include a valid issuer identity Root Chain Id construct BaseTokenRPC");
+        if (!fctIdentityUtil.isValidIdentityChainId(rootChainId)) throw new Error("You must include a valid issuer identity Root Chain Id construct BaseTokenCLI");
         this._rootChainId = rootChainId;
     }
 
     getIssuance() {
-        return call(this._rpc, 'get-issuance', generateTokenRPCParams(this));
+        return call(this._rpc, 'get-issuance', generateTokenCLIParams(this));
     }
 
     getTransaction(txId) {
         if (txId.length !== 64) throw new Error("You must include a valid 32 Byte tx ID (entryhash)");
-        return call(this._rpc, 'get-transaction', generateTokenRPCParams(this, {'tx-id': txId}));
+        return call(this._rpc, 'get-transaction', generateTokenCLIParams(this, {'tx-id': txId}));
     }
 
     getTransactions(txId, fa, start, limit) {
         if (txId && txId.length !== 32) throw new Error("You must include a valid 32 Byte tx ID (entryhash)");
         if (fa && !fctAddressUtil.isValidFctPublicAddress(fa)) throw new Error("You must include a valid public Factoid address");
-        return call(this._rpc, 'get-transactions', generateTokenRPCParams(this, {
+        return call(this._rpc, 'get-transactions', generateTokenCLIParams(this, {
             'tx-id': txId,
             'fa-address': fa,
             start: start,
@@ -96,16 +96,16 @@ class BaseTokenRPC {
 
     getBalance(fa) {
         if (!fctAddressUtil.isValidFctPublicAddress(fa)) throw new Error("You must include a valid public Factoid address");
-        return call(this._rpc, 'get-balance', generateTokenRPCParams(this, {'fa-address': fa}));
+        return call(this._rpc, 'get-balance', generateTokenCLIParams(this, {'fa-address': fa}));
     }
 
     getStats() {
-        return call(this._rpc, 'get-stats', generateTokenRPCParams(this));
+        return call(this._rpc, 'get-stats', generateTokenCLIParams(this));
     }
 
     //non-fungible
     getToken(tokenId) {
-        return call(this._rpc, 'get-token', generateTokenRPCParams(this, {'nf-token-id': tokenId}));
+        return call(this._rpc, 'get-token', generateTokenCLIParams(this, {'nf-token-id': tokenId}));
     }
 }
 
@@ -113,7 +113,7 @@ class BaseTokenRPC {
 let FAT0Transaction = require('../0/Transaction').Transaction;
 let FAT0Issuance = require('../0/Issuance').Issuance;
 
-class FAT0TokenRPC extends BaseTokenRPC {
+class FAT0TokenCLI extends BaseTokenCLI {
     constructor(rpc, rootChainId, tokenId) {
         super(rpc, rootChainId, tokenId);
     }
@@ -135,8 +135,7 @@ class FAT0TokenRPC extends BaseTokenRPC {
 }
 
 
-
-function generateTokenRPCParams(tokenRPC, params) {
+function generateTokenCLIParams(tokenRPC, params) {
     return Object.assign({
         'token-id': tokenRPC._tokenId,
         'issuer-id': tokenRPC._rootChainId
@@ -144,7 +143,7 @@ function generateTokenRPCParams(tokenRPC, params) {
 }
 
 async function call(rpc, method, params) {
-    if (!rpc instanceof RPC) throw new Error("Must include a valid RPC instance to call endpoint");
+    if (!rpc instanceof CLI) throw new Error("Must include a valid CLI instance to call endpoint");
 
     //TODO: Basic HTTP Auth
 
@@ -163,6 +162,6 @@ async function call(rpc, method, params) {
 }
 
 module.exports = {
-    RPCBuilder,
-    BaseTokenRPC
+    CLIBuilder,
+    BaseTokenCLI
 };

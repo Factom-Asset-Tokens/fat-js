@@ -1,5 +1,5 @@
 module.exports = Object.assign({},
-    require('./rpc/RPC'),
+    require('./cli/CLI'),
     {
         FAT0: {
             Transaction: require('./0/Transaction'),

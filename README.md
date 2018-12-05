@@ -6,7 +6,7 @@
 
 [![Coverage Status](https://coveralls.io/repos/github/DBGrow/fat-js/badge.svg?branch=master&t=X5s8cd)](https://coveralls.io/github/DBGrow/fat-js?branch=master)
 
-[Factom Asset Token](https://github.com/DBGrow/FAT) Client and RPC implementation in JS :blue_heart:
+[Factom Asset Token](https://github.com/DBGrow/FAT) Client and CLI implementation in JS :blue_heart:
 
 Currently supports **FAT-0** token standard.
 
@@ -46,24 +46,24 @@ A fresh `bundle.js` will be built in the  `browser` directory.
 
 
 
-## Instantiate FAT RPC
+## Instantiate FAT CLI
 
 ```javascript
-const RPCBuilder = require('fat-js').RPCBuilder
-let rpc = new RPCBuilder()
+const CLIBuilder = require('fat-js').CLIBuilder
+let rpc = new CLIBuilder()
     .host('fatnode.mysite.com')
     .port(1234)
     .version('v0')
     .auth('my-user', 'my-pass')
     .build();
  
-//get the RPC client for a token: <tokenId> <issuer Root Chain ID>
+//get the CLI client for a token: <tokenId> <issuer Root Chain ID>
 let tokenRPC = rpc.getTokenRPC('mytoken','888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762')
 ```
 
 
 
-## FAT Token RPC Calls
+## FAT Token CLI Calls
 
 ### Get Issuance
 
@@ -171,7 +171,7 @@ console.log(JSON.stringify(stats, undefined, 2));
 All FAT-0 Transaction Builder Options
 
 ```javascript
-const RPCBuilder = require('fat-js').FAT0.TransactionBuilder
+const CLIBuilder = require('fat-js').FAT0.TransactionBuilder
 let tx = new TransactionBuilder()
 	.input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 75)
 	.input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 75)
@@ -188,7 +188,7 @@ let tx = new TransactionBuilder()
 All FAT-0 Issuance Builder Options
 
 ```javascript
-const RPCBuilder = require('fat-js').FAT0.IssuanceBuilder
+const CLIBuilder = require('fat-js').FAT0.IssuanceBuilder
 let issuance = new IssuanceBuilder("888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "mytoken", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
                 .supply(1000000)
                 .name('Test Token')
