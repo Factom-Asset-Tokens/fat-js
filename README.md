@@ -50,15 +50,13 @@ A fresh `bundle.js` will be built in the  `browser` directory.
 
 ```javascript
 const CLIBuilder = require('fat-js').CLIBuilder
-let rpc = new CLIBuilder()
+let cli = new CLIBuilder()
     .host('fatnode.mysite.com')
     .port(1234)
-    .version('v0')
-    .auth('my-user', 'my-pass')
     .build();
  
 //get the CLI client for a token: <tokenId> <issuer Root Chain ID>
-let tokenRPC = rpc.getTokenRPC('mytoken','888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762')
+let tokenCLI = cli.getTokenCLI('mytoken','888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762')
 ```
 
 
@@ -69,10 +67,10 @@ let tokenRPC = rpc.getTokenRPC('mytoken','888888d027c59579fc47a6fc6c4a5c0409c7c3
 
 ```javascript
 //using async/await
-let issuance = await tokenRpc.getIssuance();
+let issuance = await tokenCLI.getIssuance();
 
 //or using promises
-tokenRpc.getIssuance().then(function(issuance){
+tokenCLI.getIssuance().then(function(issuance){
     
 }).catch(function(err){
     console.error(err);
@@ -95,7 +93,7 @@ console.log(JSON.stringify(issuance.toObject(), undefined, 2));
 ### Get Transaction
 
 ```javascript
-let transaction = await tokenRpc.getTransaction('d9b6ca250c97fdbe48eb3972a7d4b906aac54f2048982acfcb6019bc2a018be9');
+let transaction = await tokenCLI.getTransaction('d9b6ca250c97fdbe48eb3972a7d4b906aac54f2048982acfcb6019bc2a018be9');
 
 console.log(JSON.stringify(transaction.toObject(), undefined, 2));
 /* =>
@@ -127,7 +125,7 @@ console.log(JSON.stringify(transaction.toObject(), undefined, 2));
 ### Get Transactions
 
 ```javascript
-let transaction = await tokenRpc.getTransactions();
+let transaction = await tokenCLI.getTransactions();
 ```
 
 
@@ -135,7 +133,7 @@ let transaction = await tokenRpc.getTransactions();
 ### Get Balance
 
 ```javascript
-let balance = await tokenRpc.getBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
+let balance = await tokenCLI.getBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
 
 console.log(balance);
 /* =>
@@ -148,7 +146,7 @@ console.log(balance);
 ### Get Stats
 
 ```javascript
-let stats = await tokenRpc.getStats();
+let stats = await tokenCLI.getStats();
 
 console.log(JSON.stringify(stats, undefined, 2));
 /* =>
@@ -171,13 +169,14 @@ console.log(JSON.stringify(stats, undefined, 2));
 All FAT-0 Transaction Builder Options
 
 ```javascript
-const CLIBuilder = require('fat-js').FAT0.TransactionBuilder
-let tx = new TransactionBuilder()
-	.input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 75)
-	.input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 75)
+const TransactionBuilder = require('fat-js').FAT0.TransactionBuilder
+
+const tokenId = 'mytoken';
+const issuerRootChainId = '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762';
+
+let tx = new TransactionBuilder(tokenId, issuerRootChainId)
+	.input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 150)
 	.output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
-	.blockheight(12345812737123)
-    .salt("superrandom1928498fj2")
 	.build();
 ```
 
@@ -189,7 +188,7 @@ All FAT-0 Issuance Builder Options
 
 ```javascript
 const CLIBuilder = require('fat-js').FAT0.IssuanceBuilder
-let issuance = new IssuanceBuilder("888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "mytoken", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
+let issuance = new IssuanceBuilder("mytoken", "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
                 .supply(1000000)
                 .name('Test Token')
                 .symbol('TTK')
