@@ -1,4 +1,5 @@
 const assert = require('chai').assert;
+let TransactionBuilder = require('../../0/Transaction').TransactionBuilder;
 
 describe('Integration Spec', function () {
 
@@ -9,7 +10,7 @@ describe('Integration Spec', function () {
         .port(8078)
         .build();
 
-    const tokenCLI = cli.getTokenRPC('514b5c9694f3e225ba77f942d72269a023da8b0c3bc5e8aea8dceb565ab7d915');
+    const tokenCLI = cli.getTokenCLI('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec');
 
     describe('RPC Methods', function () {
         it('get-daemon-properties', async function () {
@@ -28,12 +29,11 @@ describe('Integration Spec', function () {
         });
 
         it('get-transaction', async function () {
-            const transaction = await tokenCLI.getTransaction('f08bd163fbc6a004aa827350cc5f1df2f800c880614f968d5817446092fe3b78');
+            const transaction = await tokenCLI.getTransaction('3f21c0b24a66ad5f95116c3ad5703d66c336831dac6451b4a41d126becd9b174');
             assert(transaction !== undefined, 'Transaction was not returned');
             assert(typeof transaction === 'object', 'Transaction was not an object');
             console.log(JSON.stringify(transaction, undefined, 2));
         });
-
 
         it('get-transactions', async function () {
             const transactions = await tokenCLI.getTransactions();
@@ -54,6 +54,18 @@ describe('Integration Spec', function () {
             assert(stats !== undefined, 'Stats were not returned');
             assert(typeof stats === 'object', 'Stats was not an object');
             console.log(JSON.stringify(stats, undefined, 2));
+        });
+
+        it('send-transaction', async function () {
+            const tx = new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
+                .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", 150)
+                .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
+                .build();
+
+            console.log(JSON.stringify(tx.getExtIds(), undefined, 2));
+
+            const result = await tokenCLI.sendTransaction(tx);
+            console.log(JSON.stringify(result, undefined, 2));
         });
     });
 });

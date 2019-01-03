@@ -39,11 +39,11 @@ class CLI {
         this._password = builder._password;
     }
 
-    getTokenRPC(tokenChainId) {
+    getTokenCLI(tokenChainId) {
         return new BaseTokenCLI(this, tokenChainId);
     }
 
-    getTypedTokenRPC(type, tokenId, rootChainId) {
+    getTypedTokenCLI(type, tokenId, rootChainId) {
         switch (type) {
             case 'FAT-0': {
                 return new FAT0TokenCLI(this, tokenId, rootChainId);
@@ -80,14 +80,14 @@ class BaseTokenCLI {
         return call(this._rpc, 'get-transaction', generateTokenCLIParams(this, {'entryhash': txId}));
     }
 
-    getTransactions(entryhash, fa, start, limit) {
+    getTransactions(entryhash, address, start, limit) {
         if (entryhash && entryhash.length !== 32) throw new Error("You must include a valid 32 Byte tx ID (entryhash)");
-        if (fa && !fctAddressUtil.isValidFctPublicAddress(fa)) throw new Error("You must include a valid public Factoid address");
+        if (address && !fctAddressUtil.isValidFctPublicAddress(address)) throw new Error("You must include a valid public Factoid address");
         return call(this._rpc, 'get-transactions', generateTokenCLIParams(this, {
-            'entryhash': entryhash,
-            'address': fa,
-            start: start,
-            limit: limit
+            entryhash,
+            address,
+            start,
+            limit
         }));
     }
 
@@ -98,6 +98,20 @@ class BaseTokenCLI {
 
     getStats() {
         return call(this._rpc, 'get-stats', generateTokenCLIParams(this));
+    }
+
+    sendTransaction(transaction) {
+        const entry = transaction.getEntry();
+
+        let params = {
+            chainid: this._tokenChainId,
+            extids: entry.extIds.map((id) => id.toString('hex')),
+            content: entry.content.toString('hex')
+        };
+
+        console.log(JSON.stringify(params, undefined, 2));
+
+        return call(this._rpc, 'send-transaction', generateTokenCLIParams(this, params));
     }
 }
 

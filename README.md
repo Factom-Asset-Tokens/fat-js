@@ -55,8 +55,8 @@ let cli = new CLIBuilder()
     .port(1234)
     .build();
  
-//get the CLI client for a token: <tokenId> <issuer Root Chain ID>
-let tokenCLI = cli.getTokenCLI('mytoken','888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762')
+//get the CLI client for a token by token chain ID
+let tokenCLI = cli.getTokenCLI('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
 ```
 
 
@@ -172,9 +172,9 @@ All FAT-0 Transaction Builder Options
 const TransactionBuilder = require('fat-js').FAT0.TransactionBuilder
 
 const tokenId = 'mytoken';
-const issuerRootChainId = '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762';
+const tokenChainId = '013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec';
 
-let tx = new TransactionBuilder(tokenId, issuerRootChainId)
+let tx = new TransactionBuilder(tokenChainId)
 	.input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 150)
 	.output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
 	.build();

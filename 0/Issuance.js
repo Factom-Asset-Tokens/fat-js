@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const {Entry} = require('factom');
 const util = require('../util');
 const factomCryptoValidation = require('factom-identity-lib/src/validation');
 const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
@@ -136,6 +137,14 @@ class Issuance {
 
     toObject() {
         return JSON.parse(this._content);
+    }
+
+    getEntry() {
+       return Entry.builder()
+            .chainId(Buffer.from(util.getTransactionChainId(this._tokenId, this._rootChainId)))
+            .extIds(this.getExtIds(), 'utf8')
+            .content(Buffer.from(this.getContent()), 'utf8')
+            .build();
     }
 }
 

@@ -7,7 +7,7 @@ const ES = 'Es3k4L7La1g7CY5zVLer21H3JFkXgCBCBx8eSM2q9hLbevbuoL6a'; //EC1tE4afVGP
 //Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ', 'FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
 
 const testTokenID = 'mytoken';
-const testIssuerRootChainId = '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762';
+const testTokenChainId = '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762';
 
 describe('Unit Spec', function () {
 
@@ -16,8 +16,8 @@ describe('Unit Spec', function () {
     describe('Transaction Builder', function () {
 
         it('Transaction Spec', function () {
-            let tx = new TransactionBuilder(testTokenID, testIssuerRootChainId)
-                .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 150)
+            let tx = new TransactionBuilder(testTokenChainId)
+                .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", 150)
                 .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
                 .build();
 
@@ -42,9 +42,9 @@ describe('Unit Spec', function () {
             assert(tx.getTimestamp() === undefined, "Timestamp was included in built transaction (should only have timestamp after entry to Factom)");
 
             //salt (autofill): note a salt is not mandatory as per FAT-0. It is optional but strongly recommended
-            assert(tx.getSalt() !== undefined, "salt was not included automatically in built transaction");
-            assert(typeof tx.getSalt() === 'string', "salt included was not a string");
-            assert(tx.getSalt().length === 64, "salt included was not 64 bytes in length (" + tx.getSalt().length + ")");
+            // assert(tx.getSalt() !== undefined, "salt was not included automatically in built transaction");
+            // assert(typeof tx.getSalt() === 'string', "salt included was not a string");
+            // assert(tx.getSalt().length === 64, "salt included was not 64 bytes in length (" + tx.getSalt().length + ")");
 
             //content
             assert(typeof tx.getContent() === 'string', "tx content was not as string");
@@ -57,14 +57,16 @@ describe('Unit Spec', function () {
 
             //extIds
             assert(Array.isArray(tx.getExtIds()), "tx ExtIds were not an array");
-            assert(tx.getExtIds() % 2 === 0, "tx ExtIds were not even (odd = coinbase tx)");
+            assert(tx.getExtIds().length % 2 === 0, "tx ExtIds were not even (odd = coinbase tx)");
 
             //check validity
             assert(tx.isValid(), "Transaction generated was invalid");
+
+            console.log(tx.getEntry())
         });
 
         it('All Transaction Builder Inputs', function () {
-            let tx = new TransactionBuilder(testTokenID, testIssuerRootChainId)
+            let tx = new TransactionBuilder(testTokenChainId)
                 .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 75)
                 .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
                 .coinbaseInput(75)
@@ -88,7 +90,7 @@ describe('Unit Spec', function () {
 
         it('Issuance Spec', function () {
 
-            let tx = new TransactionBuilder(testTokenID, testIssuerRootChainId)
+            let tx = new TransactionBuilder(testTokenChainId)
                 .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 150)
                 .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
                 .build();
@@ -134,13 +136,13 @@ describe('Unit Spec', function () {
                 .build();
 
             //token RPC
-            assert(RPC['getTokenRPC'] !== undefined, "Token RPC Method was not defined");
-            assert(typeof RPC['getTokenRPC'] === 'function', "Token RPC Method was not a function");
+            assert(RPC['getTokenCLI'] !== undefined, "Token RPC Method was not defined");
+            assert(typeof RPC['getTokenCLI'] === 'function', "Token RPC Method was not a function");
 
         });
 
         it('Basic Token RPC Spec', function () {
-            let TokenRPC = new RPCBuilder().build().getTokenRPC('b54c4310530dc4dd361101644fa55cb10aec561e7874a7b786ea3b66f2c6fdfb');
+            let TokenRPC = new RPCBuilder().build().getTokenCLI('b54c4310530dc4dd361101644fa55cb10aec561e7874a7b786ea3b66f2c6fdfb');
             assert(TokenRPC['getBalance'] !== undefined, "getBalance method was not defined");
             assert(typeof TokenRPC['getBalance'] === 'function', "getBalance method was not a function");
 
