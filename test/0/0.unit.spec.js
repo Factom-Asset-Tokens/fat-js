@@ -2,7 +2,7 @@ const assert = require('chai').assert;
 
 const fctAddrUtils = require('factom/src/addresses');
 
-const ES = 'Es3k4L7La1g7CY5zVLer21H3JFkXgCBCBx8eSM2q9hLbevbuoL6a';
+const ES = 'Es3k4L7La1g7CY5zVLer21H3JFkXgCBCBx8eSM2q9hLbevbuoL6a'; //EC1tE4afVGPrBUStDhZPx1aHf4yHqsJuaDpM7WDbXCcYxruUxj2D
 
 //Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ', 'FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
 
@@ -14,7 +14,6 @@ describe('Unit Spec', function () {
     let TransactionBuilder = require('../../0/Transaction').TransactionBuilder;
 
     describe('Transaction Builder', function () {
-
 
         it('Transaction Spec', function () {
             let tx = new TransactionBuilder(testTokenID, testIssuerRootChainId)
@@ -141,7 +140,7 @@ describe('Unit Spec', function () {
         });
 
         it('Basic Token RPC Spec', function () {
-            let TokenRPC = new RPCBuilder().build().getTokenRPC('mytoken', "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762");
+            let TokenRPC = new RPCBuilder().build().getTokenRPC('b54c4310530dc4dd361101644fa55cb10aec561e7874a7b786ea3b66f2c6fdfb');
             assert(TokenRPC['getBalance'] !== undefined, "getBalance method was not defined");
             assert(typeof TokenRPC['getBalance'] === 'function', "getBalance method was not a function");
 

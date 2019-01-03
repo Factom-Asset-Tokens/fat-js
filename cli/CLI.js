@@ -39,8 +39,8 @@ class CLI {
         this._password = builder._password;
     }
 
-    getTokenRPC(tokenId, rootChainId) {
-        return new BaseTokenCLI(this, tokenId, rootChainId);
+    getTokenRPC(tokenChainId) {
+        return new BaseTokenCLI(this, tokenChainId);
     }
 
     getTypedTokenRPC(type, tokenId, rootChainId) {
@@ -57,21 +57,18 @@ class CLI {
         return call(this, 'get-daemon-tokens');
     }
 
-    getVersion() {
-        return call(this, 'version');
+    getDaemonProperties() {
+        return call(this, 'get-daemon-properties');
     }
 }
 
 class BaseTokenCLI {
-    constructor(rpc, tokenId, rootChainId) {
+    constructor(rpc, tokenChainId) {
         if (!rpc instanceof CLI) throw new Error("Must include an RPc object of type CLI");
         this._rpc = rpc;
 
-        if (tokenId === undefined || typeof  tokenId !== 'string') throw new Error('Token is a required string');
-        this._tokenId = tokenId;
-
-        if (!fctIdentityUtil.isValidIdentityChainId(rootChainId)) throw new Error("You must include a valid issuer identity Root Chain Id construct BaseTokenCLI");
-        this._rootChainId = rootChainId;
+        if (!tokenChainId || tokenChainId.length !== 64) throw new Error("You must include a valid token chain ID to construct BaseTokenCLI");
+        this._tokenChainId = tokenChainId;
     }
 
     getIssuance() {
@@ -80,15 +77,15 @@ class BaseTokenCLI {
 
     getTransaction(txId) {
         if (txId.length !== 64) throw new Error("You must include a valid 32 Byte tx ID (entryhash)");
-        return call(this._rpc, 'get-transaction', generateTokenCLIParams(this, {'tx-id': txId}));
+        return call(this._rpc, 'get-transaction', generateTokenCLIParams(this, {'entryhash': txId}));
     }
 
-    getTransactions(txId, fa, start, limit) {
-        if (txId && txId.length !== 32) throw new Error("You must include a valid 32 Byte tx ID (entryhash)");
+    getTransactions(entryhash, fa, start, limit) {
+        if (entryhash && entryhash.length !== 32) throw new Error("You must include a valid 32 Byte tx ID (entryhash)");
         if (fa && !fctAddressUtil.isValidFctPublicAddress(fa)) throw new Error("You must include a valid public Factoid address");
         return call(this._rpc, 'get-transactions', generateTokenCLIParams(this, {
-            'tx-id': txId,
-            'fa-address': fa,
+            'entryhash': entryhash,
+            'address': fa,
             start: start,
             limit: limit
         }));
@@ -96,16 +93,11 @@ class BaseTokenCLI {
 
     getBalance(fa) {
         if (!fctAddressUtil.isValidFctPublicAddress(fa)) throw new Error("You must include a valid public Factoid address");
-        return call(this._rpc, 'get-balance', generateTokenCLIParams(this, {'fa-address': fa}));
+        return call(this._rpc, 'get-balance', generateTokenCLIParams(this, {'address': fa}));
     }
 
     getStats() {
         return call(this._rpc, 'get-stats', generateTokenCLIParams(this));
-    }
-
-    //non-fungible
-    getToken(tokenId) {
-        return call(this._rpc, 'get-token', generateTokenCLIParams(this, {'nf-token-id': tokenId}));
     }
 }
 
@@ -114,8 +106,8 @@ let FAT0Transaction = require('../0/Transaction').Transaction;
 let FAT0Issuance = require('../0/Issuance').Issuance;
 
 class FAT0TokenCLI extends BaseTokenCLI {
-    constructor(rpc, rootChainId, tokenId) {
-        super(rpc, rootChainId, tokenId);
+    constructor(rpc, tokenChainId) {
+        super(rpc, tokenChainId);
     }
 
     async getIssuance() {
@@ -137,8 +129,7 @@ class FAT0TokenCLI extends BaseTokenCLI {
 
 function generateTokenCLIParams(tokenRPC, params) {
     return Object.assign({
-        'token-id': tokenRPC._tokenId,
-        'issuer-id': tokenRPC._rootChainId
+        'chainid': tokenRPC._tokenChainId
     }, params);
 }
 
