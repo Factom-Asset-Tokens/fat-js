@@ -71,7 +71,6 @@ class Transaction {
         if (builder instanceof TransactionBuilder) {
             this.inputs = builder._inputs;
             this.outputs = builder._outputs;
-            this.salt = builder._salt;
 
             this.content = JSON.stringify(this); //snapshot the tx object
 
@@ -88,12 +87,12 @@ class Transaction {
 
                     const index = Buffer.from(sigIndexCounter.toString());
                     const timestamp = Buffer.from(unixSeconds.toString());
-                    const chainId = Buffer.from(builder._tokenChainId);
+                    const chainId = Buffer.from(builder._tokenChainId, 'hex');
                     const content = Buffer.from(this.content);
 
                     const data = Buffer.concat([index, timestamp, chainId, content]);
-                    const dataHash = fctUtil.sha256(data);
-                    
+                    const dataHash = fctUtil.sha512(data);
+
                     sigIndexCounter++;
                     return nacl.detached(dataHash, key.secretKey);
                 });
@@ -213,3 +212,21 @@ module.exports = {
     Transaction,
     TransactionBuilder
 };
+
+function stringToBytes(str) {
+    var ch, st, re = [];
+    for (var i = 0; i < str.length; i++) {
+        ch = str.charCodeAt(i);  // get char
+        st = [];                 // set up "stack"
+        do {
+            st.push(ch & 0xFF);  // push byte to stack
+            ch = ch >> 8;          // shift value down by 1 byte
+        }
+        while (ch);
+        // add stack contents to result
+        // done because chars have "wrong" endianness
+        re = re.concat(st.reverse());
+    }
+    // return an array of bytes
+    return re;
+}

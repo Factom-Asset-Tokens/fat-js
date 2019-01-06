@@ -47,6 +47,7 @@ describe('Integration Spec', function () {
             assert(balance !== undefined, 'Balance was not returned');
             assert(Number.isInteger(balance), 'Balance was not an number');
             assert(balance > 0, 'Balance was 0 (expected > 0)');
+            console.log(balance)
         });
 
         it('get-stats', async function () {
@@ -58,8 +59,8 @@ describe('Integration Spec', function () {
 
         it('send-transaction', async function () {
             const tx = new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
-                .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", 150)
-                .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
+                .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 1)
+                .output("FA3umTvVhkcysBewF1sGAMeAeKDdG7kTQBbtf5nwuFUGwrNa5kAr", 1)
                 .build();
 
             console.log(JSON.stringify(tx.getExtIds(), undefined, 2));
