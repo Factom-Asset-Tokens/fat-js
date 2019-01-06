@@ -75,7 +75,9 @@ class Transaction {
 
             this.content = JSON.stringify(this); //snapshot the tx object
 
-            this.extIds = [];
+            const unixSeconds = Math.round(new Date().getTime() / 1000);
+
+            this.extIds = [unixSeconds.toString()];
 
             this.tokenChainId = builder._tokenChainId;
 
@@ -84,15 +86,16 @@ class Transaction {
                 let sigIndexCounter = 0;
                 this.signatures = builder._keys.map(key => {
 
-                    const data = sigIndexCounter + builder._tokenChainId + this.content.toString('hex');
-                    console.log('content: ', data);
+                    const index = Buffer.from(sigIndexCounter.toString());
+                    const timestamp = Buffer.from(unixSeconds.toString());
+                    const chainId = Buffer.from(builder._tokenChainId);
+                    const content = Buffer.from(this.content);
 
-                    const dataHash = fctUtil.sha256(Buffer.from(data));
-                    console.log('content hash: ', dataHash);
-
-                    let signature = nacl.detached(dataHash, key.secretKey);
+                    const data = Buffer.concat([index, timestamp, chainId, content]);
+                    const dataHash = fctUtil.sha256(data);
+                    
                     sigIndexCounter++;
-                    return signature;
+                    return nacl.detached(dataHash, key.secretKey);
                 });
                 for (let i = 0; i < this.rcds.length; i++) {
                     this.extIds.push(this.rcds[i]);
