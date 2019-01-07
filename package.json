@@ -5,9 +5,10 @@
   "repository": "https://github.com/Factom-Asset-Tokens/fat-js.git",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint 0 cli",
     "test": "nyc mocha test/test.js",
     "build": "webpack",
-    "prepublish": "npm run build"
+    "prepublish": "npm run lint && npm run build"
   },
   "directories": {
     "test": "test"
@@ -29,13 +30,14 @@
     "babel-loader": "8.0.4",
     "chai": "4.1.2",
     "coveralls": "3.0.2",
+    "eslint": "^5.12.0",
     "istanbul": "0.4.5",
     "mocha": "5.2.0",
     "mocha-lcov-reporter": "1.3.0",
     "nyc": "12.0.2",
     "sinon": "6.1.5",
-    "webpack-cli": "3.1.2",
-    "webpack": "4.20.2"
+    "webpack": "4.20.2",
+    "webpack-cli": "3.1.2"
   },
   "publishConfig": {
     "access": "public"
