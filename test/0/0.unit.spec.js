@@ -49,8 +49,8 @@ describe('Unit Spec', function () {
                 .setIssuerSK1("sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
                 .build();
 
-            assert(Object.keys(tx.inputs).length === 1, "Inputs length(" + Object.keys(tx.inputs).length + ") was different than expected");
-            assert(Object.keys(tx.outputs).length === 1, "Outputs length was different than expected");
+            assert(Object.keys(tx.getInputs()).length === 1, "Inputs length(" + Object.keys(tx.getInputs()).length + ") was different than expected");
+            assert(Object.keys(tx.getOutputs()).length === 1, "Outputs length was different than expected");
             assert(tx.isCoinbase() === true, "Failed to detect a coinbase transaction")
         });
 

@@ -70,19 +70,19 @@ class TransactionBuilder {
 class Transaction {
     constructor(builder) {
         if (builder instanceof TransactionBuilder) {
-            this.inputs = builder._inputs;
-            this.outputs = builder._outputs;
+            this._inputs = builder._inputs;
+            this._outputs = builder._outputs;
 
-            this.content = JSON.stringify(this); //snapshot the tx object
+            this._content = JSON.stringify({inputs: this._inputs, outputs: this._outputs}); //snapshot the tx object
 
             const unixSeconds = Math.round(new Date().getTime() / 1000);
 
-            this.extIds = [unixSeconds.toString()];
+            this._extIds = [unixSeconds.toString()];
 
-            this.tokenChainId = builder._tokenChainId;
+            this._tokenChainId = builder._tokenChainId;
 
             //handle coinbase tx
-            if (Object.keys(this.inputs).find(address => address === COINBASE_ADDRESS_PUBLIC)) {
+            if (Object.keys(this._inputs).find(address => address === COINBASE_ADDRESS_PUBLIC)) {
 
                 if (!builder._sk1) throw new Error("You must include a valid SK1 Key to sign a coinbase transaction");
                 // this.extIds.push(fctIdentityCrypto.sign(builder._sk1, builder._tokenChainId + this.content));
@@ -90,33 +90,33 @@ class Transaction {
                 const index = Buffer.from('0');
                 const timestamp = Buffer.from(unixSeconds.toString());
                 const chainId = Buffer.from(builder._tokenChainId, 'hex');
-                const content = Buffer.from(this.content);
+                const content = Buffer.from(this._content);
 
                 const key = nacl.keyPair.fromSeed(fctIdentityCrypto.extractSecretFromIdentityKey(builder._sk1));
 
-                this.rcds = [Buffer.concat([RCD_TYPE_1, Buffer.from(key.publicKey)])];
+                this._rcds = [Buffer.concat([RCD_TYPE_1, Buffer.from(key.publicKey)])];
 
-                this.signatures = [nacl.detached(fctUtil.sha512(Buffer.concat([index, timestamp, chainId, content])), key.secretKey)];
+                this._signatures = [nacl.detached(fctUtil.sha512(Buffer.concat([index, timestamp, chainId, content])), key.secretKey)];
 
-                this.extIds.push(this.rcds[0]);
-                this.extIds.push(this.signatures[0]);
+                this._extIds.push(this._rcds[0]);
+                this._extIds.push(this._signatures[0]);
 
             } else { //otherwise normal transaction
-                this.rcds = builder._keys.map(key => Buffer.concat([RCD_TYPE_1, Buffer.from(key.publicKey)]));
+                this._rcds = builder._keys.map(key => Buffer.concat([RCD_TYPE_1, Buffer.from(key.publicKey)]));
                 let sigIndexCounter = 0;
-                this.signatures = builder._keys.map(key => {
+                this._signatures = builder._keys.map(key => {
 
                     const index = Buffer.from(sigIndexCounter.toString());
                     const timestamp = Buffer.from(unixSeconds.toString());
                     const chainId = Buffer.from(builder._tokenChainId, 'hex');
-                    const content = Buffer.from(this.content);
+                    const content = Buffer.from(this._content);
 
                     sigIndexCounter++;
                     return nacl.detached(fctUtil.sha512(Buffer.concat([index, timestamp, chainId, content])), key.secretKey);
                 });
-                for (let i = 0; i < this.rcds.length; i++) {
-                    this.extIds.push(this.rcds[i]);
-                    this.extIds.push(this.signatures[i]);
+                for (let i = 0; i < this._rcds.length; i++) {
+                    this._extIds.push(this._rcds[i]);
+                    this._extIds.push(this._signatures[i]);
                 }
             }
         } else throw new Error('Transaction may only be instantiated by TransactionBuilder');
@@ -125,22 +125,22 @@ class Transaction {
     }
 
     getInputs() {
-        return this.inputs;
+        return this._inputs;
     }
 
     getOutputs() {
-        return this.outputs;
+        return this._outputs;
     }
 
     isCoinbase() {
-        return Object.keys(this.inputs).find(address => address === COINBASE_ADDRESS_PUBLIC) !== undefined;
+        return Object.keys(this._inputs).find(address => address === COINBASE_ADDRESS_PUBLIC) !== undefined;
     }
 
     getEntry() {
         return Entry.builder()
-            .chainId(Buffer.from(this.tokenChainId))
-            .extIds(this.extIds, 'utf8')
-            .content(Buffer.from(this.content), 'utf8')
+            .chainId(Buffer.from(this._tokenChainId))
+            .extIds(this._extIds, 'utf8')
+            .content(Buffer.from(this._content), 'utf8')
             .build();
     }
 }

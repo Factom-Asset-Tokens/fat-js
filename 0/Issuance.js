@@ -4,8 +4,6 @@ const util = require('../util');
 const factomCryptoValidation = require('factom-identity-lib/src/validation');
 const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
 const fctIdentityUtil = require('factom-identity-lib/src/validation');
-const Transaction = require('./Transaction').Transaction;
-
 
 class IssuanceBuilder {
 
@@ -90,10 +88,6 @@ class Issuance {
         return this._rootChainId;
     }
 
-    getTransactions() {
-        return this._transactions;
-    }
-
     getType() {
         return this._type;
     }
@@ -110,10 +104,6 @@ class Issuance {
         return this._supply;
     }
 
-    getSalt() {
-        return this._salt;
-    }
-
     getContent() {
         return this._content;
     }
@@ -122,14 +112,10 @@ class Issuance {
         return this._extIds;
     }
 
-    toObject() {
-        return JSON.parse(this._content);
-    }
-
     getEntry() {
        return Entry.builder()
             .chainId(Buffer.from(util.getTransactionChainId(this._tokenId, this._rootChainId)))
-            .extIds(this.getExtIds(), 'utf8')
+           .extIds(this.getExtIds(), 'utf8')
             .content(Buffer.from(this.getContent()), 'utf8')
             .build();
     }
