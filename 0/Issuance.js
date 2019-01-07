@@ -43,19 +43,6 @@ class IssuanceBuilder {
         return this;
     };
 
-    salt(salt) {
-        if (typeof salt !== 'string' || salt.length < 1) throw new Error('salt must be a non empty string, if defined (optional)');
-        this._salt = salt;
-        return this;
-    }
-
-    coinbase(transaction) {
-        if (!transaction instanceof Transaction) throw new Error("Transaction must be of type Transaction");
-        if (!this._transactions) this._transactions = [transaction];
-        else this._transactions.push(transaction);
-        return this;
-    };
-
     build() {
         //validate required fields
 
@@ -71,7 +58,7 @@ class Issuance {
             this._name = builder._name;
             this._symbol = builder._symbol;
             this._supply = builder._supply;
-            this._salt = builder._salt || crypto.randomBytes(32).toString('hex');
+            this._salt = crypto.randomBytes(32).toString('hex');
 
             this._content = JSON.stringify(this);
 

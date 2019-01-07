@@ -63,7 +63,18 @@ describe('Integration Spec', function () {
                 .output("FA3umTvVhkcysBewF1sGAMeAeKDdG7kTQBbtf5nwuFUGwrNa5kAr", 1)
                 .build();
 
-            console.log(JSON.stringify(tx.getExtIds(), undefined, 2));
+            const result = await tokenCLI.sendTransaction(tx);
+            console.log(JSON.stringify(result, undefined, 2));
+        });
+
+        it('send-transaction(coinbase)', async function () {
+            let tx = new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
+                .coinbaseInput(10)
+                .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 10)
+                .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+                .build();
+
+            // console.log(JSON.stringify(tx.getExtIds(), undefined, 2));
 
             const result = await tokenCLI.sendTransaction(tx);
             console.log(JSON.stringify(result, undefined, 2));
