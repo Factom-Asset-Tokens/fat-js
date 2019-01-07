@@ -138,9 +138,9 @@ class Transaction {
 
     getEntry() {
         return Entry.builder()
-            .chainId(Buffer.from(this._tokenChainId))
+            .chainId(this._tokenChainId)
             .extIds(this._extIds, 'utf8')
-            .content(Buffer.from(this._content), 'utf8')
+            .content(this._content, 'utf8')
             .build();
     }
 }
