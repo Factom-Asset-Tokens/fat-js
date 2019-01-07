@@ -42,10 +42,10 @@ class CLI {
         return new BaseTokenCLI(this, tokenChainId);
     }
 
-    getTypedTokenCLI(type, tokenId, rootChainId) {
+    getTypedTokenCLI(type, tokenId) {
         switch (type) {
             case 'FAT-0': {
-                return new FAT0TokenCLI(this, tokenId, rootChainId);
+                return new FAT0TokenCLI(this, tokenId);
             }
             default:
                 throw new Error("Unsupported FAT token type " + type);
@@ -102,9 +102,9 @@ class BaseTokenCLI {
     sendTransaction(transaction) {
         const entry = transaction.getEntry();
 
-        let params = {
+        const params = {
             chainid: this._tokenChainId,
-            extids: entry.extIds.map((id) => id.toString('hex')),
+            extids: entry.extIdsHex,
             content: entry.content.toString('hex')
         };
 
@@ -113,8 +113,8 @@ class BaseTokenCLI {
 }
 
 //Token Specific Token RPCs (Optional, wraps response in class from corresponding token type)
-let FAT0Transaction = require('../0/Transaction').Transaction;
-let FAT0Issuance = require('../0/Issuance').Issuance;
+const FAT0Transaction = require('../0/Transaction').Transaction;
+const FAT0Issuance = require('../0/Issuance').Issuance;
 
 class FAT0TokenCLI extends BaseTokenCLI {
     constructor(rpc, tokenChainId) {
@@ -122,17 +122,17 @@ class FAT0TokenCLI extends BaseTokenCLI {
     }
 
     async getIssuance() {
-        let issuance = await super.getIssuance();
+        const issuance = await super.getIssuance();
         return new FAT0Issuance(issuance);
     }
 
     async getTransaction(txId) {
-        let transaction = await super.getTransaction(txId);
+        const transaction = await super.getTransaction(txId);
         return new FAT0Transaction(transaction);
     }
 
     async getTransactions(txId, fa, start, limit) {
-        let transactions = await super.getTransactions(txId, fa, start, limit);
+        const transactions = await super.getTransactions(txId, fa, start, limit);
         return transactions.map(tx => new FAT0Transaction(tx));
     }
 }
@@ -149,7 +149,7 @@ async function call(rpc, method, params) {
 
     //TODO: Basic HTTP Auth
 
-    let response = await axios.post('http://' + rpc._host + ':' + rpc._port + '/v1', {
+    const response = await axios.post('http://' + rpc._host + ':' + rpc._port + '/v1', {
         jsonrpc: '2.0',
         id: Math.floor(Math.random() * 10000),
         method: method,
