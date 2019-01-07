@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const {Entry} = require('factom');
+const { Entry } = require('factom');
 const util = require('../util');
 const factomCryptoValidation = require('factom-identity-lib/src/validation');
 const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
@@ -11,7 +11,7 @@ class IssuanceBuilder {
         if (!fctIdentityUtil.isValidIdentityChainId(rootChainId)) throw new Error("You must include a valid issuer identity Root Chain Id to issue a FAT token");
         this._rootChainId = rootChainId;
 
-        if (tokenId === undefined || typeof  tokenId !== 'string') throw new Error('Token is a required string');
+        if (tokenId === undefined || typeof tokenId !== 'string') throw new Error('Token is a required string');
         this._tokenId = tokenId;
 
         if (!factomCryptoValidation.isValidSk1(sk1)) throw new Error("Supplied key is not a valid sk1 private key");
@@ -24,7 +24,7 @@ class IssuanceBuilder {
         if (!name) throw new Error("Token name must be defined");
         this._name = name;
         return this;
-    };
+    }
 
     symbol(symbol) {
         if (!symbol) throw new Error("Token symbol must be defined");
@@ -32,14 +32,14 @@ class IssuanceBuilder {
         if (symbol.length == 0 || symbol.length > 4) throw new Error("Token symbol must be 1 - 4 characters");
         this._symbol = symbol;
         return this;
-    };
+    }
 
     supply(supply) {
         if (isNaN(supply)) throw new Error("Supply must be a number");
         if (supply <= 0) throw new Error("Supply must be > 0");
         this._supply = supply;
         return this;
-    };
+    }
 
     build() {
         //validate required fields
@@ -113,9 +113,9 @@ class Issuance {
     }
 
     getEntry() {
-       return Entry.builder()
+        return Entry.builder()
             .chainId(Buffer.from(util.getTransactionChainId(this._tokenId, this._rootChainId)))
-           .extIds(this.getExtIds(), 'utf8')
+            .extIds(this.getExtIds(), 'utf8')
             .content(Buffer.from(this.getContent()), 'utf8')
             .build();
     }

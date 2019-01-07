@@ -1,9 +1,8 @@
 const axios = require('axios');
-const fctIdentityUtil = require('factom-identity-lib/src/validation');
 const fctAddressUtil = require('factom/src/addresses');
 
 class CLIBuilder {
-    constructor(builder) {
+    constructor() {
 
     }
 
@@ -32,7 +31,7 @@ class CLIBuilder {
 
 class CLI {
     constructor(builder) {
-        if (!builder instanceof CLIBuilder) throw new Error("Must include an cli builder");
+        if (!(builder instanceof CLIBuilder)) throw new Error("Must include an cli builder");
         this._host = builder._host || 'localhost';
         this._port = builder._port || 8078;
         this._username = builder._username;
@@ -64,7 +63,7 @@ class CLI {
 
 class BaseTokenCLI {
     constructor(rpc, tokenChainId) {
-        if (!rpc instanceof CLI) throw new Error("Must include an RPc object of type CLI");
+        if (!(rpc instanceof CLI)) throw new Error("Must include an RPc object of type CLI");
         this._rpc = rpc;
 
         if (!tokenChainId || tokenChainId.length !== 64) throw new Error("You must include a valid token chain ID to construct BaseTokenCLI");
@@ -109,8 +108,6 @@ class BaseTokenCLI {
             content: entry.content.toString('hex')
         };
 
-        console.log(JSON.stringify(params, undefined, 2));
-
         return call(this._rpc, 'send-transaction', generateTokenCLIParams(this, params));
     }
 }
@@ -148,7 +145,7 @@ function generateTokenCLIParams(tokenRPC, params) {
 }
 
 async function call(rpc, method, params) {
-    if (!rpc instanceof CLI) throw new Error("Must include a valid CLI instance to call endpoint");
+    if (!(rpc instanceof CLI)) throw new Error("Must include a valid CLI instance to call endpoint");
 
     //TODO: Basic HTTP Auth
 
