@@ -70,6 +70,10 @@ class BaseTokenCLI {
         this._tokenChainId = tokenChainId;
     }
 
+    getTokenChainId() {
+        return this._tokenChainId;
+    }
+
     getIssuance() {
         return call(this._rpc, 'get-issuance', generateTokenCLIParams(this));
     }
