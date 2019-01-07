@@ -11,18 +11,8 @@ module.exports.getIssuanceChainId = function (tokenId, rootChainId) {
         .extId(Buffer.from("token"))
         .extId(Buffer.from(tokenId))
         .extId(Buffer.from("issuer"))
-        .extId(Buffer.from(rootChainId))
-        .build()).id.toString('hex')
-};
-
-module.exports.getTransactionChainId = function (tokenId, rootChainId) {
-    return new Chain(Entry.builder()
-        .extId(Buffer.from("token"))
-        .extId(Buffer.from(tokenId))
-        .extId(Buffer.from("issuer"))
-        .extId(Buffer.from(rootChainId))
-        .extId(Buffer.from("transactions"))
-        .build()).id.toString('hex')
+        .extId(Buffer.from(rootChainId, 'hex'))
+        .build()).idHex
 };
 
 module.exports.getIdentityKeyFromSK1 = function (sk1) {

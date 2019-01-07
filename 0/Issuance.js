@@ -66,18 +66,27 @@ class Issuance {
             this._transactions = builder._transactions || [];
 
             //handle issuance signing
-            this._extIds = [fctIdentityCrypto.sign(builder._sk1, util.getTransactionChainId(builder._tokenId, builder._rootChainId) + this._content)];
+            this._chainId = util.getIssuanceChainId(builder._tokenId, builder._rootChainId);
+            this._extIds = [fctIdentityCrypto.sign(builder._sk1, this._chainId + this._content)];
 
         } else if (typeof builder === 'object') {
-            this._type = builder.type;
-            this._name = builder.name;
-            this._symbol = builder.symbol;
-            this._supply = builder.supply;
-            this._salt = builder.salt;
+            this._type = builder.issuance.type;
+            this._name = builder.issuance.name;
+            this._symbol = builder.issuance.symbol;
+            this._supply = builder.issuance.supply;
+            this._salt = builder.issuance.salt;
             this._content = JSON.stringify(this);
+
+            this._tokenId = builder.tokenid;
+            this._rootChainId = builder.issuerid;
+            this._chainId = util.getIssuanceChainId(this._tokenId, this._rootChainId);
         }
 
         Object.freeze(this);
+    }
+
+    getChainId() {
+        return this._chainId;
     }
 
     getTokenId() {
@@ -114,9 +123,9 @@ class Issuance {
 
     getEntry() {
         return Entry.builder()
-            .chainId(Buffer.from(util.getTransactionChainId(this._tokenId, this._rootChainId)))
+            .chainId(this.getChainId())
             .extIds(this.getExtIds(), 'utf8')
-            .content(Buffer.from(this.getContent()), 'utf8')
+            .content(this.getContent(), 'utf8')
             .build();
     }
 }
