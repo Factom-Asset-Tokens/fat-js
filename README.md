@@ -113,9 +113,7 @@ console.log(JSON.stringify(transaction.toObject(), undefined, 2));
             "address":"FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM",
             "amount":150
          }
-      ],
-      "blockheight":1537450868,
-      "salt":"80d87a8bd5cf2a3eca9037c2229f3701eed29360caa975531ef5fe476b1b70b5"
+      ]
 }
 */
 ```
@@ -166,8 +164,6 @@ console.log(JSON.stringify(stats, undefined, 2));
 
 ### Transaction Builder
 
-All FAT-0 Transaction Builder Options
-
 ```javascript
 const TransactionBuilder = require('fat-js').FAT0.TransactionBuilder
 
@@ -178,13 +174,18 @@ let tx = new TransactionBuilder(tokenChainId)
 	.input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 150)
 	.output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
 	.build();
+
+//coinbase transaction
+let tx = new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
+                .coinbaseInput(10)
+                .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 10)
+                .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+                .build();
 ```
 
 
 
 ## Issuance Builder
-
-All FAT-0 Issuance Builder Options
 
 ```javascript
 const CLIBuilder = require('fat-js').FAT0.IssuanceBuilder

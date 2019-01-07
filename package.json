@@ -1,7 +1,8 @@
 {
-  "name": "fat-js",
+  "name": "@fat-token/fat-js",
   "version": "0.0.0",
-  "description": "Factom Asset Token (FAT) RPC Library in JS",
+  "description": "Factom Asset Token (FAT) library in JS",
+  "repository": "https://github.com/Factom-Asset-Tokens/fat-js.git",
   "main": "index.js",
   "scripts": {
     "test": "nyc mocha test/test.js",
@@ -37,5 +38,8 @@
     "sinon": "6.1.5",
     "webpack-cli": "3.1.2",
     "webpack": "4.20.2"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
