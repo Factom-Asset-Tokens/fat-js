@@ -85,7 +85,6 @@ class Transaction {
             if (Object.keys(this._inputs).find(address => address === COINBASE_ADDRESS_PUBLIC)) {
 
                 if (!builder._sk1) throw new Error("You must include a valid SK1 Key to sign a coinbase transaction");
-                // this.extIds.push(fctIdentityCrypto.sign(builder._sk1, builder._tokenChainId + this.content));
 
                 const index = Buffer.from('0');
                 const timestamp = Buffer.from(unixSeconds.toString());
@@ -119,7 +118,16 @@ class Transaction {
                     this._extIds.push(this._signatures[i]);
                 }
             }
-        } else throw new Error('Transaction may only be instantiated by TransactionBuilder');
+        } else { //from object
+            if (!builder.inputs) throw new Error("Valid FAT-0 transactions must include inputs");
+            this._inputs = builder.inputs;
+
+            if (!builder.outputs) throw new Error("Valid FAT-0 transactions must include outputs");
+            this._outputs = builder.outputs;
+            this._entryhash = builder.entryhash;
+            this._chainId = builder.chainid;
+            this._txId = builder.txid;
+        }
 
         Object.freeze(this);
     }
@@ -142,6 +150,10 @@ class Transaction {
             .extIds(this._extIds, 'utf8')
             .content(this._content, 'utf8')
             .build();
+    }
+
+    getEntryhash() {
+        return this._entryhash;
     }
 }
 

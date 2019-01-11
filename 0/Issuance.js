@@ -1,9 +1,14 @@
 const crypto = require('crypto');
-const { Entry } = require('factom');
+const nacl = require('tweetnacl/nacl-fast').sign;
+const {Entry, Chain} = require('factom');
 const util = require('../util');
-const factomCryptoValidation = require('factom-identity-lib/src/validation');
+const fctCryptoValidation = require('factom-identity-lib/src/validation');
 const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
 const fctIdentityUtil = require('factom-identity-lib/src/validation');
+const fctUtil = require('factom/src/util');
+
+const RCD_TYPE_1 = Buffer.from('01', 'hex');
+
 
 class IssuanceBuilder {
 
@@ -14,7 +19,7 @@ class IssuanceBuilder {
         if (tokenId === undefined || typeof tokenId !== 'string') throw new Error('Token is a required string');
         this._tokenId = tokenId;
 
-        if (!factomCryptoValidation.isValidSk1(sk1)) throw new Error("Supplied key is not a valid sk1 private key");
+        if (!fctCryptoValidation.isValidSk1(sk1)) throw new Error("Supplied key is not a valid sk1 private key");
         this._sk1 = sk1;
 
         this._type = 'FAT-0'
@@ -66,8 +71,21 @@ class Issuance {
             this._transactions = builder._transactions || [];
 
             //handle issuance signing
-            this._chainId = util.getIssuanceChainId(builder._tokenId, builder._rootChainId);
-            this._extIds = [fctIdentityCrypto.sign(builder._sk1, this._chainId + this._content)];
+            this._tokenChainId = util.getTokenChainId(builder._tokenId, builder._rootChainId);
+
+            const index = Buffer.from('0');
+            const timestamp = Buffer.from(Math.round(new Date().getTime() / 1000).toString());
+            const chainId = Buffer.from(this._tokenChainId, 'hex');
+            const content = Buffer.from(this._content);
+
+            const key = nacl.keyPair.fromSeed(fctIdentityCrypto.extractSecretFromIdentityKey(builder._sk1));
+
+            const rcd = [Buffer.concat([RCD_TYPE_1, Buffer.from(key.publicKey)])];
+
+            const signature = [nacl.detached(fctUtil.sha512(Buffer.concat([index, timestamp, chainId, content])), key.secretKey)];
+
+
+            this._extIds = [timestamp, rcd, signature];
 
         } else if (typeof builder === 'object') {
             this._type = builder.issuance.type;
@@ -79,14 +97,14 @@ class Issuance {
 
             this._tokenId = builder.tokenid;
             this._rootChainId = builder.issuerid;
-            this._chainId = util.getIssuanceChainId(this._tokenId, this._rootChainId);
+            this._tokenChainId = util.getTokenChainId(this._tokenId, this._rootChainId);
         }
 
         Object.freeze(this);
     }
 
-    getChainId() {
-        return this._chainId;
+    getTokenChainId() {
+        return this._tokenChainId;
     }
 
     getTokenId() {
@@ -113,19 +131,20 @@ class Issuance {
         return this._supply;
     }
 
-    getContent() {
-        return this._content;
-    }
-
-    getExtIds() {
-        return this._extIds;
+    getChain() {
+        return new Chain(Entry.builder()
+            .extId(Buffer.from("token"))
+            .extId(Buffer.from(this._tokenId))
+            .extId(Buffer.from("issuer"))
+            .extId(Buffer.from(this._rootChainId, 'hex'))
+            .build())
     }
 
     getEntry() {
         return Entry.builder()
-            .chainId(this.getChainId())
-            .extIds(this.getExtIds(), 'utf8')
-            .content(this.getContent(), 'utf8')
+            .chainId(this._tokenChainId)
+            .extIds(this._extIds, 'utf8')
+            .content(this._content, 'utf8')
             .build();
     }
 }

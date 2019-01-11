@@ -1,7 +1,7 @@
 const assert = require('chai').assert;
 let TransactionBuilder = require('../../0/Transaction').TransactionBuilder;
 
-describe('Integration Spec', function () {
+describe('CLI Integration', function () {
 
     const CLIBuilder = require('../../cli/CLI').CLIBuilder;
 
@@ -10,9 +10,7 @@ describe('Integration Spec', function () {
         .port(8078)
         .build();
 
-    const tokenCLI = cli.getTokenCLI('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec');
-
-    describe('RPC Methods', function () {
+    describe('Daemon Methods', function () {
         it('get-daemon-properties', async function () {
             const properties = await cli.getDaemonProperties();
             assert(properties !== undefined, 'Properties was not returned');
@@ -21,6 +19,16 @@ describe('Integration Spec', function () {
             assert(typeof properties.fatdversion === 'string', 'FATD version was not a string');
         });
 
+        it('get-tracked-tokens', async function () {
+            const tokens = await cli.getTrackedTokens();
+            assert(tokens !== undefined, 'Tokens were not returned');
+            assert(Array.isArray(tokens), 'Tokens was not an array of tracked tokens');
+        });
+    });
+
+    describe('Untyped Token CLI Methods', function () {
+        const tokenCLI = cli.getTokenCLI('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec');
+        
         it('get-issuance', async function () {
             const issuance = await tokenCLI.getIssuance();
             assert(issuance !== undefined, 'Issuance was not returned');
@@ -57,7 +65,7 @@ describe('Integration Spec', function () {
             console.log(JSON.stringify(stats, undefined, 2));
         });
 
-        it('send-transaction', async function () {
+        /*it('send-transaction', async function () {
             const tx = new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
                 .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 1)
                 .output("FA3umTvVhkcysBewF1sGAMeAeKDdG7kTQBbtf5nwuFUGwrNa5kAr", 1)
@@ -78,6 +86,31 @@ describe('Integration Spec', function () {
 
             const result = await tokenCLI.sendTransaction(tx);
             console.log(JSON.stringify(result, undefined, 2));
+        });*/
+    });
+
+    describe('Typed Token CLI Methods', function () {
+        const typedTokenCLI = cli.getTypedTokenCLI('FAT-0', '013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec');
+
+        it('get-issuance', async function () {
+            const issuance = await typedTokenCLI.getIssuance();
+            assert(issuance !== undefined, 'Issuance was not returned');
+            /*assert(typeof issuance === 'object', 'Issuance was not an object');
+            console.log(JSON.stringify(issuance, undefined, 2));*/
+        });
+
+        it('get-transaction', async function () {
+            const transaction = await typedTokenCLI.getTransaction('3f21c0b24a66ad5f95116c3ad5703d66c336831dac6451b4a41d126becd9b174');
+            assert(transaction !== undefined, 'Transaction was not returned');
+            /*assert(typeof transaction === 'object', 'Transaction was not an object');
+            console.log(JSON.stringify(transaction, undefined, 2));*/
+        });
+
+        it('get-transactions', async function () {
+            const transactions = await typedTokenCLI.getTransactions();
+            assert(transactions !== undefined, 'Transactions were not returned');
+            assert(Array.isArray(transactions), 'Transactions was not an array');
+            console.log(JSON.stringify(transactions, undefined, 2));
         });
     });
 });

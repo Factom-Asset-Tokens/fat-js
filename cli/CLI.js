@@ -45,7 +45,7 @@ class CLI {
     getTypedTokenCLI(type, tokenId) {
         switch (type) {
             case 'FAT-0': {
-                return new FAT0TokenCLI(this, tokenId);
+                return new TypedTokenCLI(this, tokenId);
             }
             default:
                 throw new Error("Unsupported FAT token type " + type);
@@ -120,7 +120,7 @@ class BaseTokenCLI {
 const FAT0Transaction = require('../0/Transaction').Transaction;
 const FAT0Issuance = require('../0/Issuance').Issuance;
 
-class FAT0TokenCLI extends BaseTokenCLI {
+class TypedTokenCLI extends BaseTokenCLI {
     constructor(rpc, tokenChainId) {
         super(rpc, tokenChainId);
     }
@@ -132,15 +132,14 @@ class FAT0TokenCLI extends BaseTokenCLI {
 
     async getTransaction(txId) {
         const transaction = await super.getTransaction(txId);
-        return new FAT0Transaction(transaction);
+        return new FAT0Transaction(transaction.data);
     }
 
     async getTransactions(txId, fa, start, limit) {
         const transactions = await super.getTransactions(txId, fa, start, limit);
-        return transactions.map(tx => new FAT0Transaction(tx));
+        return transactions.map(tx => new FAT0Transaction(tx.data));
     }
 }
-
 
 function generateTokenCLIParams(tokenRPC, params) {
     return Object.assign({
@@ -169,5 +168,6 @@ async function call(rpc, method, params) {
 
 module.exports = {
     CLIBuilder,
-    BaseTokenCLI
+    BaseTokenCLI,
+    TypedTokenCLI,
 };
