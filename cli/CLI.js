@@ -97,9 +97,9 @@ class BaseTokenCLI {
         }));
     }
 
-    getBalance(fa) {
-        if (!fctAddressUtil.isValidFctPublicAddress(fa)) throw new Error("You must include a valid public Factoid address");
-        return call(this._rpc, 'get-balance', generateTokenCLIParams(this, {'address': fa}));
+    getBalance(address) {
+        if (!fctAddressUtil.isValidFctPublicAddress(address)) throw new Error("You must include a valid public Factoid address");
+        return call(this._rpc, 'get-balance', generateTokenCLIParams(this, {address}));
     }
 
     getStats() {
@@ -120,6 +120,15 @@ class BaseTokenCLI {
 
     getToken(nftokenid) {
         return call(this._rpc, 'get-nf-token', generateTokenCLIParams(this, {nftokenid}));
+    }
+
+    getNFBalance(address, page, limit, order) {
+        if (!fctAddressUtil.isValidFctPublicAddress(address)) throw new Error("You must include a valid public Factoid address");
+        return call(this._rpc, 'get-nf-balance', generateTokenCLIParams(this, {address, page, limit, order}));
+    }
+
+    getNFTokens(page, limit, order) {
+        return call(this._rpc, 'get-nf-tokens', generateTokenCLIParams(this, {page, limit, order}));
     }
 }
 
@@ -142,8 +151,8 @@ class FAT0TokenCLI extends BaseTokenCLI {
         return new FAT0Transaction(transaction.data);
     }
 
-    async getTransactions(txId, fa, start, limit) {
-        const transactions = await super.getTransactions(txId, fa, start, limit);
+    async getTransactions(txId, address, start, limit) {
+        const transactions = await super.getTransactions(txId, address, start, limit);
         return transactions.map(tx => new FAT0Transaction(tx.data));
     }
 }

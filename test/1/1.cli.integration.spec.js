@@ -51,6 +51,20 @@ describe('CLI Integration', function () {
             console.log(balance)
         });
 
+        it('get-nf-balance', async function () {
+            const balance = await tokenCLI.getNFBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM', undefined, undefined, 'desc');
+            assert(balance !== undefined, 'Balance was not returned');
+            // assert(Number.isInteger(balance), 'Balance was not an number');
+            // assert(balance > 0, 'Balance was 0 (expected > 0)');
+            console.log(balance)
+        });
+
+        it('get-nf-tokens', async function () {
+            const tokens = await tokenCLI.getNFTokens(undefined, undefined, 'desc');
+            assert(tokens !== undefined, 'Tokens were not returned');
+            console.log(tokens)
+        });
+
         it('get-stats', async function () {
             const stats = await tokenCLI.getStats();
             assert(stats !== undefined, 'Stats were not returned');
