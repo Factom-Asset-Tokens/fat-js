@@ -1,5 +1,7 @@
 const assert = require('chai').assert;
-let TransactionBuilder = require('../../0/Transaction').TransactionBuilder;
+let TransactionBuilder = require('../../1/Transaction').TransactionBuilder;
+
+// const testChainId = 'eb55f75551acfb9c4d8dc1f09f11f2512d8aa98ebc1c0d05652ce8d92102fad8';
 
 describe('CLI Integration', function () {
 
@@ -10,25 +12,9 @@ describe('CLI Integration', function () {
         .port(8078)
         .build();
 
-    describe('Daemon Methods', function () {
-        it('get-daemon-properties', async function () {
-            const properties = await cli.getDaemonProperties();
-            assert(properties !== undefined, 'Properties was not returned');
-            assert(typeof properties === 'object', 'Properties was not a string');
-            assert(typeof properties.apiversion === 'string', 'API version was not a string');
-            assert(typeof properties.fatdversion === 'string', 'FATD version was not a string');
-        });
-
-        it('get-tracked-tokens', async function () {
-            const tokens = await cli.getTrackedTokens();
-            assert(tokens !== undefined, 'Tokens were not returned');
-            assert(Array.isArray(tokens), 'Tokens was not an array of tracked tokens');
-        });
-    });
-
     describe('Untyped Token CLI Methods', function () {
-        const tokenCLI = cli.getTokenCLI('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec');
-        
+        const tokenCLI = cli.getTokenCLI('eb55f75551acfb9c4d8dc1f09f11f2512d8aa98ebc1c0d05652ce8d92102fad8');
+
         it('get-issuance', async function () {
             const issuance = await tokenCLI.getIssuance();
             assert(issuance !== undefined, 'Issuance was not returned');
@@ -37,7 +23,7 @@ describe('CLI Integration', function () {
         });
 
         it('get-transaction', async function () {
-            const transaction = await tokenCLI.getTransaction('3f21c0b24a66ad5f95116c3ad5703d66c336831dac6451b4a41d126becd9b174');
+            const transaction = await tokenCLI.getTransaction('2774b2bbb41fce285351565604d3674208582aaf10b36c046d06259d9e97c536');
             assert(transaction !== undefined, 'Transaction was not returned');
             assert(typeof transaction === 'object', 'Transaction was not an object');
             console.log(JSON.stringify(transaction, undefined, 2));
@@ -50,12 +36,33 @@ describe('CLI Integration', function () {
             console.log(JSON.stringify(transactions, undefined, 2));
         });
 
+        it('get-nf-token', async function () {
+            const token = await tokenCLI.getToken(0);
+            assert(token !== undefined, 'Token was not returned');
+            // assert(Array.isArray(transactions), 'Transactions was not an array');
+            console.log(JSON.stringify(token, undefined, 2));
+        });
+
         it('get-balance', async function () {
             const balance = await tokenCLI.getBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
             assert(balance !== undefined, 'Balance was not returned');
             assert(Number.isInteger(balance), 'Balance was not an number');
             assert(balance > 0, 'Balance was 0 (expected > 0)');
             console.log(balance)
+        });
+
+        it('get-nf-balance', async function () {
+            const balance = await tokenCLI.getNFBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM', undefined, undefined, 'desc');
+            assert(balance !== undefined, 'Balance was not returned');
+            // assert(Number.isInteger(balance), 'Balance was not an number');
+            // assert(balance > 0, 'Balance was 0 (expected > 0)');
+            console.log(balance)
+        });
+
+        it('get-nf-tokens', async function () {
+            const tokens = await tokenCLI.getNFTokens(undefined, undefined, 'desc');
+            assert(tokens !== undefined, 'Tokens were not returned');
+            console.log(tokens)
         });
 
         it('get-stats', async function () {
@@ -66,19 +73,29 @@ describe('CLI Integration', function () {
         });
 
         it('send-transaction', async function () {
-            const tx = new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
-                .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 1)
-                .output("FA3umTvVhkcysBewF1sGAMeAeKDdG7kTQBbtf5nwuFUGwrNa5kAr", 1)
+            this.timeout(60000);
+
+            const randomId = getRandomInteger(12, 100000);
+
+            const tx = new TransactionBuilder('eb55f75551acfb9c4d8dc1f09f11f2512d8aa98ebc1c0d05652ce8d92102fad8')
+                .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", [randomId])
+                .output("FA3umTvVhkcysBewF1sGAMeAeKDdG7kTQBbtf5nwuFUGwrNa5kAr", [randomId])
                 .build();
+
+            // console.log(tx.getEntry());
 
             const result = await tokenCLI.sendTransaction(tx);
             console.log(JSON.stringify(result, undefined, 2));
         });
 
         it('send-transaction(coinbase)', async function () {
-            let tx = new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
-                .coinbaseInput(10)
-                .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 10)
+            this.timeout(60000);
+
+            const randomId = getRandomInteger(100000, 99999999);
+
+            const tx = new TransactionBuilder('eb55f75551acfb9c4d8dc1f09f11f2512d8aa98ebc1c0d05652ce8d92102fad8')
+                .coinbaseInput([randomId])
+                .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [randomId])
                 .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
                 .build();
 
@@ -90,7 +107,7 @@ describe('CLI Integration', function () {
     });
 
     describe('Typed Token CLI Methods', function () {
-        const typedTokenCLI = cli.getTypedTokenCLI('FAT-0', '013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec');
+        const typedTokenCLI = cli.getTypedTokenCLI('FAT-1', 'eb55f75551acfb9c4d8dc1f09f11f2512d8aa98ebc1c0d05652ce8d92102fad8');
 
         it('get-issuance', async function () {
             const issuance = await typedTokenCLI.getIssuance();
@@ -100,7 +117,7 @@ describe('CLI Integration', function () {
         });
 
         it('get-transaction', async function () {
-            const transaction = await typedTokenCLI.getTransaction('3f21c0b24a66ad5f95116c3ad5703d66c336831dac6451b4a41d126becd9b174');
+            const transaction = await typedTokenCLI.getTransaction('2774b2bbb41fce285351565604d3674208582aaf10b36c046d06259d9e97c536');
             assert(transaction !== undefined, 'Transaction was not returned');
             /*assert(typeof transaction === 'object', 'Transaction was not an object');
             console.log(JSON.stringify(transaction, undefined, 2));*/
@@ -114,3 +131,7 @@ describe('CLI Integration', function () {
         });
     });
 });
+
+function getRandomInteger(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
+}

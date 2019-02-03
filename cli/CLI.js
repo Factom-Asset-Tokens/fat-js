@@ -45,7 +45,10 @@ class CLI {
     getTypedTokenCLI(type, tokenId) {
         switch (type) {
             case 'FAT-0': {
-                return new TypedTokenCLI(this, tokenId);
+                return new FAT0TokenCLI(this, tokenId);
+            }
+            case 'FAT-1': {
+                return new FAT1TokenCLI(this, tokenId);
             }
             default:
                 throw new Error("Unsupported FAT token type " + type);
@@ -94,9 +97,9 @@ class BaseTokenCLI {
         }));
     }
 
-    getBalance(fa) {
-        if (!fctAddressUtil.isValidFctPublicAddress(fa)) throw new Error("You must include a valid public Factoid address");
-        return call(this._rpc, 'get-balance', generateTokenCLIParams(this, {'address': fa}));
+    getBalance(address) {
+        if (!fctAddressUtil.isValidFctPublicAddress(address)) throw new Error("You must include a valid public Factoid address");
+        return call(this._rpc, 'get-balance', generateTokenCLIParams(this, {address}));
     }
 
     getStats() {
@@ -114,13 +117,26 @@ class BaseTokenCLI {
 
         return call(this._rpc, 'send-transaction', generateTokenCLIParams(this, params));
     }
+
+    getToken(nftokenid) {
+        return call(this._rpc, 'get-nf-token', generateTokenCLIParams(this, {nftokenid}));
+    }
+
+    getNFBalance(address, page, limit, order) {
+        if (!fctAddressUtil.isValidFctPublicAddress(address)) throw new Error("You must include a valid public Factoid address");
+        return call(this._rpc, 'get-nf-balance', generateTokenCLIParams(this, {address, page, limit, order}));
+    }
+
+    getNFTokens(page, limit, order) {
+        return call(this._rpc, 'get-nf-tokens', generateTokenCLIParams(this, {page, limit, order}));
+    }
 }
 
 //Token Specific Token RPCs (Optional, wraps response in class from corresponding token type)
 const FAT0Transaction = require('../0/Transaction').Transaction;
 const FAT0Issuance = require('../0/Issuance').Issuance;
 
-class TypedTokenCLI extends BaseTokenCLI {
+class FAT0TokenCLI extends BaseTokenCLI {
     constructor(rpc, tokenChainId) {
         super(rpc, tokenChainId);
     }
@@ -135,9 +151,33 @@ class TypedTokenCLI extends BaseTokenCLI {
         return new FAT0Transaction(transaction.data);
     }
 
+    async getTransactions(txId, address, start, limit) {
+        const transactions = await super.getTransactions(txId, address, start, limit);
+        return transactions.map(tx => new FAT0Transaction(tx.data));
+    }
+}
+
+const FAT1Transaction = require('../1/Transaction').Transaction;
+const FAT1Issuance = require('../1/Issuance').Issuance;
+
+class FAT1TokenCLI extends BaseTokenCLI {
+    constructor(rpc, tokenChainId) {
+        super(rpc, tokenChainId);
+    }
+
+    async getIssuance() {
+        const issuance = await super.getIssuance();
+        return new FAT1Issuance(issuance);
+    }
+
+    async getTransaction(txId) {
+        const transaction = await super.getTransaction(txId);
+        return new FAT1Transaction(transaction.data);
+    }
+
     async getTransactions(txId, fa, start, limit) {
         const transactions = await super.getTransactions(txId, fa, start, limit);
-        return transactions.map(tx => new FAT0Transaction(tx.data));
+        return transactions.map(tx => new FAT1Transaction(tx.data));
     }
 }
 
@@ -169,5 +209,5 @@ async function call(rpc, method, params) {
 module.exports = {
     CLIBuilder,
     BaseTokenCLI,
-    TypedTokenCLI,
+    TypedTokenCLI: FAT0TokenCLI,
 };

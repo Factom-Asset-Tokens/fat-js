@@ -18,36 +18,32 @@ class TransactionBuilder {
         this._outputs = {};
     }
 
-    input(fs, amount) {
+    input(fs, ids) {
 
         //if this is setup as coinbase, prevent additional inputs
         if (Object.keys(this._inputs).find(address => address === COINBASE_ADDRESS_PUBLIC)) throw new Error('Cannot add an additional input to a coinbase transaction');
 
         if (!fctAddressUtil.isValidPrivateAddress(fs)) throw new Error("Input address must be a valid private Factoid address");
-        if (isNaN(amount) || !Number.isInteger(amount) || amount < 1) throw new Error("Input amount must be a positive nonzero integer");
+        if (!validateTokenIds(ids)) throw new Error("Invalid ID range: " + JSON.stringify(ids));
 
         this._keys.push(nacl.keyPair.fromSeed(fctAddressUtil.addressToKey(fs)));
-        this._inputs[fctAddressUtil.getPublicAddress(fs)] = amount;
+        this._inputs[fctAddressUtil.getPublicAddress(fs)] = ids;
         return this;
     }
 
-    coinbaseInput(amount) {
+    coinbaseInput(ids) {
         if (this._inputs.length > 0) throw new Error('Coinbase transactions may only have a single input');
-        this.input(COINBASE_ADDRESS_PRIVATE, amount);
+
+        this.input(COINBASE_ADDRESS_PRIVATE, ids);
         return this;
     }
 
-    output(fa, amount) {
+    output(fa, ids) {
         if (!fctAddressUtil.isValidFctPublicAddress(fa)) throw new Error("Output address must be a valid public Factoid address");
-        if (isNaN(amount) || !Number.isInteger(amount) || amount < 1) throw new Error("Output amount must be a positive nonzero integer");
+        if (!validateTokenIds(ids)) throw new Error("Invalid ID range: " + JSON.stringify(ids));
 
-        this._outputs[fa] = amount;
-        return this;
-    }
-
-    burnOutput(amount) {
-        if (Object.keys(this._outputs).find(address => address === COINBASE_ADDRESS_PUBLIC)) throw new Error('Cannot add a duplicate burn output to a burn transaction');
-        this.output(COINBASE_ADDRESS_PUBLIC, amount);
+        // if (!Array.isArray(ids)) this._outputs[fa] = [ids];
+        else this._outputs[fa] = ids;
         return this;
     }
 
@@ -60,9 +56,20 @@ class TransactionBuilder {
     build() {
         if (Object.keys(this._inputs).length === 0 || Object.keys(this._outputs).length === 0) throw new Error("Must have at least one input and one output");
 
-        const inputSum = Object.values(this._inputs).reduce((amount, sum) => amount + sum, 0);
-        const outputSum = Object.values(this._outputs).reduce((amount, sum) => amount + sum, 0);
-        if (inputSum !== outputSum) throw new Error("Input and output amount sums must match (" + inputSum + " != " + outputSum + ")");
+        //evaluate the token ids in inputs/outputs. Should be the same set
+        const inputSet = new Set();
+        Object.keys(this._inputs).forEach((key) => {
+            if (Number.isInteger(this._inputs[key])) inputSet.add(this._inputs[key]);
+            else for (let i = this._inputs[key].min; i < this._inputs[key].max; i++) inputSet.add(i)
+        });
+
+        const outputSet = new Set();
+        Object.keys(this._outputs).forEach((key) => {
+            if (Number.isInteger(this._outputs[key])) inputSet.add(this._outputs[key]);
+            else for (let i = this._outputs[key].min; i < this._outputs[key].max; i++) inputSet.add(i)
+        });
+
+        // if (!Array.from(inputSet).every(Array.from(outputSet))) throw new Error('Input and output tokens do not match');
 
         if (Object.keys(this._inputs).find(address => address === COINBASE_ADDRESS_PUBLIC)) {
             if (!this._sk1) throw new Error('You must include a valid issuer sk1 key to perform a coinbase transaction')
@@ -72,6 +79,12 @@ class TransactionBuilder {
     }
 }
 
+function validateTokenIds(ids) {
+    return Array.isArray(ids) && ids.every(id => { //make sure every value is either an integer, or a valid range object
+        return Number.isInteger(id) || (typeof id === 'object' && Number.isInteger(id.min) && Number.isInteger(id.max) && id.max > id.min && Object.keys(id).length === 2)
+    });
+}
+
 class Transaction {
     constructor(builder) {
         if (builder instanceof TransactionBuilder) {
@@ -79,6 +92,8 @@ class Transaction {
             this._outputs = builder._outputs;
 
             this._content = JSON.stringify({inputs: this._inputs, outputs: this._outputs}); //snapshot the tx object
+
+            console.log(this._content);
 
             const unixSeconds = Math.round(new Date().getTime() / 1000);
 

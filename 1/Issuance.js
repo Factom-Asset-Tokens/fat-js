@@ -22,7 +22,7 @@ class IssuanceBuilder {
         if (!fctCryptoValidation.isValidSk1(sk1)) throw new Error("Supplied key is not a valid sk1 private key");
         this._sk1 = sk1;
 
-        this._type = 'FAT-0'
+        this._type = 'FAT-1'
     }
 
     name(name) {

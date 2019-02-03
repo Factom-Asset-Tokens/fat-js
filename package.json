@@ -1,6 +1,6 @@
 {
   "name": "@fat-token/fat-js",
-  "version": "0.0.0",
+  "version": "0.1.0-rc1",
   "description": "Factom Asset Token (FAT) library in JS",
   "repository": "https://github.com/Factom-Asset-Tokens/fat-js.git",
   "main": "index.js",
