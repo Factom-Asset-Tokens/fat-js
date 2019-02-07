@@ -5,7 +5,7 @@
   "repository": "https://github.com/Factom-Asset-Tokens/fat-js.git",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint 0 cli",
+    "lint": "eslint 0 1 cli",
     "test": "nyc mocha test/test.js",
     "build": "webpack",
     "prepublish": "npm run lint && npm run build"

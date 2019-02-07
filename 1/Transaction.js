@@ -57,17 +57,17 @@ class TransactionBuilder {
         if (Object.keys(this._inputs).length === 0 || Object.keys(this._outputs).length === 0) throw new Error("Must have at least one input and one output");
 
         //evaluate the token ids in inputs/outputs. Should be the same set
-        const inputSet = new Set();
-        Object.keys(this._inputs).forEach((key) => {
-            if (Number.isInteger(this._inputs[key])) inputSet.add(this._inputs[key]);
-            else for (let i = this._inputs[key].min; i < this._inputs[key].max; i++) inputSet.add(i)
-        });
+        // const inputSet = new Set();
+        // Object.keys(this._inputs).forEach((key) => {
+        //     if (Number.isInteger(this._inputs[key])) inputSet.add(this._inputs[key]);
+        //     else for (let i = this._inputs[key].min; i < this._inputs[key].max; i++) inputSet.add(i)
+        // });
 
-        const outputSet = new Set();
-        Object.keys(this._outputs).forEach((key) => {
-            if (Number.isInteger(this._outputs[key])) inputSet.add(this._outputs[key]);
-            else for (let i = this._outputs[key].min; i < this._outputs[key].max; i++) inputSet.add(i)
-        });
+        // const outputSet = new Set();
+        // Object.keys(this._outputs).forEach((key) => {
+        //     if (Number.isInteger(this._outputs[key])) inputSet.add(this._outputs[key]);
+        //     else for (let i = this._outputs[key].min; i < this._outputs[key].max; i++) inputSet.add(i)
+        // });
 
         // if (!Array.from(inputSet).every(Array.from(outputSet))) throw new Error('Input and output tokens do not match');
 
@@ -92,8 +92,6 @@ class Transaction {
             this._outputs = builder._outputs;
 
             this._content = JSON.stringify({inputs: this._inputs, outputs: this._outputs}); //snapshot the tx object
-
-            console.log(this._content);
 
             const unixSeconds = Math.round(new Date().getTime() / 1000);
 
