@@ -11,4 +11,26 @@ module.exports.getTokenChainId = function (tokenId, rootChainId) {
         .build()).idHex
 };
 
+module.exports.reduceNFIds = function (ids) {
+    const ranges = [];
+    let min, max;
+    for (let i = 0; i < ids.length; i++) {
+        min = ids[i];
+        max = min;
+        while (ids[i + 1] - ids[i] === 1) {
+            max = ids[i + 1]; // increment the index if the numbers sequential
+            i++;
+        }
+        ranges.push(min === max ? min : {min, max});
+    }
+    return ranges;
+};
+
+module.exports.expandNFIds = function (ids) {
+    let expanded = [];
+    ids.forEach((id) =>
+        typeof id === 'object' ? expanded = expanded.concat(Array(id.max - id.min + 1).fill().map((element, index) => id.min + index)) : expanded.push(id));
+    return expanded;
+};
+
 

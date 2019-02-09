@@ -1,4 +1,4 @@
-const axios = require('axios');
+const axios = require('axios').create({timeout: 5000});
 const fctAddressUtil = require('factom/src/addresses');
 
 class CLIBuilder {

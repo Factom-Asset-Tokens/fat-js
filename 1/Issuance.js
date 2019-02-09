@@ -41,13 +41,14 @@ class IssuanceBuilder {
 
     supply(supply) {
         if (isNaN(supply)) throw new Error("Supply must be a number");
-        if (supply <= 0) throw new Error("Supply must be > 0");
+        if (supply < -1) throw new Error("Supply must be >= -1 (infinite)");
         this._supply = supply;
         return this;
     }
 
     build() {
         //validate required fields
+        if (this._supply === undefined) this._supply = -1; //unlimited supply by default
 
         return new Issuance(this);
     }
@@ -61,7 +62,6 @@ class Issuance {
             this._name = builder._name;
             this._symbol = builder._symbol;
             this._supply = builder._supply;
-            this._salt = crypto.randomBytes(32).toString('hex');
 
             this._content = JSON.stringify(this);
 
@@ -90,12 +90,13 @@ class Issuance {
             this._name = builder.issuance.name;
             this._symbol = builder.issuance.symbol;
             this._supply = builder.issuance.supply;
-            this._salt = builder.issuance.salt;
             this._content = JSON.stringify(this);
 
             this._tokenId = builder.tokenid;
             this._rootChainId = builder.issuerid;
             this._tokenChainId = util.getTokenChainId(this._tokenId, this._rootChainId);
+            this._entryhash = builder.entryhash;
+            this._timestamp = builder.timestamp;
         }
 
         Object.freeze(this);
@@ -111,6 +112,14 @@ class Issuance {
 
     getIssuerIdentityRootChainId() {
         return this._rootChainId;
+    }
+
+    getEntryhash() {
+        return this._entryhash;
+    }
+
+    getTimestamp() {
+        return this._timestamp;
     }
 
     getType() {

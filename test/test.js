@@ -8,5 +8,7 @@ describe('FAT-0', () => {
 });
 
 describe('FAT-1', () => {
+    require('./1/1.transaction.unit.spec');
+    require('./1/1.issuance.unit.spec');
     require('./1/1.cli.integration.spec');
 });

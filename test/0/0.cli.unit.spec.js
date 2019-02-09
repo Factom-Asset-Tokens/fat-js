@@ -8,20 +8,16 @@ const ES = 'Es3k4L7La1g7CY5zVLer21H3JFkXgCBCBx8eSM2q9hLbevbuoL6a'; //EC1tE4afVGP
 
 describe('CLI Unit', function () {
 
-    describe('CLI Builder', function () {
-
         let CLIBuilder = require('../../cli/CLI').CLIBuilder;
         let BaseTokenCLI = require('../../cli/CLI').BaseTokenCLI;
         let TypedTokenCLI = require('../../cli/CLI').TypedTokenCLI;
 
-        it('Builder Methods', function () {
+    it('CLI Builder Methods', function () {
             let cli = new CLIBuilder()
                 .host('fatnode.mysite.com')
                 .port(1234)
                 .auth('my-user', 'my-pass')
                 .build();
-
-
         });
 
         it('CLI Methods', function () {
@@ -63,7 +59,4 @@ describe('CLI Unit', function () {
             assert(typeof typedTokenCLI['getStats'] === 'function', "getStats was not a function");
             assert(typeof typedTokenCLI['sendTransaction'] === 'function', "sendTransaction was not a function");
         });
-
-    })
-
 });

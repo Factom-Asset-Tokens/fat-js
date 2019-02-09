@@ -7,6 +7,7 @@ const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
 const RCD_TYPE_1 = Buffer.from('01', 'hex');
 const COINBASE_ADDRESS_PUBLIC = 'FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC';
 const COINBASE_ADDRESS_PRIVATE = 'Fs1KWJrpLdfucvmYwN2nWrwepLn8ercpMbzXshd1g8zyhKXLVLWj';
+const util = require('../util');
 
 class TransactionBuilder {
     constructor(tokenChainId) {
@@ -56,24 +57,20 @@ class TransactionBuilder {
     build() {
         if (Object.keys(this._inputs).length === 0 || Object.keys(this._outputs).length === 0) throw new Error("Must have at least one input and one output");
 
-        //evaluate the token ids in inputs/outputs. Should be the same set
-        // const inputSet = new Set();
-        // Object.keys(this._inputs).forEach((key) => {
-        //     if (Number.isInteger(this._inputs[key])) inputSet.add(this._inputs[key]);
-        //     else for (let i = this._inputs[key].min; i < this._inputs[key].max; i++) inputSet.add(i)
-        // });
-
-        // const outputSet = new Set();
-        // Object.keys(this._outputs).forEach((key) => {
-        //     if (Number.isInteger(this._outputs[key])) inputSet.add(this._outputs[key]);
-        //     else for (let i = this._outputs[key].min; i < this._outputs[key].max; i++) inputSet.add(i)
-        // });
-
-        // if (!Array.from(inputSet).every(Array.from(outputSet))) throw new Error('Input and output tokens do not match');
-
         if (Object.keys(this._inputs).find(address => address === COINBASE_ADDRESS_PUBLIC)) {
             if (!this._sk1) throw new Error('You must include a valid issuer sk1 key to perform a coinbase transaction')
         }
+
+        //evaluate the token ids in inputs/outputs. Should be the same set
+        let allInputIds = [];
+        Object.values(this._inputs).forEach(ids => allInputIds = allInputIds.concat(util.expandNFIds(ids)));
+        allInputIds.sort();
+
+        let allOutputIds = [];
+        Object.values(this._outputs).forEach(ids => allOutputIds = allOutputIds.concat(util.expandNFIds(ids)));
+        allOutputIds.sort();
+
+        if (JSON.stringify(allInputIds) !== JSON.stringify(allOutputIds)) throw new Error('Input and output token IDS do not match');
 
         return new Transaction(this);
     }
@@ -81,7 +78,7 @@ class TransactionBuilder {
 
 function validateTokenIds(ids) {
     return Array.isArray(ids) && ids.every(id => { //make sure every value is either an integer, or a valid range object
-        return Number.isInteger(id) || (typeof id === 'object' && Number.isInteger(id.min) && Number.isInteger(id.max) && id.max > id.min && Object.keys(id).length === 2)
+        return Number.isInteger(id) || (typeof id === 'object' && Number.isInteger(id.min) && Number.isInteger(id.max) && id.max >= id.min && Object.keys(id).length === 2)
     });
 }
 
