@@ -124,14 +124,12 @@ class Transaction {
                 }
             }
         } else { //from object
-            if (!builder.inputs) throw new Error("Valid FAT-0 transactions must include inputs");
-            this._inputs = builder.inputs;
+            if (!builder.data.inputs) throw new Error("Valid FAT-0 transactions must include inputs");
+            this._inputs = builder.data.inputs;
 
-            if (!builder.outputs) throw new Error("Valid FAT-0 transactions must include outputs");
-            this._outputs = builder.outputs;
-            this._entryhash = builder.entryhash;
-            this._chainId = builder.chainid;
-            this._txId = builder.txid;
+            if (!builder.data.outputs) throw new Error("Valid FAT-0 transactions must include outputs");
+            this._outputs = builder.data.outputs;
+            this._entryhash = builder.data.entryhash;
         }
 
         Object.freeze(this);

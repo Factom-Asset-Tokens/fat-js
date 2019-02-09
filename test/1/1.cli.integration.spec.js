@@ -3,7 +3,7 @@ let TransactionBuilder = require('../../1/Transaction').TransactionBuilder;
 
 // const testChainId = 'eb55f75551acfb9c4d8dc1f09f11f2512d8aa98ebc1c0d05652ce8d92102fad8';
 
-describe('CLI Integration', function () {
+describe('FAT-1 CLI Integration', function () {
 
     const CLIBuilder = require('../../cli/CLI').CLIBuilder;
 

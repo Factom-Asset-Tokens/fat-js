@@ -1,4 +1,4 @@
-const axios = require('axios').create({timeout: 5000});
+const axios = require('axios');
 const fctAddressUtil = require('factom/src/addresses');
 
 class CLIBuilder {
@@ -24,10 +24,16 @@ class CLIBuilder {
         return this;
     }
 
+    //
+    timeout(timeout) {
+        this._timeout = timeout;
+    }
+
     build() {
         return new CLI(this);
     }
 }
+
 
 class CLI {
     constructor(builder) {
@@ -36,19 +42,29 @@ class CLI {
         this._port = builder._port || 8078;
         this._username = builder._username;
         this._password = builder._password;
+
+        if (this._username && !this._password || this._password && !this._username) throw new Error('Must specify both username and password to use RPC authentication');
+
+        this._timeout = builder._timeout || 5000;
+
+        this._axios = axios.create({
+            baseURL: 'http://' + this._host + ':' + this._port + '/v1',
+            timeout: this._timeout,
+            auth: (this._username && this._password) ? {username: this._username, password: this._password} : undefined
+        });
     }
 
     getTokenCLI(tokenChainId) {
         return new BaseTokenCLI(this, tokenChainId);
     }
 
-    getTypedTokenCLI(type, tokenId) {
+    getTypedTokenCLI(type, tokenChainId) {
         switch (type) {
             case 'FAT-0': {
-                return new FAT0TokenCLI(this, tokenId);
+                return new FAT0CLI(this, tokenChainId);
             }
             case 'FAT-1': {
-                return new FAT1TokenCLI(this, tokenId);
+                return new FAT1CLI(this, tokenChainId);
             }
             default:
                 throw new Error("Unsupported FAT token type " + type);
@@ -132,55 +148,6 @@ class BaseTokenCLI {
     }
 }
 
-//Token Specific Token RPCs (Optional, wraps response in class from corresponding token type)
-const FAT0Transaction = require('../0/Transaction').Transaction;
-const FAT0Issuance = require('../0/Issuance').Issuance;
-
-class FAT0TokenCLI extends BaseTokenCLI {
-    constructor(rpc, tokenChainId) {
-        super(rpc, tokenChainId);
-    }
-
-    async getIssuance() {
-        const issuance = await super.getIssuance();
-        return new FAT0Issuance(issuance);
-    }
-
-    async getTransaction(txId) {
-        const transaction = await super.getTransaction(txId);
-        return new FAT0Transaction(transaction.data);
-    }
-
-    async getTransactions(txId, address, start, limit) {
-        const transactions = await super.getTransactions(txId, address, start, limit);
-        return transactions.map(tx => new FAT0Transaction(tx.data));
-    }
-}
-
-const FAT1Transaction = require('../1/Transaction').Transaction;
-const FAT1Issuance = require('../1/Issuance').Issuance;
-
-class FAT1TokenCLI extends BaseTokenCLI {
-    constructor(rpc, tokenChainId) {
-        super(rpc, tokenChainId);
-    }
-
-    async getIssuance() {
-        const issuance = await super.getIssuance();
-        return new FAT1Issuance(issuance);
-    }
-
-    async getTransaction(txId) {
-        const transaction = await super.getTransaction(txId);
-        return new FAT1Transaction(transaction.data);
-    }
-
-    async getTransactions(txId, fa, start, limit) {
-        const transactions = await super.getTransactions(txId, fa, start, limit);
-        return transactions.map(tx => new FAT1Transaction(tx.data));
-    }
-}
-
 function generateTokenCLIParams(tokenRPC, params) {
     return Object.assign({
         'chainid': tokenRPC._tokenChainId
@@ -190,9 +157,7 @@ function generateTokenCLIParams(tokenRPC, params) {
 async function call(rpc, method, params) {
     if (!(rpc instanceof CLI)) throw new Error("Must include a valid CLI instance to call endpoint");
 
-    //TODO: Basic HTTP Auth
-
-    const response = await axios.post('http://' + rpc._host + ':' + rpc._port + '/v1', {
+    const response = await rpc._axios.post('/', {
         jsonrpc: '2.0',
         id: Math.floor(Math.random() * 10000),
         method: method,
@@ -209,5 +174,7 @@ async function call(rpc, method, params) {
 module.exports = {
     CLIBuilder,
     BaseTokenCLI,
-    TypedTokenCLI: FAT0TokenCLI,
 };
+
+const FAT0CLI = require('../0/CLI').CLI;
+const FAT1CLI = require('../1/CLI').CLI;

@@ -1,4 +1,3 @@
-const crypto = require('crypto');
 const nacl = require('tweetnacl/nacl-fast').sign;
 const {Entry, Chain} = require('factom');
 const util = require('../util');

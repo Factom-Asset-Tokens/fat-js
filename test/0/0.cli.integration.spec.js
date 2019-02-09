@@ -1,7 +1,7 @@
 const assert = require('chai').assert;
 let TransactionBuilder = require('../../0/Transaction').TransactionBuilder;
 
-describe('CLI Integration', function () {
+describe('FAT-0 CLI Integration', function () {
 
     const CLIBuilder = require('../../cli/CLI').CLIBuilder;
 
@@ -9,22 +9,6 @@ describe('CLI Integration', function () {
         .host('localhost')
         .port(8078)
         .build();
-
-    describe('Daemon Methods', function () {
-        it('get-daemon-properties', async function () {
-            const properties = await cli.getDaemonProperties();
-            assert(properties !== undefined, 'Properties was not returned');
-            assert(typeof properties === 'object', 'Properties was not a string');
-            assert(typeof properties.apiversion === 'string', 'API version was not a string');
-            assert(typeof properties.fatdversion === 'string', 'FATD version was not a string');
-        });
-
-        it('get-tracked-tokens', async function () {
-            const tokens = await cli.getTrackedTokens();
-            assert(tokens !== undefined, 'Tokens were not returned');
-            assert(Array.isArray(tokens), 'Tokens was not an array of tracked tokens');
-        });
-    });
 
     describe('Untyped Token CLI Methods', function () {
         const tokenCLI = cli.getTokenCLI('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec');
