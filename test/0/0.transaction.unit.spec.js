@@ -47,9 +47,12 @@ describe('Transaction Unit', function () {
             .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
             .build();
 
-        //check coinbase
         assert(tx.isCoinbase() === true, "generated tx should be a coinbase transaction");
 
-
+        //test burn transaction
+        tx = new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
+            .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", 150)
+            .burnOutput(150)
+            .build();
     });
 });

@@ -48,6 +48,12 @@ class TransactionBuilder {
         return this;
     }
 
+    burnOutput(ids) {
+        if (Object.keys(this._outputs).find(address => address === COINBASE_ADDRESS_PUBLIC)) throw new Error('Cannot add a duplicate burn output to a burn transaction');
+        this.output(COINBASE_ADDRESS_PUBLIC, ids);
+        return this;
+    }
+
     setIssuerSK1(sk1) {
         if (!fctIdentityUtil.isValidSk1(sk1)) throw new Error("You must include a valid SK1 Key to sign a coinbase transaction");
         this._sk1 = sk1;

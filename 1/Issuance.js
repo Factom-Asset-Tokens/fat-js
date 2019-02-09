@@ -81,7 +81,6 @@ class Issuance {
 
             const signature = [nacl.detached(fctUtil.sha512(Buffer.concat([index, timestamp, chainId, content])), key.secretKey)];
 
-
             this._extIds = [timestamp, rcd, signature];
 
         } else if (typeof builder === 'object') {

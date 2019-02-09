@@ -62,7 +62,7 @@ describe('FAT-1 CLI Integration', function () {
         it('get-nf-tokens', async function () {
             const tokens = await tokenCLI.getNFTokens(undefined, undefined, 'desc');
             assert(tokens !== undefined, 'Tokens were not returned');
-            console.log(tokens)
+            console.log(JSON.stringify(tokens, undefined, 2))
         });
 
         it('get-stats', async function () {
