@@ -24,7 +24,7 @@ describe('Transaction Unit', function () {
         assert(tx.getInputs() !== undefined, "tx did not include inputs");
         assert(typeof tx.getInputs() === 'object', "tx inputs were not an object");
         assert(Object.keys(tx.getInputs()).length === 1, "tx inputs length was not expected");
-        assert(Object.keys(tx.getInputs()).every(address => fctAddrUtils.isValidFctPublicAddress(address)), "Not every FCT Address in inputs was a valid public Factoid address");
+        assert(Object.keys(tx.getInputs()).every(address => fctAddrUtils.isValidPublicFctAddress(address)), "Not every FCT Address in inputs was a valid public Factoid address");
         assert(Object.values(tx.getInputs()).every(ids => {
             return Array.isArray(ids) && ids.every(id => { //make sure every value is either an integer, or a valid range object
                 return Number.isInteger(id) || (typeof id === 'object' && Number.isInteger(id.min) && Number.isInteger(id.max) && id.max >= id.min && Object.keys(id).length === 2)
@@ -35,7 +35,7 @@ describe('Transaction Unit', function () {
         assert(tx.getOutputs() !== undefined, "tx did not include inputs");
         assert(typeof tx.getOutputs() === 'object', "tx inputs were not an object");
         assert(Object.keys(tx.getOutputs()).length === 1, "tx inputs length was not expected");
-        assert(Object.keys(tx.getOutputs()).every(address => fctAddrUtils.isValidFctPublicAddress(address)), "Not every FCT Address in outputs was a valid public Factoid address");
+        assert(Object.keys(tx.getOutputs()).every(address => fctAddrUtils.isValidPublicFctAddress(address)), "Not every FCT Address in outputs was a valid public Factoid address");
         assert(Object.values(tx.getOutputs()).every(ids => {
             return Array.isArray(ids) && ids.every(id => { //make sure every value is either an integer, or a valid range object
                 return Number.isInteger(id) || (typeof id === 'object' && Number.isInteger(id.min) && Number.isInteger(id.max) && id.max >= id.min && Object.keys(id).length === 2)

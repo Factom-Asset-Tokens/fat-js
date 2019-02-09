@@ -40,7 +40,7 @@ class TransactionBuilder {
     }
 
     output(fa, ids) {
-        if (!fctAddressUtil.isValidFctPublicAddress(fa)) throw new Error("Output address must be a valid public Factoid address");
+        if (!fctAddressUtil.isValidPublicFctAddress(fa)) throw new Error("Output address must be a valid public Factoid address");
         if (!validateTokenIds(ids)) throw new Error("Invalid ID range: " + JSON.stringify(ids));
 
         // if (!Array.isArray(ids)) this._outputs[fa] = [ids];

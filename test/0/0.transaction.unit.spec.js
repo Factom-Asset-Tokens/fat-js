@@ -24,14 +24,14 @@ describe('Transaction Unit', function () {
         assert(tx.getInputs() !== undefined, "tx did not include inputs");
         assert(typeof tx.getInputs() === 'object', "tx inputs were not an object");
         assert(Object.keys(tx.getInputs()).length === 1, "tx inputs length was not expected");
-        assert(Object.keys(tx.getInputs()).every(address => fctAddrUtils.isValidFctPublicAddress(address)), "Not every FCT Address in inputs was a valid public Factoid address");
+        assert(Object.keys(tx.getInputs()).every(address => fctAddrUtils.isValidPublicFctAddress(address)), "Not every FCT Address in inputs was a valid public Factoid address");
         assert(Object.values(tx.getInputs()).every(amount => !isNaN(amount) && Number.isInteger(amount) && amount > 0), "Not every amount in inputs was a valid positive nonzero integer");
 
         //outputs
         assert(tx.getOutputs() !== undefined, "tx did not include inputs");
         assert(typeof tx.getOutputs() === 'object', "tx inputs were not an object");
         assert(Object.keys(tx.getOutputs()).length === 1, "tx inputs length was not expected");
-        assert(Object.keys(tx.getOutputs()).every(address => fctAddrUtils.isValidFctPublicAddress(address)), "Not every FCT Address in outputs was a valid public Factoid address");
+        assert(Object.keys(tx.getOutputs()).every(address => fctAddrUtils.isValidPublicFctAddress(address)), "Not every FCT Address in outputs was a valid public Factoid address");
         assert(Object.values(tx.getOutputs()).every(amount => !isNaN(amount) && Number.isInteger(amount) && amount > 0), "Not every amount in outputs was a valid positive nonzero integer");
 
         //check coinbase

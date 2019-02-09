@@ -38,7 +38,7 @@ class TransactionBuilder {
     }
 
     output(fa, amount) {
-        if (!fctAddressUtil.isValidFctPublicAddress(fa)) throw new Error("Output address must be a valid public Factoid address");
+        if (!fctAddressUtil.isValidPublicFctAddress(fa)) throw new Error("Output address must be a valid public Factoid address");
         if (isNaN(amount) || !Number.isInteger(amount) || amount < 1) throw new Error("Output amount must be a positive nonzero integer");
 
         this._outputs[fa] = amount;

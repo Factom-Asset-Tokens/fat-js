@@ -104,7 +104,7 @@ class BaseTokenCLI {
 
     getTransactions(entryhash, address, page, limit) {
         if (entryhash && entryhash.length !== 32) throw new Error("You must include a valid 32 Byte tx ID (entryhash)");
-        if (address && !fctAddressUtil.isValidFctPublicAddress(address)) throw new Error("You must include a valid public Factoid address");
+        if (address && !fctAddressUtil.isValidPublicFctAddress(address)) throw new Error("You must include a valid public Factoid address");
         return call(this._rpc, 'get-transactions', generateTokenCLIParams(this, {
             entryhash,
             address,
@@ -114,7 +114,7 @@ class BaseTokenCLI {
     }
 
     getBalance(address) {
-        if (!fctAddressUtil.isValidFctPublicAddress(address)) throw new Error("You must include a valid public Factoid address");
+        if (!fctAddressUtil.isValidPublicFctAddress(address)) throw new Error("You must include a valid public Factoid address");
         return call(this._rpc, 'get-balance', generateTokenCLIParams(this, {address}));
     }
 
@@ -139,7 +139,7 @@ class BaseTokenCLI {
     }
 
     getNFBalance(address, page, limit, order) {
-        if (!fctAddressUtil.isValidFctPublicAddress(address)) throw new Error("You must include a valid public Factoid address");
+        if (!fctAddressUtil.isValidPublicFctAddress(address)) throw new Error("You must include a valid public Factoid address");
         return call(this._rpc, 'get-nf-balance', generateTokenCLIParams(this, {address, page, limit, order}));
     }
 
