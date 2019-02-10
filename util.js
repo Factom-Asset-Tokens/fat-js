@@ -40,4 +40,10 @@ module.exports.countNFIds = function (ids) {
     return count;
 };
 
+module.exports.validateNFIds = function (ids) {
+    return Array.isArray(ids) && ids.length > 0 && ids.every(id => { //make sure every value is either an integer, or a valid range object
+        return Number.isInteger(id) || (typeof id === 'object' && Number.isInteger(id.min) && Number.isInteger(id.max) && id.max >= id.min && Object.keys(id).length === 2)
+    }) && new Set(module.exports.expandNFIds(ids)).size === module.exports.expandNFIds(ids).length;
+};
+
 

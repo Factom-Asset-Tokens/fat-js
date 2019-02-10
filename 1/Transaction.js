@@ -25,7 +25,7 @@ class TransactionBuilder {
         if (Object.keys(this._inputs).find(address => address === COINBASE_ADDRESS_PUBLIC)) throw new Error('Cannot add an additional input to a coinbase transaction');
 
         if (!fctAddressUtil.isValidPrivateAddress(fs)) throw new Error("Input address must be a valid private Factoid address");
-        if (!validateTokenIds(ids)) throw new Error("Invalid ID range: " + JSON.stringify(ids));
+        if (!util.validateNFIds(ids)) throw new Error("Invalid ID range: " + JSON.stringify(ids));
 
         this._keys.push(nacl.keyPair.fromSeed(fctAddressUtil.addressToKey(fs)));
         this._inputs[fctAddressUtil.getPublicAddress(fs)] = ids;
@@ -41,7 +41,7 @@ class TransactionBuilder {
 
     output(fa, ids) {
         if (!fctAddressUtil.isValidPublicFctAddress(fa)) throw new Error("Output address must be a valid public Factoid address");
-        if (!validateTokenIds(ids)) throw new Error("Invalid ID range: " + JSON.stringify(ids));
+        if (!util.validateNFIds(ids)) throw new Error("Invalid ID range: " + JSON.stringify(ids));
 
         // if (!Array.isArray(ids)) this._outputs[fa] = [ids];
         else this._outputs[fa] = ids;
@@ -80,12 +80,6 @@ class TransactionBuilder {
 
         return new Transaction(this);
     }
-}
-
-function validateTokenIds(ids) {
-    return Array.isArray(ids) && ids.every(id => { //make sure every value is either an integer, or a valid range object
-        return Number.isInteger(id) || (typeof id === 'object' && Number.isInteger(id.min) && Number.isInteger(id.max) && id.max >= id.min && Object.keys(id).length === 2)
-    });
 }
 
 class Transaction {

@@ -25,4 +25,30 @@ const assert = require('chai').assert;
         it('Count the balance of an array of ID ranges of {min:max}/integer slices', function () {
             assert(util.countNFIds([{min: 0, max: 3}, 5, 9]) === 6)
         });
+
+        it('Validate an array of ID ranges', function () {
+            assert(util.validateNFIds([0, 1, 2, {min: 3, max: 3}, {min: 4, max: 100}]), 'Failed to detect valid range');
+
+            assert(!util.validateNFIds([0, 1, 2, {min: -3, max: 3}, {
+                min: 4,
+                max: 100
+            }]), 'Failed to detect invalid range with negative number');
+
+            assert(!util.validateNFIds([0, 1, 2, {min: 3, max: 2}, {
+                min: 4,
+                max: 100
+            }]), 'Failed to detect invalid range with max < min');
+
+            assert(!util.validateNFIds([0, 1, 2, 2]), 'Failed to detect invalid range with overlapping ranges with (int:int');
+
+            assert(!util.validateNFIds([0, 1, 2, {min: 2, max: 3}, {
+                min: 4,
+                max: 100
+            }]), 'Failed to detect invalid range with overlapping ranges with (int:range');
+
+            assert(!util.validateNFIds([0, 1, 2, {min: 3, max: 3}, {
+                min: 3,
+                max: 4
+            }]), 'Failed to detect invalid range with overlapping ranges(range:range)');
+        });
 });

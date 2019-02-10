@@ -1,5 +1,7 @@
 const assert = require('chai').assert;
 let TransactionBuilder = require('../../1/Transaction').TransactionBuilder;
+let Transaction = require('../../1/Transaction').Transaction;
+let Issuance = require('../../1/Issuance').Issuance;
 
 // const testChainId = 'eb55f75551acfb9c4d8dc1f09f11f2512d8aa98ebc1c0d05652ce8d92102fad8';
 
@@ -14,6 +16,8 @@ describe('FAT-1 CLI Integration', function () {
 
     describe('Untyped Token CLI Methods', function () {
         const tokenCLI = cli.getTokenCLI('eb55f75551acfb9c4d8dc1f09f11f2512d8aa98ebc1c0d05652ce8d92102fad8');
+
+        assert(tokenCLI.getTokenChainId() === 'eb55f75551acfb9c4d8dc1f09f11f2512d8aa98ebc1c0d05652ce8d92102fad8', 'Unexpected token chain ID in CLI: ' + tokenCLI.getTokenChainId());
 
         it('get-issuance', async function () {
             const issuance = await tokenCLI.getIssuance();
@@ -112,22 +116,20 @@ describe('FAT-1 CLI Integration', function () {
         it('get-issuance', async function () {
             const issuance = await typedTokenCLI.getIssuance();
             assert(issuance !== undefined, 'Issuance was not returned');
-            /*assert(typeof issuance === 'object', 'Issuance was not an object');
-            console.log(JSON.stringify(issuance, undefined, 2));*/
+            assert(issuance instanceof Issuance, 'Issuance returned was not properly typed')
         });
 
         it('get-transaction', async function () {
             const transaction = await typedTokenCLI.getTransaction('2774b2bbb41fce285351565604d3674208582aaf10b36c046d06259d9e97c536');
             assert(transaction !== undefined, 'Transaction was not returned');
-            /*assert(typeof transaction === 'object', 'Transaction was not an object');
-            console.log(JSON.stringify(transaction, undefined, 2));*/
+            assert(transaction instanceof Transaction, 'Transaction returned was not properly typed')
         });
 
         it('get-transactions', async function () {
             const transactions = await typedTokenCLI.getTransactions();
             assert(transactions !== undefined, 'Transactions were not returned');
             assert(Array.isArray(transactions), 'Transactions was not an array');
-            console.log(JSON.stringify(transactions, undefined, 2));
+            assert(transactions.every(tx => tx instanceof Transaction), 'Transactions returned were not properly typed')
         });
     });
 });
