@@ -10,7 +10,7 @@ describe('FAT-1 CLI Integration', function () {
     const CLIBuilder = require('../../cli/CLI').CLIBuilder;
 
     const cli = new CLIBuilder()
-        .host('localhost')
+        .host('0.testnet.fat.dbgrow.com')
         .port(8078)
         .build();
 

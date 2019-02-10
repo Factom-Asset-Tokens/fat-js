@@ -4,7 +4,7 @@ let CLIBuilder = require('../../cli/CLI').CLIBuilder;
 describe('CLI Integration', function () {
 
     const cli = new CLIBuilder()
-        .host('localhost')
+        .host('0.testnet.fat.dbgrow.com')
         .port(8078)
         .build();
 

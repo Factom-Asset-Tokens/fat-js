@@ -10,7 +10,7 @@ describe('FAT-0 CLI Integration', function () {
     const CLIBuilder = require('../../cli/CLI').CLIBuilder;
 
     const cli = new CLIBuilder()
-        .host('localhost')
+        .host('0.testnet.fat.dbgrow.com')
         .port(8078)
         .build();
 
@@ -99,7 +99,6 @@ describe('FAT-0 CLI Integration', function () {
             assert(transactions !== undefined, 'Transactions were not returned');
             assert(Array.isArray(transactions), 'Transactions was not an array');
             assert(transactions.every(tx => tx instanceof Transaction), 'Transactions returned were not properly typed')
-
         });
     });
 });

@@ -2,11 +2,13 @@
 
 # fat-js
 
-[![Build Status](https://travis-ci.com/DBGrow/fat-js.svg?token=REedCkSxoVCAw1Krjc8q&branch=master)](https://travis-ci.com/DBGrow/fat-js)
+[![Build Status](https://travis-ci.com/Factom-Asset-Tokens/fat-js.svg?branch=master)](https://travis-ci.com/Factom-Asset-Tokens/fat-js)
 
-[![Coverage Status](https://coveralls.io/repos/github/DBGrow/fat-js/badge.svg?branch=master&t=X5s8cd)](https://coveralls.io/github/DBGrow/fat-js?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/Factom-Asset-Tokens/fat-js/badge.svg?branch=master)](https://coveralls.io/github/Factom-Asset-Tokens/fat-js?branch=master)
 
-[Factom Asset Token](https://github.com/DBGrow/FAT) Client and CLI implementation in JS :blue_heart:
+
+
+[Factom Asset Token](https://github.com/DBGrow/FAT) client implementation in JS :blue_heart:
 
 Currently supports **FAT-0** and **FAT-1** token standards.
 
@@ -28,7 +30,7 @@ NPM via package.json:
 
 or
 
-NPM:
+NPM CLI:
 
 ```
 npm i @fat-token/fat-js
@@ -38,7 +40,7 @@ npm i @fat-token/fat-js
 
 ## Browser Bundle
 
-A browser friendly bundle of the current fat-js version can be found at `browser/bundle.js`
+A browser friendly bundle of the current fat-js version can be found at `dist/fatjs.js`
 
 To build the bundle from source ensure you have browserify installed, and simply navigate to the root of the fat-js project and run:
 
@@ -418,6 +420,33 @@ const chainId = util.getTokenChainId('mytoken', '888888b2e7c7c63655fa85e0b0c43b4
 
 
 
+### Validate Non-Fungible Token ID Range
+
+Take an array of integers or integer ranges representing NF token IDs and validate them
+
+```javascript
+let valid = util.validateNFIds([0, 1, 2, {min: 3, max: 3}, {min: 4, max: 100}]);
+
+/*
+=> true
+*/
+
+valid = util.validateNFIds([0, 1, 2, -3]); //negative ID
+valid = util.validateNFIds([0, 1, 2, {min: 3, max: 2}]); //min > max
+valid = util.validateNFIds([0, 1, 2, {min: 3, abc: 4}]); //malformed range or int
+valid = util.validateNFIds([0, 1, 2, {min: 3, max: 2}]); //min < max
+valid = util.validateNFIds([0, 1, 2, {min: 3, max: 3}, {min: 3, max: 4}]); //overlapping range
+
+/*
+=> false
+*/
+
+```
+
+### 
+
+
+
 ### Reduce Non-Fungible Token ID Range
 
 Take an array of integers representing NF token IDs and group them into ID ranges
@@ -456,6 +485,20 @@ const numbers = util.expandNFIds([{min: 0, max: 3}, 5, 9])
   5,
   9
 ]
+*/
+```
+
+
+
+### Count Non-Fungible Token ID Range
+
+Take an array of ID ranges representing NF token IDs get the count of tokens represented
+
+```javascript
+const count = util.countNFIds([{min: 0, max: 3}, 5, 9])
+
+/*
+6
 */
 ```
 

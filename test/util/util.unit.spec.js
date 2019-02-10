@@ -27,7 +27,10 @@ const assert = require('chai').assert;
         });
 
         it('Validate an array of ID ranges', function () {
-            assert(util.validateNFIds([0, 1, 2, {min: 3, max: 3}, {min: 4, max: 100}]), 'Failed to detect valid range');
+            assert(util.validateNFIds([0, 1, 2, {min: 3, max: 3}, {
+                min: 4,
+                max: 100
+            }]) === true, 'Failed to detect valid range');
 
             assert(!util.validateNFIds([0, 1, 2, {min: -3, max: 3}, {
                 min: 4,
