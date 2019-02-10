@@ -18,7 +18,7 @@ module.exports.reduceNFIds = function (ids) {
         min = ids[i];
         max = min;
         while (ids[i + 1] - ids[i] === 1) {
-            max = ids[i + 1]; // increment the index if the numbers sequential
+            max = ids[i + 1]; // increment the index if sequential
             i++;
         }
         ranges.push(min === max ? min : {min, max});
@@ -31,6 +31,13 @@ module.exports.expandNFIds = function (ids) {
     ids.forEach((id) =>
         typeof id === 'object' ? expanded = expanded.concat(Array(id.max - id.min + 1).fill().map((element, index) => id.min + index)) : expanded.push(id));
     return expanded;
+};
+
+module.exports.countNFIds = function (ids) {
+    let count = 0;
+    ids.forEach((id) =>
+        typeof id === 'object' ? count += (id.max - id.min) + 1 : count += 1);
+    return count;
 };
 
 

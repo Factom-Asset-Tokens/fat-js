@@ -1,5 +1,4 @@
 const assert = require('chai').assert;
-describe('Utils', function () {
     const util = require('../../util');
 
     describe('FATIP-100', function () {
@@ -22,5 +21,8 @@ describe('Utils', function () {
         it('Expand an array of form {min:max} slices or integers to integers', function () {
             assert(JSON.stringify(util.expandNFIds([{min: 0, max: 3}, 5, 9])) === JSON.stringify([0, 1, 2, 3, 5, 9]))
         });
-    });
+
+        it('Count the balance of an array of ID ranges of {min:max}/integer slices', function () {
+            assert(util.countNFIds([{min: 0, max: 3}, 5, 9]) === 6)
+        });
 });
