@@ -43,9 +43,14 @@ module.exports.countNFIds = function (ids) {
 };
 
 module.exports.validateNFIds = function (ids) {
-    return Array.isArray(ids) && ids.length > 0 && ids.every(id => { //make sure every value is either an integer, or a valid range object
-        return Number.isInteger(id) || (typeof id === 'object' && Number.isInteger(id.min) && Number.isInteger(id.max) && id.max >= id.min && Object.keys(id).length === 2)
-    }) && new Set(module.exports.expandNFIds(ids)).size === module.exports.expandNFIds(ids).length;
+    return Array.isArray(ids) && ids.length > 0 && ids.every(isValidNFIdRepresentation) && hasNoDuplicatedNFId(ids);
 };
 
+function isValidNFIdRepresentation(id) {
+    return Number.isInteger(id) || (typeof id === 'object' && Number.isInteger(id.min) && Number.isInteger(id.max) && id.max >= id.min && Object.keys(id).length === 2)
+}
 
+function hasNoDuplicatedNFId(ids) {
+    const expanded = module.exports.expandNFIds(ids);
+    return new Set(expanded).size === expanded.length;
+}
