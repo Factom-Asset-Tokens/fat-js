@@ -1,4 +1,3 @@
-//Token Specific Token RPCs (Optional, wraps response in class from corresponding token type)
 const Transaction = require('./Transaction').Transaction;
 const Issuance = require('./Issuance').Issuance;
 
@@ -22,6 +21,10 @@ class CLI extends BaseTokenCLI {
     async getTransactions(txId, address, start, limit) {
         const transactions = await super.getTransactions(txId, address, start, limit);
         return transactions.map(tx => new Transaction(tx));
+    }
+
+    getType() {
+        return 'FAT-0';
     }
 }
 

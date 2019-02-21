@@ -57,6 +57,16 @@ class TransactionBuilder {
         return this;
     }
 
+    metadata(metadata) {
+        try {
+            JSON.stringify(metadata)
+        } catch (e) {
+            throw new Error("Transaction metadata bust be a valid JSON object or primitive");
+        }
+        this._metadata = metadata;
+        return this;
+    }
+
     build() {
         if (Object.keys(this._inputs).length === 0 || Object.keys(this._outputs).length === 0) throw new Error("Must have at least one input and one output");
 
@@ -77,8 +87,9 @@ class Transaction {
         if (builder instanceof TransactionBuilder) {
             this._inputs = builder._inputs;
             this._outputs = builder._outputs;
+            this._metadata = builder._metadata;
 
-            this._content = JSON.stringify({inputs: this._inputs, outputs: this._outputs}); //snapshot the tx object
+            this._content = JSON.stringify({inputs: this._inputs, outputs: this._outputs, metadata: this._metadata}); //snapshot the tx object
 
             const unixSeconds = Math.round(new Date().getTime() / 1000);
 
@@ -129,6 +140,8 @@ class Transaction {
 
             if (!builder.data.outputs) throw new Error("Valid FAT-0 transactions must include outputs");
             this._outputs = builder.data.outputs;
+
+            this._metadata = builder.data.metadata;
             this._entryhash = builder.data.entryhash;
         }
 
@@ -141,6 +154,10 @@ class Transaction {
 
     getOutputs() {
         return this._outputs;
+    }
+
+    getMetadata() {
+        return this._metadata;
     }
 
     isCoinbase() {

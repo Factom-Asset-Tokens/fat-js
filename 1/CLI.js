@@ -1,4 +1,5 @@
-//Token Specific Token RPCs (Optional, wraps response in class from corresponding token type)
+const fctAddressUtil = require('factom/src/addresses');
+
 const Transaction = require('./Transaction').Transaction;
 const Issuance = require('./Issuance').Issuance;
 
@@ -23,6 +24,29 @@ class CLI extends BaseTokenCLI {
         const transactions = await super.getTransactions(txId, address, start, limit);
         return transactions.map(tx => new Transaction(tx));
     }
+
+    getNFToken(nftokenid) {
+        return this._cli.call('get-nf-token', generateTokenCLIParams(this, {nftokenid}));
+    }
+
+    getNFBalance(address, page, limit, order) {
+        if (!fctAddressUtil.isValidPublicFctAddress(address)) throw new Error("You must include a valid public Factoid address");
+        return this._cli.call('get-nf-balance', generateTokenCLIParams(this, {address, page, limit, order}));
+    }
+
+    getNFTokens(page, limit, order) {
+        return this._cli.call('get-nf-tokens', generateTokenCLIParams(this, {page, limit, order}));
+    }
+
+    getType() {
+        return 'FAT-1';
+    }
+}
+
+function generateTokenCLIParams(tokenRPC, params) {
+    return Object.assign({
+        'chainid': tokenRPC._tokenChainId
+    }, params);
 }
 
 module.exports = {

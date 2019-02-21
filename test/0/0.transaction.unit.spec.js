@@ -3,11 +3,6 @@ const assert = require('chai').assert;
 const fctAddrUtils = require('factom/src/addresses');
 const Entry = require('factom/src/entry').Entry;
 
-const ES = 'Es3k4L7La1g7CY5zVLer21H3JFkXgCBCBx8eSM2q9hLbevbuoL6a'; //EC1tE4afVGPrBUStDhZPx1aHf4yHqsJuaDpM7WDbXCcYxruUxj2D
-
-//Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ', 'FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
-
-const testTokenID = 'mytoken';
 const testTokenChainId = '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762';
 
 describe('Transaction Unit', function () {
@@ -54,6 +49,18 @@ describe('Transaction Unit', function () {
             .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", 150)
             .burnOutput(150)
             .build();
+
+        //test metadata
+        const meta = {type: 'fat-js test run', timestamp: new Date().getTime()};
+
+        tx = new TransactionBuilder(testTokenChainId)
+            .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", 150)
+            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
+            .metadata(meta)
+            .build();
+
+        assert(typeof tx.getMetadata() === 'object', 'Metadata was not an object');
+        assert(JSON.stringify(tx.getMetadata()) === JSON.stringify(meta), 'Metadata was not equal to expected');
 
         //TX ERRORS:
 

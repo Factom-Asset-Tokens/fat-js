@@ -60,6 +60,31 @@ class TransactionBuilder {
         return this;
     }
 
+    metadata(metadata) {
+        try {
+            JSON.stringify(metadata)
+        } catch (e) {
+            throw new Error("Transaction metadata bust be a valid JSON object or primitive");
+        }
+        this._metadata = metadata;
+        return this;
+    }
+
+    tokenMetadata(tokenMetadata) {
+
+        if (!Array.isArray(tokenMetadata)) throw new Error('Token metadata must be an array');
+        if (!tokenMetadata.every(meta => typeof meta === 'object' && Object.keys(meta).length === 2 && meta.ids !== undefined && meta.metadata !== undefined)) throw new Error('Every metadata range representation must have only keys ids(Array) and metadata(JSON stringifiable value)');
+
+        const allIds = tokenMetadata.reduce((all, rangeMeta) => {
+            return all.concat(rangeMeta.ids);
+        }, []);
+
+        if (!util.validateNFIds(allIds)) throw new Error('Invalid token metadata, must not contain any duplicates or overlapping ranges');
+
+        this._tokenMetadata = tokenMetadata;
+        return this;
+    }
+
     build() {
         if (Object.keys(this._inputs).length === 0 || Object.keys(this._outputs).length === 0) throw new Error("Must have at least one input and one output");
 
@@ -78,6 +103,9 @@ class TransactionBuilder {
 
         if (JSON.stringify(allInputIds) !== JSON.stringify(allOutputIds)) throw new Error('Input and output token IDS do not match');
 
+        //restrict tokenmetadata to coinbase transactions
+        if (this._tokenMetadata !== undefined && !Object.keys(this._inputs).find(address => address === COINBASE_ADDRESS_PUBLIC)) throw new Error('You may only specify tokenmetadata for coinbase transactions');
+
         return new Transaction(this);
     }
 }
@@ -87,8 +115,15 @@ class Transaction {
         if (builder instanceof TransactionBuilder) {
             this._inputs = builder._inputs;
             this._outputs = builder._outputs;
+            this._metadata = builder._metadata;
+            this._tokenMetadata = builder._tokenMetadata;
 
-            this._content = JSON.stringify({inputs: this._inputs, outputs: this._outputs}); //snapshot the tx object
+            this._content = JSON.stringify({
+                inputs: this._inputs,
+                outputs: this._outputs,
+                metadata: this._metadata,
+                tokenmetadata: this._tokenMetadata
+            }); //snapshot the tx object
 
             const unixSeconds = Math.round(new Date().getTime() / 1000);
 
@@ -151,6 +186,14 @@ class Transaction {
 
     getOutputs() {
         return this._outputs;
+    }
+
+    getMetadata() {
+        return this._metadata;
+    }
+
+    getTokenMetadata() {
+        return this._tokenMetadata;
     }
 
     isCoinbase() {

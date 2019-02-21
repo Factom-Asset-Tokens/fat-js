@@ -3,11 +3,6 @@ const assert = require('chai').assert;
 const fctAddrUtils = require('factom/src/addresses');
 const Entry = require('factom/src/entry').Entry;
 
-const ES = 'Es3k4L7La1g7CY5zVLer21H3JFkXgCBCBx8eSM2q9hLbevbuoL6a'; //EC1tE4afVGPrBUStDhZPx1aHf4yHqsJuaDpM7WDbXCcYxruUxj2D
-
-//Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ', 'FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
-
-const testTokenID = 'mytoken';
 const testTokenChainId = '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762';
 
 describe('Transaction Unit', function () {
@@ -64,6 +59,36 @@ describe('Transaction Unit', function () {
             .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", [{min: 0, max: 3}, 150])
             .burnOutput([{min: 0, max: 3}, 150])
             .build();
+
+        //test metadata
+        const meta = {type: 'fat-js test run', timestamp: new Date().getTime()};
+
+        tx = new TransactionBuilder(testTokenChainId)
+            .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", [10])
+            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [10])
+            .metadata(meta)
+            .build();
+
+        assert(typeof tx.getMetadata() === 'object', 'Metadata was not an object');
+        assert(JSON.stringify(tx.getMetadata()) === JSON.stringify(meta), 'Metadata was not equal to expected');
+
+        tx = new TransactionBuilder(testTokenChainId)
+            .coinbaseInput([10])
+            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [10])
+            .tokenMetadata([
+                {
+                    ids: [10],
+                    metadata: meta,
+                }
+            ])
+            .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+            .build();
+
+        assert(typeof tx.getTokenMetadata() === 'object', 'Token metadata was not an object');
+        assert(JSON.stringify(tx.getTokenMetadata()) === JSON.stringify([{
+            ids: [10],
+            metadata: meta,
+        }]), 'Token metadata was not equal to expected');
 
         //TX ERRORS:
 
@@ -141,5 +166,27 @@ describe('Transaction Unit', function () {
             .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", [])
             .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [])
             .build());
+
+        //specify invalid tx metadata
+
+        assert.throws(() => new TransactionBuilder(testTokenChainId)
+            .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", [10])
+            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [10])
+            .metadata(new HTMLDataElement())
+            .build());
+
+        //specify token metadata without the tx being coinbase
+        assert.throws(() => new TransactionBuilder(testTokenChainId)
+            .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", [10])
+            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [10])
+            .tokenMetadata([
+                {
+                    ids: [10],
+                    metadata: meta,
+                }
+            ])
+            .build())
     });
+
+
 });

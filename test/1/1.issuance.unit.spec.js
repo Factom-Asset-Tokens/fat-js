@@ -2,9 +2,6 @@ const assert = require('chai').assert;
 const Entry = require('factom/src/entry').Entry;
 const Chain = require('factom/src/chain').Chain;
 
-
-const testTokenChainId = '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762';
-
 describe('Issuance Unit', function () {
 
 
