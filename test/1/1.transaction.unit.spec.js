@@ -72,6 +72,7 @@ describe('Transaction Unit', function () {
         assert(typeof tx.getMetadata() === 'object', 'Metadata was not an object');
         assert(JSON.stringify(tx.getMetadata()) === JSON.stringify(meta), 'Metadata was not equal to expected');
 
+        //token metadata
         tx = new TransactionBuilder(testTokenChainId)
             .coinbaseInput([10])
             .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [10])

@@ -165,11 +165,17 @@ class Transaction {
     }
 
     getEntry() {
+        if (!this._tokenChainId) throw new Error('Can only get a valid Factom entry for a transaction built using TransactionBuilder');
+
         return Entry.builder()
             .chainId(this._tokenChainId)
             .extIds(this._extIds, 'utf8')
             .content(this._content, 'utf8')
             .build();
+    }
+
+    getTokenChainId() {
+        return this._tokenChainId;
     }
 
     getEntryhash() {
