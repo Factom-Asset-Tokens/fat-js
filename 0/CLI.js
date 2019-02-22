@@ -18,8 +18,8 @@ class CLI extends BaseTokenCLI {
         return new Transaction(transaction);
     }
 
-    async getTransactions(txId, address, start, limit) {
-        const transactions = await super.getTransactions(txId, address, start, limit);
+    async getTransactions(entryhash, address, page, limit, order) {
+        const transactions = await super.getTransactions(entryhash, address, page, limit, order);
         return transactions.map(tx => new Transaction(tx));
     }
 

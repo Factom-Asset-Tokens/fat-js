@@ -116,14 +116,15 @@ class BaseTokenCLI {
         return this._cli.call('get-transaction', generateTokenCLIParams(this, {'entryhash': txId}));
     }
 
-    getTransactions(entryhash, address, page, limit) {
+    getTransactions(entryhash, address, page, limit, order) {
         if (entryhash && entryhash.length !== 32) throw new Error("You must include a valid 32 Byte tx ID (entryhash)");
         if (address && !fctAddressUtil.isValidPublicFctAddress(address)) throw new Error("You must include a valid public Factoid address");
         return this._cli.call('get-transactions', generateTokenCLIParams(this, {
             entryhash,
             address,
             page,
-            limit
+            limit,
+            order
         }));
     }
 
