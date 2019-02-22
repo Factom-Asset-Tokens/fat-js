@@ -24,12 +24,6 @@ class IssuanceBuilder {
         this._type = 'FAT-1'
     }
 
-    name(name) {
-        if (!name) throw new Error("Token name must be defined");
-        this._name = name;
-        return this;
-    }
-
     symbol(symbol) {
         if (!symbol) throw new Error("Token symbol must be defined");
         if (!new RegExp('[A-Z ]+').test(symbol)) throw new Error("Token symbol must only contain capital letters A-Z");
@@ -40,7 +34,7 @@ class IssuanceBuilder {
 
     supply(supply) {
         if (isNaN(supply)) throw new Error("Supply must be a number");
-        if (supply < -1) throw new Error("Supply must be >= -1 (infinite)");
+        if (supply === 0 || supply < -1) throw new Error("Supply must be equal to -1(infinite) or greater than 0");
         this._supply = supply;
         return this;
     }
@@ -58,7 +52,6 @@ class Issuance {
 
         if (builder instanceof IssuanceBuilder) {
             this._type = builder._type;
-            this._name = builder._name;
             this._symbol = builder._symbol;
             this._supply = builder._supply;
 
@@ -85,7 +78,6 @@ class Issuance {
 
         } else if (typeof builder === 'object') {
             this._type = builder.issuance.type;
-            this._name = builder.issuance.name;
             this._symbol = builder.issuance.symbol;
             this._supply = builder.issuance.supply;
             this._content = JSON.stringify(this);
@@ -122,10 +114,6 @@ class Issuance {
 
     getType() {
         return this._type;
-    }
-
-    getName() {
-        return this._name;
     }
 
     getSymbol() {

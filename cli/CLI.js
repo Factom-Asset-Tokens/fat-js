@@ -1,4 +1,5 @@
 const axios = require('axios');
+const Joi = require('joi');
 const fctAddressUtil = require('factom/src/addresses');
 
 class CLIBuilder {
@@ -94,6 +95,14 @@ class CLI {
     }
 }
 
+const getTransactionsSchema = Joi.object().keys({
+    entryhash: Joi.string().length(64),
+    address: Joi.string().length(52),
+    page: Joi.number().integer().min(0),
+    limit: Joi.number().integer().min(0),
+    order: Joi.string().valid(['asc', 'desc']),
+});
+
 class BaseTokenCLI {
     constructor(cli, tokenChainId) {
         if (!(cli instanceof CLI)) throw new Error("Must include an RPc object of type CLI");
@@ -116,16 +125,11 @@ class BaseTokenCLI {
         return this._cli.call('get-transaction', generateTokenCLIParams(this, {'entryhash': txId}));
     }
 
-    getTransactions(entryhash, address, page, limit, order) {
-        if (entryhash && entryhash.length !== 32) throw new Error("You must include a valid 32 Byte tx ID (entryhash)");
-        if (address && !fctAddressUtil.isValidPublicFctAddress(address)) throw new Error("You must include a valid public Factoid address");
-        return this._cli.call('get-transactions', generateTokenCLIParams(this, {
-            entryhash,
-            address,
-            page,
-            limit,
-            order
-        }));
+    getTransactions(params) {
+        const validation = Joi.validate(params, getTransactionsSchema, {});
+        if (validation.error) throw new Error('Params validation error - ' + validation.error.details[0].message);
+        if (params && params.address && !fctAddressUtil.isValidPublicFctAddress(params.address)) throw new Error("You must include a valid public Factoid address");
+        return this._cli.call('get-transactions', generateTokenCLIParams(this, params));
     }
 
     getBalance(address) {

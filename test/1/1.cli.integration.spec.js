@@ -57,7 +57,7 @@ describe('FAT-1 CLI Integration', function () {
         it('get-nf-balance', async function () {
             const tokenCLI = await cli.getTokenCLI(tokenChainId);
 
-            const balance = await tokenCLI.getNFBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM', undefined, undefined, 'desc');
+            const balance = await tokenCLI.getNFBalance({address: 'FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM'});
             assert(balance !== undefined, 'Balance was not returned');
             assert(Array.isArray(balance), 'Balance was not an array');
             assert(balance.length > 0, 'Balance was 0 tokens in length (expected > 0)');
@@ -74,7 +74,7 @@ describe('FAT-1 CLI Integration', function () {
         it('get-nf-tokens', async function () {
             const tokenCLI = await cli.getTokenCLI(tokenChainId);
 
-            const tokens = await tokenCLI.getNFTokens(undefined, undefined, 'desc');
+            const tokens = await tokenCLI.getNFTokens();
             assert(tokens !== undefined, 'Tokens were not returned');
             assert(Array.isArray(tokens), 'Tokens returned were not an array');
             assert(tokens.every(token => typeof token === 'object'), 'Tokens returned were not an array of object');

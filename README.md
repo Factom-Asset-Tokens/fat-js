@@ -1,4 +1,4 @@
-![](https://png.icons8.com/ios-glyphs/128/3498db/octahedron.png)![](https://png.icons8.com/ios/40/3498db/javascript-filled.png)
+![](https://png.icons8.com/ios-glyphs/128/3498db/octahedron.png![](https://png.icons8.com/ios/40/3498db/javascript-filled.png)
 
 # fat-js
 
@@ -60,6 +60,8 @@ Build and use FAT transactions
 
 ### Transaction Builder
 
+#### Examples
+
 ```javascript
 const TransactionBuilder = require('fat-js').FAT0.TransactionBuilder
 
@@ -92,25 +94,153 @@ tx = new TransactionBuilder(tokenChainId)
             .build();
 ```
 
+#### Methods
+
+- `new TransactionBuilder(tokenChainId)` - **TransactionBuilder**
+  - Params
+    - `tokenChainId` - **string** - required
+      - The Factom chain ID of the destination FAT-0 token chain
+- `builder.input(fs, amount)` - **TransactionBuilder**
+  - Params
+    - `fs` - **string** - required
+      - The private key corresponding to the input Factoid address. Used to sign the FAT transaction
+    - `amount` - **integer** - required
+      - The number of fungible FAT tokens to send from the input address, in the least divisible balance unit
+- `builder.coinbaseInput(amount)` - **TransactionBuilder**
+  - Params
+    - `amount` - **integer** - required
+      - The number of fungible FAT tokens to mint from the coinbase address. Coinbase transactions may only have a single input. Coinbase transactions must specify a sk1 issuer private key via `builder.setIssuerSK1(sk1)`
+
+- `builder.output(fa, amount)` - **TransactionBuilder**
+  - Params
+    - `fa` - **string** - required
+      - The public Factoid address output of the transaction
+    - `amount` - **integer** - required
+      - The number of fungible FAT tokens to send to the output address, in the least divisible balance unit
+- `builder.burnOutput(amount)` - **TransactionBuilder**
+  - Params
+    - `amount` - **integer** - required
+      - The number of fungible FAT tokens to send to the burn address in the transaction
+- `builder.metadata(metadata)` - **TransactionBuilder**
+  - Params
+    - `metadata` - **string | number | object** - required
+      - The metadata to include with the transaction. Must be JSON stringifiable
+- `build()` - **Transaction**
+  - The complete, built FAT-0 transaction object
 
 
-### Transaction Methods
 
-| Method                 | Return Type                                                  | Return Example                                               | Description                                                  |
-| ---------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| `tx.getInputs()`       | object                                                       | ```{"FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM":150}``` | The inputs of the transaction                                |
-| `tx.getOutputs()`      | object                                                       | ```{"FA1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm":150}``` | The outputs of the transaction                               |
-| `tx.getMetadata()`     | -                                                            | ```{type: 'fat-js test run', timestamp: new Date().getTime()}``` | The metadata included with the transaction. Return type is variable based on original input |
-| `tx.isCoinbase()`      | boolean                                                      | ```true```                                                   | Is the transaction a coinbase tx                             |
-| `tx.getTokenChainId()` | string                                                       | ```013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec``` | The token chain of the transaction. Only returned for txs built using TransactionBuilder |
-| `tx.getEntryhash()`    | string                                                       | ```013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec``` | Get the factom entry hash of the tx. Only returned for txs from the RPC server |
-| `tx.getEntry()`        | [factom-js](https://github.com/PaulBernier/factomjs/blob/master/src/entry.js#L26) Entry | See factom-js [docs](https://github.com/PaulBernier/factomjs#add-an-entry) | The entry object for submission to Factom. Only returned for txs built using TransactionBuilder. |
+### Transaction
 
-#### 
+#### Examples
+
+```javascript
+const Transaction = require('fat-js').FAT0.Transaction
+
+//From transaction builder
+let tx = new TransactionBuilder(tokenChainId)
+	.input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 150)
+	.output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
+	.build();
+
+tx.getInputs(); // => {"FA1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm":150}
+
+tx.getTokenChainId(); // => "013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec"
+
+
+//or from API response
+const response =
+    {
+        entryhash: '68f3ca3a8c9f7a0cb32dc9717347cb179b63096e051a60ce8be9c292d29795af',
+        timestamp: 1550696040,
+        data:
+            {
+                inputs: {FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC: 10},
+                outputs: {FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM: 10}
+            }
+    };
+
+tx = new Transaction(response);
+
+tx.getEntryHash(); // => "68f3ca3a8c9f7a0cb32dc9717347cb179b63096e051a60ce8be9c292d29795af"
+```
+
+
+
+#### Methods
+
+- `new Transaction(params)` - **Transaction**
+
+  - Params
+    - `params` - **TransactionBuilder | object** - required
+      - An instance of TransactionBuilder or a transaction JSON object from the fatd RPC endpoint
+
+- `tx.getInputs()` - **object**
+
+  - The inputs of the transaction
+
+  - ```json
+    {"FA1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm":150}
+    ```
+
+- `tx.getOutputs()` - **object**
+
+  - The outputs of the transaction
+
+  - ```json
+    {"FA1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm":150}
+    ```
+
+- `tx.getMetadata()` - **variable type**
+
+  - The metadata submitted with the transaction, if include . Return type is variable based on original input.
+
+  - ```json
+    {"name": 'my metadata', "value": 123}
+    ```
+
+- `tx.isCoinbase()` - **boolean**
+
+  - Check if the transaction a coinbase tx (token minting transaction, from coinbase address `FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC`)
+
+  - ```json
+    false
+    ```
+
+- `tx.getTokenChainId()` - **string**
+
+  - The Factom chain ID of the transaction. Only returned for txs built using TransactionBuilder, otherwise undefined
+
+  - ```json
+    "013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec"
+    ```
+
+- `tx.getEntryhash()` - **string**
+
+  - The Factom entry hash of the transaction. Only returned for txs returned from the fatd RPC
+
+  - ```json
+    "abba93b0acfaacffa081c25467ec9e18f0314f77787cbba58ed97491e59db07c"
+    ```
+
+- `tx.getTimestamp()` - **number**
+
+  - The Factom unix timestamp of the transaction. Only returned for txs returned from the fatd RPC
+
+  - ```json
+    1550696040
+    ```
+
+- `tx.getEntry()` - **[factom-js](https://github.com/PaulBernier/factomjs/blob/master/src/entry.js#L26) Entry**
+
+  - The factom-js entry object for submission to Factom. Only returned for transactions built using TransactionBuilder. See factom-js [docs](https://github.com/PaulBernier/factomjs#add-an-entry) 
+
 
 ## FAT-1
 
 ### Transaction Builder
+
+#### Examples
 
 ```javascript
 const TransactionBuilder = require('fat-js').FAT1.TransactionBuilder
@@ -157,22 +287,65 @@ tx = new TransactionBuilder(testTokenChainId)
             .build();
 ```
 
+#### Methods
+
+- `new TransactionBuilder(tokenChainId)` - **TransactionBuilder**
+  - Params
+    - `tokenChainId` - **string** - required
+      - The Factom chain ID of the destination FAT-0 token chain
+- `builder.input(fs, ids)` - **TransactionBuilder**
+  - Params
+    - `fs` - **string** - required
+      - The private key corresponding to the input Factoid address. Used to sign the FAT transaction
+    - `ids` - **array** - required
+      - An array of valid integer NF token IDs, or token ID ranges of the form `{min: 0,max: 3}`
+- `builder.coinbaseInput(ids)` - **TransactionBuilder**
+  - Params
+    - `ids` - **array** - required
+      - An array of valid integer NF token IDs or token ID ranges of the form `{min: 0,max: 3}` to mint from the coinbase address. Coinbase transactions may only have a single input. Coinbase transactions must specify a sk1 issuer private key via `builder.setIssuerSK1(sk1)`
+
+- `builder.output(fa, ids)` - **TransactionBuilder**
+
+  - Params
+    - `fa` - **string** - required
+      - The public Factoid address output of the transaction
+    - `ids` - **integer** - required
+      - An array of valid integer NF token IDs or token ID ranges to send to the output address of the form `{min: 0,max: 3}` 
+
+- `builder.burnOutput(ids)` - **TransactionBuilder**
+
+  - Params
+    - `amount` - **integer** - required
+      - An array of valid integer NF token IDs or token ID ranges to send to the burn address in the transaction
+
+- `builder.metadata(metadata)` - **TransactionBuilder**
+
+  - Params
+    - `metadata` - **string | number | object** - required
+      - The metadata to include with the transaction. Must be JSON stringifiable
+
+- `builder.tokenMetadata(metadata)` - **TransactionBuilder**
+
+  - Params
+
+    - `metadata` - **array** - required
+
+      - The token specific metadata to include with the transaction. Must be JSON stringifiable. Token metadata can may only be set in coinbase transactions
+
+      - Must be of the form: 
+
+        ```javascript
+        {
+            "ids": [3, {"min": 4, "max": 5}],
+            "metadata": {"type": "fat-js test run", "value": new 1234}
+        }
+        ```
+
+- `build()` - **Transaction**
+
+  - The complete, built FAT-0 transaction object
 
 
-### Transaction Methods
-
-| Method                  | Return Type                                                  | Return Example                                               | Description                                                  |
-| ----------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| `tx.getInputs()`        | object                                                       | ```{"FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM":[0]}``` | The inputs of the transaction                                |
-| `tx.getOutputs()`       | object                                                       | ```{"FA1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm":[0]}``` | The outputs of the transaction                               |
-| `tx.getMetadata()`      | -                                                            | ```{type: 'fat-js test run', timestamp: new Date().getTime()}``` | The metadata included with the transaction. Return type is variable based on original input |
-| `tx.getTokenMetadata()` | -                                                            | ```{ ids: [0],  metadata: {abc:'Hello!'}}```                 | The metadata attached to one or more NF tokens. Return type is variable based on original input |
-| `tx.isCoinbase()`       | boolean                                                      | ```true```                                                   | Is the transaction a coinbase tx                             |
-| `tx.getTokenChainId()`  | string                                                       | ```013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec``` | The token chain of the transaction. Only returned for txs built using TransactionBuilder |
-| `tx.getEntryhash()`     | string                                                       | ```7f11f4ff6ffb2a6a5a86d61de69f9dce66fd655f4a86ae7d85fb2df80eb1a3ff``` | Get the factom entry hash of the tx. Only returned for txs from the RPC server |
-| `tx.getEntry()`         | [factom-js](https://github.com/PaulBernier/factomjs/blob/master/src/entry.js#L26) Entry | See factom-js [docs](https://github.com/PaulBernier/factomjs#add-an-entry) | The entry object for submission to Factom. Only returned for txs built using TransactionBuilder. |
-
-#### 
 
 # CLI
 
@@ -256,6 +429,8 @@ The token CLI allows access to both FAT-0 and FAT-1 data from fatd.
 
 Before creating a token you must create a token CLI instance using the token's chain ID:
 
+
+
 ### Instantiate Token CLI
 
 ```javascript
@@ -272,7 +447,7 @@ const tokenCLI = cli.getTokenCLI('013de826902b7d075f00101649ca4fa7b49b5157cba736
 
 ### Get Issuance
 
-Get a FAT issuance entry for the token
+Get a FAT issuance entry for the selected token
 
 ```javascript
 const issuance = await tokenCLI.getIssuance();
@@ -295,19 +470,21 @@ const transaction = await tokenCLI.getTransaction('d9b6ca250c97fdbe48eb3972a7d4b
 Get a paged list of FAT transactions.
 
 ```javascript
-const transactions = await tokenCLI.getTransactions(entryhash, address, page, limit);
+const transactions = await tokenCLI.getTransactions(params);
 ```
 
-| Param       | Type   | Description                                                  |
-| ----------- | ------ | ------------------------------------------------------------ |
-| `entryhash` | string | 64 Byte Factom entryhash of the transaction to start the page of transactions |
-| `address`   | string | Public Factoid address input/output to filter the results by |
-| `page`      | number | Integer result page number                                   |
-| `limit`     | number | Integer number of results per page                           |
-
-#### Ordering
-
-Transactions are returned from oldest (0th) to newest (last)
+- Params
+  - `params` - **object** - optional
+    - `address` - **string** - optional
+      - Filter transactions by public Factoid address. Return transactions with `address` in the inputs or outputs of the transaction.
+    - `entryhash` - **string** - optional
+      - The Factom entryhash of the transaction to start the result set at
+    - `limit` - **number** - optional
+      - The integer limit of number of transactions returned
+    - `page` - **number** - optional
+      - The page count of the results returned
+    - `order` - **string** - optional
+      - The time order to return transactions in. Either `asc` or `desc`. Default `asc`
 
 
 
@@ -332,7 +509,7 @@ let balance = await tokenCLI.getBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcH
 Get the tokens owned by a public Factoid address.
 
 ```javascript
-let tokens = await tokenCLI.getNFBalance(address, page, limit, order);
+let tokens = await tokenCLI.getNFBalance(params);
 
 /*
 [
@@ -344,12 +521,16 @@ let tokens = await tokenCLI.getNFBalance(address, page, limit, order);
 */
 ```
 
-| Param     | Type   | Description                                                  |
-| --------- | ------ | ------------------------------------------------------------ |
-| `address` | string | Public Factoid address to get the balance of                 |
-| `page`    | number | Integer result page number                                   |
-| `limit`   | number | Integer number of results per page                           |
-| `order`   | string | The sort order to return token IDS in. Either `desc` or `asc` |
+- Params
+  - `params` - **object** - optional
+    - `address` - **string** - required
+      - Filter transactions by public Factoid address. Return transactions with `address` in the inputs or outputs of the transaction.
+    - `limit` - **number** - optional
+      - The integer limit of number of transactions returned
+    - `page` - **number** - optional
+      - The page count of the results returned
+    - `order` - **string** - optional
+      - The time order to return transactions in. Either `asc` or `desc`. Default `asc`
 
 
 
@@ -358,7 +539,7 @@ let tokens = await tokenCLI.getNFBalance(address, page, limit, order);
 Page through all tokens currently in circulation
 
 ```javascript
-let tokens = await tokenCLI.getNFTokens(page, limit, order);
+let tokens = await tokenCLI.getNFTokens(params);
 
 /*
 [
@@ -374,11 +555,14 @@ let tokens = await tokenCLI.getNFTokens(page, limit, order);
 */
 ```
 
-| Param   | Type   | Description                                                  |
-| ------- | ------ | ------------------------------------------------------------ |
-| `page`  | number | Integer result page number                                   |
-| `limit` | number | Integer number of results per page                           |
-| `order` | string | The sort order to return token IDS in. Either `desc` or `asc` |
+- Params
+  - `params` - **object** - optional
+    - `limit` - **number** - optional
+      - The integer limit of number of transactions returned
+    - `page` - **number** - optional
+      - The page count of the results returned
+    - `order` - **string** - optional
+      - The time order to return transactions in. Either `asc` or `desc`. Default `asc`
 
 
 
@@ -430,7 +614,6 @@ const result = await tokenCLI.sendTransaction(tx);
 const CLIBuilder = require('fat-js').FAT0.IssuanceBuilder
 const issuance = new IssuanceBuilder("mytoken", "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
                 .supply(1000000)
-                .name('Test Token')
                 .symbol('TTK')
                 .build()
 ```

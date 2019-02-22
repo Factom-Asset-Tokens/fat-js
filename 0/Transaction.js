@@ -92,6 +92,7 @@ class Transaction {
             this._content = JSON.stringify({inputs: this._inputs, outputs: this._outputs, metadata: this._metadata}); //snapshot the tx object
 
             const unixSeconds = Math.round(new Date().getTime() / 1000);
+            this._timestamp = unixSeconds;
 
             this._extIds = [unixSeconds.toString()];
 
@@ -142,7 +143,9 @@ class Transaction {
             this._outputs = builder.data.outputs;
 
             this._metadata = builder.data.metadata;
-            this._entryhash = builder.data.entryhash;
+
+            this._entryhash = builder.entryhash;
+            this._timestamp = builder.timestamp;
         }
 
         Object.freeze(this);
@@ -180,6 +183,10 @@ class Transaction {
 
     getEntryhash() {
         return this._entryhash;
+    }
+
+    getTimestamp() {
+        return this._timestamp;
     }
 }
 

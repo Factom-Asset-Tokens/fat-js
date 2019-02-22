@@ -10,14 +10,12 @@ describe('Issuance Unit', function () {
 
     it('Builder', function () {
         let issuance = new IssuanceBuilder("mytoken", "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
-            .name('Test NF Token')
             .symbol('TNFT')
             .supply(1000000)
             .build();
 
         assert(issuance.getIssuerIdentityRootChainId() === '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762', "Unexpected root chain ID");
         assert(issuance.getType() === 'FAT-1', "Unexpected token type");
-        assert(issuance.getName() === 'Test NF Token', "Unexpected token Name");
         assert(issuance.getSymbol() === 'TNFT', "Unexpected token Symbol");
         assert(issuance.getSupply() === 1000000, "Unexpected issuance token supply");
 
@@ -41,8 +39,7 @@ describe('Issuance Unit', function () {
             "issuance": {
                 "type": "FAT-1",
                 "supply": 99999999,
-                "symbol": "TNF1",
-                "name": "testfat1-0"
+                "symbol": "TNF1"
             }
         };
 
@@ -50,7 +47,6 @@ describe('Issuance Unit', function () {
 
         assert(issuance.getIssuerIdentityRootChainId() === '888888ab72e748840d82c39213c969a11ca6cb026f1d3da39fd82b95b3c1fced', "Unexpected root chain ID");
         assert(issuance.getType() === 'FAT-1', "Unexpected token type");
-        assert(issuance.getName() === 'testfat1-0', "Unexpected token Name");
         assert(issuance.getSymbol() === 'TNF1', "Unexpected token Symbol");
         assert(issuance.getSupply() === 99999999, "Unexpected issuance token supply");
 

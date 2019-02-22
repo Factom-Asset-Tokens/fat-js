@@ -1,9 +1,22 @@
 const fctAddressUtil = require('factom/src/addresses');
+const Joi = require('joi');
 
 const Transaction = require('./Transaction').Transaction;
 const Issuance = require('./Issuance').Issuance;
-
 const BaseTokenCLI = require('../cli/CLI').BaseTokenCLI;
+
+const getNFBalanceSchema = Joi.object().keys({
+    address: Joi.string().length(52).required(),
+    page: Joi.number().integer().min(0),
+    limit: Joi.number().integer().min(0),
+    order: Joi.string().valid(['asc', 'desc']),
+});
+
+const getNFTokensSchema = Joi.object().keys({
+    page: Joi.number().integer().min(0),
+    limit: Joi.number().integer().min(0),
+    order: Joi.string().valid(['asc', 'desc']),
+});
 
 class CLI extends BaseTokenCLI {
     constructor(rpc, tokenChainId) {
@@ -20,8 +33,8 @@ class CLI extends BaseTokenCLI {
         return new Transaction(transaction);
     }
 
-    async getTransactions(entryhash, address, page, limit, order) {
-        const transactions = await super.getTransactions(entryhash, address, page, limit, order);
+    async getTransactions(params) {
+        const transactions = await super.getTransactions(params);
         return transactions.map(tx => new Transaction(tx));
     }
 
@@ -29,13 +42,17 @@ class CLI extends BaseTokenCLI {
         return this._cli.call('get-nf-token', generateTokenCLIParams(this, {nftokenid}));
     }
 
-    getNFBalance(address, page, limit, order) {
-        if (!fctAddressUtil.isValidPublicFctAddress(address)) throw new Error("You must include a valid public Factoid address");
-        return this._cli.call('get-nf-balance', generateTokenCLIParams(this, {address, page, limit, order}));
+    getNFBalance(params) {
+        const validation = Joi.validate(params, getNFBalanceSchema);
+        if (validation.error) throw new Error('Params validation error - ' + validation.error.details[0].message);
+        if (!fctAddressUtil.isValidPublicFctAddress(params.address)) throw new Error("You must include a valid public Factoid address");
+        return this._cli.call('get-nf-balance', generateTokenCLIParams(this, params));
     }
 
-    getNFTokens(page, limit, order) {
-        return this._cli.call('get-nf-tokens', generateTokenCLIParams(this, {page, limit, order}));
+    getNFTokens(params) {
+        const validation = Joi.validate(params, getNFTokensSchema);
+        if (validation.error) throw new Error('Params validation error - ' + validation.error.details[0].message);
+        return this._cli.call('get-nf-tokens', generateTokenCLIParams(this, params));
     }
 
     getType() {
