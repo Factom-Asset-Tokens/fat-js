@@ -1,5 +1,5 @@
 const fctAddressUtil = require('factom/src/addresses');
-const Joi = require('joi');
+const Joi = require('joi-browser');
 
 const Transaction = require('./Transaction').Transaction;
 const Issuance = require('./Issuance').Issuance;

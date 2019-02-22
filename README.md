@@ -65,7 +65,6 @@ Build and use FAT transactions
 ```javascript
 const TransactionBuilder = require('fat-js').FAT0.TransactionBuilder
 
-const tokenId = 'mytoken';
 const tokenChainId = '013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec';
 
 let tx = new TransactionBuilder(tokenChainId)

@@ -1,5 +1,5 @@
 const axios = require('axios');
-const Joi = require('joi');
+const Joi = require('joi-browser');
 const fctAddressUtil = require('factom/src/addresses');
 
 class CLIBuilder {
