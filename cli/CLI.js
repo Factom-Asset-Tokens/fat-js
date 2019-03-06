@@ -97,7 +97,7 @@ class CLI {
 
 const getTransactionsSchema = Joi.object().keys({
     entryhash: Joi.string().length(64),
-    address: Joi.string().length(52),
+    addresses: Joi.array().items(Joi.string().length(52)),
     page: Joi.number().integer().min(0),
     limit: Joi.number().integer().min(0),
     order: Joi.string().valid(['asc', 'desc']),
@@ -128,7 +128,10 @@ class BaseTokenCLI {
     getTransactions(params) {
         const validation = Joi.validate(params, getTransactionsSchema, {});
         if (validation.error) throw new Error('Params validation error - ' + validation.error.details[0].message);
-        if (params && params.address && !fctAddressUtil.isValidPublicFctAddress(params.address)) throw new Error("You must include a valid public Factoid address");
+        if (params && params.addresses && !params.addresses.every(fctAddressUtil.isValidPublicFctAddress)) {
+            throw new Error("At least one of the Factoid addresses is invalid.");
+        }
+
         return this._cli.call('get-transactions', generateTokenCLIParams(this, params));
     }
 

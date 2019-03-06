@@ -474,8 +474,8 @@ const transactions = await tokenCLI.getTransactions(params);
 
 - Params
   - `params` - **object** - optional
-    - `address` - **string** - optional
-      - Filter transactions by public Factoid address. Return transactions with `address` in the inputs or outputs of the transaction.
+    - `addresses` - **Array<string>** - optional
+      - Filter transactions by public Factoid addresses. Return transactions with any of the `addresses` in the inputs or outputs of the transaction.
     - `entryhash` - **string** - optional
       - The Factom entryhash of the transaction to start the result set at
     - `limit` - **number** - optional
