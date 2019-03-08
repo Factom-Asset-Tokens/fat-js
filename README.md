@@ -1,4 +1,4 @@
-![](https://png.icons8.com/ios-glyphs/128/3498db/octahedron.png![](https://png.icons8.com/ios/40/3498db/javascript-filled.png)
+![](https://png.icons8.com/ios-glyphs/128/3498db/octahedron.png)![](https://png.icons8.com/ios/40/3498db/javascript-filled.png)
 
 # fat-js
 
@@ -14,7 +14,7 @@ Currently supports **FAT-0** and **FAT-1** token standards.
 
 
 
-**Note:** FAT is experimental software. This commit has been tested with [fatd](https://github.com/Factom-Asset-Tokens/fatd) commit `b3e22c9e523d217f3289fb5db4ada867437e3888`
+**Note:** FAT is experimental software. This commit has been tested with [fatd](https://github.com/Factom-Asset-Tokens/fatd) commit `d00c2122152efb107997618be997dc9df1f4f2dc`
 
 
 
