@@ -1,6 +1,6 @@
+const constant = require('../constant');
 const fctAddressUtil = require('factom/src/addresses');
 const Joi = require('joi-browser');
-
 const Transaction = require('./Transaction').Transaction;
 const Issuance = require('./Issuance').Issuance;
 const BaseTokenCLI = require('../cli/CLI').BaseTokenCLI;
@@ -56,7 +56,7 @@ class CLI extends BaseTokenCLI {
     }
 
     getType() {
-        return 'FAT-1';
+        return constant.FAT1;
     }
 }
 

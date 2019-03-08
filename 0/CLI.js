@@ -1,3 +1,4 @@
+const constant = require('../constant');
 const Transaction = require('./Transaction').Transaction;
 const Issuance = require('./Issuance').Issuance;
 
@@ -24,7 +25,7 @@ class CLI extends BaseTokenCLI {
     }
 
     getType() {
-        return 'FAT-0';
+        return constant.FAT0;
     }
 }
 

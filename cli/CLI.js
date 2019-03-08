@@ -1,3 +1,4 @@
+const constant = require('../constant');
 const axios = require('axios');
 const Joi = require('joi-browser');
 const fctAddressUtil = require('factom/src/addresses');
@@ -73,10 +74,10 @@ class CLI {
 
     async getTokenCLI(tokenChainId, type) {
         switch (type) {
-            case 'FAT-0': {
+            case constant.FAT0: {
                 return new FAT0CLI(this, tokenChainId);
             }
-            case 'FAT-1': {
+            case constant.FAT1: {
                 return new FAT1CLI(this, tokenChainId);
             }
             default: {
@@ -112,6 +113,10 @@ class BaseTokenCLI {
         this._tokenChainId = tokenChainId;
     }
 
+    getCLI() {
+        return this._cli;
+    }
+
     getTokenChainId() {
         return this._tokenChainId;
     }
@@ -126,7 +131,7 @@ class BaseTokenCLI {
     }
 
     getTransactions(params) {
-        const validation = Joi.validate(params, getTransactionsSchema, {});
+        const validation = Joi.validate(params, getTransactionsSchema);
         if (validation.error) throw new Error('Params validation error - ' + validation.error.details[0].message);
         if (params && params.addresses && !params.addresses.every(fctAddressUtil.isValidPublicFctAddress)) {
             throw new Error("At least one of the Factoid addresses is invalid.");

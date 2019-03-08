@@ -1,13 +1,11 @@
+const util = require('../util');
+const constant = require('../constant');
 const nacl = require('tweetnacl/nacl-fast').sign;
 const {Entry} = require('factom');
 const fctAddressUtil = require('factom/src/addresses');
 const fctUtil = require('factom/src/util');
 const fctIdentityUtil = require('factom-identity-lib/src/validation');
 const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
-const RCD_TYPE_1 = Buffer.from('01', 'hex');
-const COINBASE_ADDRESS_PUBLIC = 'FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC';
-const COINBASE_ADDRESS_PRIVATE = 'Fs1KWJrpLdfucvmYwN2nWrwepLn8ercpMbzXshd1g8zyhKXLVLWj';
-const util = require('../util');
 
 class TransactionBuilder {
     constructor(tokenChainId) {
@@ -22,7 +20,7 @@ class TransactionBuilder {
     input(fs, ids) {
 
         //if this is setup as coinbase, prevent additional inputs
-        if (Object.keys(this._inputs).find(address => address === COINBASE_ADDRESS_PUBLIC)) throw new Error('Cannot add an additional input to a coinbase transaction');
+        if (Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) throw new Error('Cannot add an additional input to a coinbase transaction');
 
         if (!fctAddressUtil.isValidPrivateAddress(fs)) throw new Error("Input address must be a valid private Factoid address");
         if (!util.validateNFIds(ids)) throw new Error("Invalid ID range: " + JSON.stringify(ids));
@@ -35,7 +33,7 @@ class TransactionBuilder {
     coinbaseInput(ids) {
         if (this._inputs.length > 0) throw new Error('Coinbase transactions may only have a single input');
 
-        this.input(COINBASE_ADDRESS_PRIVATE, ids);
+        this.input(constant.COINBASE_ADDRESS_PRIVATE, ids);
         return this;
     }
 
@@ -49,8 +47,8 @@ class TransactionBuilder {
     }
 
     burnOutput(ids) {
-        if (Object.keys(this._outputs).find(address => address === COINBASE_ADDRESS_PUBLIC)) throw new Error('Cannot add a duplicate burn output to a burn transaction');
-        this.output(COINBASE_ADDRESS_PUBLIC, ids);
+        if (Object.keys(this._outputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) throw new Error('Cannot add a duplicate burn output to a burn transaction');
+        this.output(constant.COINBASE_ADDRESS_PUBLIC, ids);
         return this;
     }
 
@@ -88,7 +86,7 @@ class TransactionBuilder {
     build() {
         if (Object.keys(this._inputs).length === 0 || Object.keys(this._outputs).length === 0) throw new Error("Must have at least one input and one output");
 
-        if (Object.keys(this._inputs).find(address => address === COINBASE_ADDRESS_PUBLIC)) {
+        if (Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) {
             if (!this._sk1) throw new Error('You must include a valid issuer sk1 key to perform a coinbase transaction')
         }
 
@@ -104,7 +102,7 @@ class TransactionBuilder {
         if (JSON.stringify(allInputIds) !== JSON.stringify(allOutputIds)) throw new Error('Input and output token IDS do not match');
 
         //restrict tokenmetadata to coinbase transactions
-        if (this._tokenMetadata !== undefined && !Object.keys(this._inputs).find(address => address === COINBASE_ADDRESS_PUBLIC)) throw new Error('You may only specify tokenmetadata for coinbase transactions');
+        if (this._tokenMetadata !== undefined && !Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) throw new Error('You may only specify tokenmetadata for coinbase transactions');
 
         return new Transaction(this);
     }
@@ -133,7 +131,7 @@ class Transaction {
             this._tokenChainId = builder._tokenChainId;
 
             //handle coinbase tx
-            if (Object.keys(this._inputs).find(address => address === COINBASE_ADDRESS_PUBLIC)) {
+            if (Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) {
 
                 if (!builder._sk1) throw new Error("You must include a valid SK1 Key to sign a coinbase transaction");
 
@@ -144,7 +142,7 @@ class Transaction {
 
                 const key = nacl.keyPair.fromSeed(fctIdentityCrypto.extractSecretFromIdentityKey(builder._sk1));
 
-                this._rcds = [Buffer.concat([RCD_TYPE_1, Buffer.from(key.publicKey)])];
+                this._rcds = [Buffer.concat([constant.RCD_TYPE_1, Buffer.from(key.publicKey)])];
 
                 this._signatures = [nacl.detached(fctUtil.sha512(Buffer.concat([index, timestamp, chainId, content])), key.secretKey)];
 
@@ -152,7 +150,7 @@ class Transaction {
                 this._extIds.push(this._signatures[0]);
 
             } else { //otherwise normal transaction
-                this._rcds = builder._keys.map(key => Buffer.concat([RCD_TYPE_1, Buffer.from(key.publicKey)]));
+                this._rcds = builder._keys.map(key => Buffer.concat([constant.RCD_TYPE_1, Buffer.from(key.publicKey)]));
                 let sigIndexCounter = 0;
                 this._signatures = builder._keys.map(key => {
 
@@ -201,7 +199,7 @@ class Transaction {
     }
 
     isCoinbase() {
-        return Object.keys(this._inputs).find(address => address === COINBASE_ADDRESS_PUBLIC) !== undefined;
+        return Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC) !== undefined;
     }
 
     getEntry() {
