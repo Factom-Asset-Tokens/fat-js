@@ -24,7 +24,7 @@ NPM via package.json:
 
 ```json
 "dependencies":{
-	"@fat-token/fat-js": "0.1.0-rc3"
+	"@fat-token/fat-js": "0.1.0"
 }
 ```
 
@@ -410,7 +410,7 @@ const tokens = await cli.getTrackedTokens();
 ### Manual RPC Call
 
 ```javascript
-const response = await cli.call('get-daemon-properties',{}) //method, params
+const response = await cli.call('get-daemon-properties',{}) //method, params object
 
 /*
 {
@@ -436,10 +436,12 @@ Before creating a token you must create a token CLI instance using the token's c
 const tokenCLI = await cli.getTokenCLI('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec');
 ```
 
-Fat-js will automatically and asynchronously determine the proper FAT token type to use for the CLI. You can also pass the type explicitly:
+Fat-js will automatically and asynchronously determine the proper FAT token type to use for the CLI. 
+
+You can also synchronously generate a token CLI instance if if you already know the token type:
 
 ```javascript
-const tokenCLI = cli.getTokenCLI('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec','FAT-0');
+const tokenCLI = await cli.getTokenCLISync('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec','FAT-0');
 ```
 
 
@@ -456,7 +458,7 @@ const issuance = await tokenCLI.getIssuance();
 
 ### Get Transaction
 
-Get a FAT transaction by its entryhash
+Get a FAT transaction Object by its entryhash
 
 ```javascript
 const transaction = await tokenCLI.getTransaction('d9b6ca250c97fdbe48eb3972a7d4b906aac54f2048982acfcb6019bc2a018be9');
@@ -586,7 +588,7 @@ let stats = await tokenCLI.getStats();
 
 ## Send A Transaction
 
-First instantiate the token CLI for your selected token, then:
+Send a FAT-0 or FAT-1 transaction.
 
 ```javascript
 const tx = new TransactionBuilder(tokenChainId)

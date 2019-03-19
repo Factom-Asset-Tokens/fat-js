@@ -1,3 +1,5 @@
+const util = require('../../util');
+const constant = require('../../constant');
 const assert = require('chai').assert;
 
 let TransactionBuilder = require('../../1/Transaction').TransactionBuilder;
@@ -7,6 +9,8 @@ let Issuance = require('../../1/Issuance').Issuance;
 const tokenChainId = '962a18328c83f370113ff212bae21aaf34e5252bc33d59c9db3df2a6bfda966f';
 
 describe('FAT-1 CLI Integration', function () {
+
+    this.timeout(10000);
 
     const CLIBuilder = require('../../cli/CLI').CLIBuilder;
 
@@ -20,77 +24,78 @@ describe('FAT-1 CLI Integration', function () {
         it('get-issuance', async function () {
             const tokenCLI = await cli.getTokenCLI(tokenChainId);
 
-            assert(tokenCLI.getTokenChainId() === tokenChainId, 'Unexpected token chain ID');
-            assert(tokenCLI.getType() === 'FAT-1', 'Unexpected FAT type, expected FAT-1');
+            assert.strictEqual(tokenCLI.getTokenChainId(), tokenChainId);
+            assert.strictEqual(tokenCLI.getType(), constant.FAT1);
 
             const issuance = await tokenCLI.getIssuance();
-            assert(issuance !== undefined, 'Issuance was not returned');
-            assert(issuance instanceof Issuance, "Issuance was not properly typed")
+            assert.isDefined(issuance);
+            assert.instanceOf(issuance, Issuance)
         });
 
         it('get-transaction', async function () {
             const tokenCLI = await cli.getTokenCLI(tokenChainId);
 
             const transaction = await tokenCLI.getTransaction('abba93b0acfaacffa081c25467ec9e18f0314f77787cbba58ed97491e59db07c');
-            assert(transaction !== undefined, 'Transaction was not returned');
-            assert(transaction instanceof Transaction, 'Transaction was not properly typed');
+            assert.isDefined(transaction);
+            assert.instanceOf(transaction, Transaction);
+            assert.strictEqual(transaction.getEntryhash(), 'abba93b0acfaacffa081c25467ec9e18f0314f77787cbba58ed97491e59db07c');
+            assert.isNumber(transaction.getTimestamp());
         });
 
         it('get-transactions', async function () {
             const tokenCLI = await cli.getTokenCLI(tokenChainId);
 
             const transactions = await tokenCLI.getTransactions();
-            assert(transactions !== undefined, 'Transactions were not returned');
-            assert(Array.isArray(transactions), 'Transactions was not an array');
-            assert(transactions.every(tx => tx instanceof Transaction))
+            assert.isDefined(transactions, 'Transactions were not returned');
+            assert.isArray(transactions);
+            assert.isTrue(transactions.every(tx => tx instanceof Transaction))
         });
 
         it('get-balance', async function () {
             const tokenCLI = await cli.getTokenCLI(tokenChainId);
 
             const balance = await tokenCLI.getBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
-            assert(balance !== undefined, 'Balance was not returned');
-            assert(Number.isInteger(balance), 'Balance was not an number');
-            assert(balance > 0, 'Balance was 0 (expected > 0)');
+            assert.isDefined(balance);
+            assert.isNumber(balance);
+            assert.isAbove(balance, 0);
         });
 
         it('get-nf-balance', async function () {
             const tokenCLI = await cli.getTokenCLI(tokenChainId);
 
             const balance = await tokenCLI.getNFBalance({address: 'FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM'});
-            assert(balance !== undefined, 'Balance was not returned');
-            assert(Array.isArray(balance), 'Balance was not an array');
-            assert(balance.length > 0, 'Balance was 0 tokens in length (expected > 0)');
+            assert.isDefined(balance);
+            assert.isArray(balance);
+            assert.isAbove(balance.length, 0);
+            assert.isTrue(util.validateNFIds(balance));
         });
 
         it('get-nf-token', async function () {
             const tokenCLI = await cli.getTokenCLI(tokenChainId);
 
             const token = await tokenCLI.getNFToken(12);
-            assert(token !== undefined, 'Token was not returned');
-            assert(typeof token === 'object', 'Token returned was not an object');
+            assert.isDefined(token);
+            assert.isObject(token);
         });
 
         it('get-nf-tokens', async function () {
             const tokenCLI = await cli.getTokenCLI(tokenChainId);
 
             const tokens = await tokenCLI.getNFTokens();
-            assert(tokens !== undefined, 'Tokens were not returned');
-            assert(Array.isArray(tokens), 'Tokens returned were not an array');
-            assert(tokens.every(token => typeof token === 'object'), 'Tokens returned were not an array of object');
+            assert.isDefined(tokens);
+            assert.isArray(tokens);
+            assert.isTrue(tokens.every(token => typeof token === 'object'));
         });
 
         it('get-stats', async function () {
             const tokenCLI = await cli.getTokenCLI(tokenChainId);
 
             const stats = await tokenCLI.getStats();
-            assert(stats !== undefined, 'Stats were not returned');
-            assert(typeof stats === 'object', 'Stats was not an object');
+            assert.isDefined(stats);
+            assert.isObject(stats);
         });
 
         it('send-transaction', async function () {
-            this.timeout(60000);
-
             const tokenCLI = await cli.getTokenCLI(tokenChainId);
 
             const randomId = getRandomInteger(12, 100000);
@@ -101,11 +106,10 @@ describe('FAT-1 CLI Integration', function () {
                 .build();
 
             const result = await tokenCLI.sendTransaction(tx);
+            assert.isObject(result);
         });
 
         it('send-transaction(With metadata)', async function () {
-            this.timeout(60000);
-
             const tokenCLI = await cli.getTokenCLI(tokenChainId);
 
             const randomId = getRandomInteger(12, 100000);
@@ -117,11 +121,10 @@ describe('FAT-1 CLI Integration', function () {
                 .build();
 
             const result = await tokenCLI.sendTransaction(tx);
+            assert.isObject(result);
         });
 
         it('send-transaction (with NF token metadata)', async function () {
-            this.timeout(60000);
-
             const tokenCLI = await cli.getTokenCLI(tokenChainId);
 
             const randomId = getRandomInteger(100001, 99999999);
@@ -139,12 +142,11 @@ describe('FAT-1 CLI Integration', function () {
                 .build();
 
             const result = await tokenCLI.sendTransaction(tx);
+            assert.isObject(result);
         });
 
         it('send-transaction(coinbase)', async function () {
             const tokenCLI = await cli.getTokenCLI(tokenChainId);
-
-            this.timeout(60000);
 
             const randomId = getRandomInteger(100001, 99999999);
 
@@ -154,8 +156,8 @@ describe('FAT-1 CLI Integration', function () {
                 .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
                 .build();
 
-
             const result = await tokenCLI.sendTransaction(tx);
+            assert.isObject(result);
         });
     });
 });

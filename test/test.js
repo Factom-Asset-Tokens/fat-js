@@ -1,3 +1,7 @@
+describe('Constant', () => {
+    require('./constant/constant');
+});
+
 describe('Util', () => {
     require('./util/util.unit.spec');
 });

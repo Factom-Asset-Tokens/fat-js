@@ -87,6 +87,20 @@ class CLI {
         }
     }
 
+    getTokenCLISync(tokenChainId, type) {
+        switch (type) {
+            case constant.FAT0: {
+                return new FAT0CLI(this, tokenChainId);
+            }
+            case constant.FAT1: {
+                return new FAT1CLI(this, tokenChainId);
+            }
+            default: {
+                throw new Error('Invalid FAT type string: ' + type);
+            }
+        }
+    }
+
     getTrackedTokens() {
         return this.call('get-daemon-tokens');
     }
