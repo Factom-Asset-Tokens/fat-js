@@ -22,5 +22,11 @@ describe('CLI Integration', function () {
             assert.isDefined(tokens);
             assert.isArray(tokens);
         });
+
+        it('get-sync-status', async function () {
+            const syncStatus = await cli.getSyncStatus();
+            assert.isDefined(syncStatus);
+            // assert.isArray(syncStatus);
+        });
     });
 });

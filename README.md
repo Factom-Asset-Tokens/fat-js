@@ -405,7 +405,24 @@ const tokens = await cli.getTrackedTokens();
 */
 ```
 
+### Get Daemon Sync Status
 
+Get a object containing a readout of properties for the connected fatd node
+
+```javascript
+const properties = await cli.getDaemonProperties();
+
+/*
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "syncheight": 70990,
+    "factomheight": 70990
+  },
+  "id": 6482
+}
+*/
+```
 
 ### Manual RPC Call
 

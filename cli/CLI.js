@@ -69,6 +69,8 @@ class CLI {
 
         if (data.error !== undefined) throw new Error(JSON.stringify(data.error));
 
+        console.log(JSON.stringify(data, undefined, 2));
+
         return data.result;
     }
 
@@ -107,6 +109,10 @@ class CLI {
 
     getDaemonProperties() {
         return this.call('get-daemon-properties');
+    }
+
+    getSyncStatus() {
+        return this.call('get-sync-status');
     }
 }
 
