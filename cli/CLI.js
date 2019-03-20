@@ -1,11 +1,11 @@
 const constant = require('../constant');
 const axios = require('axios');
+const JSONBig = require('json-bigint')({strict: true});
 const Joi = require('joi-browser');
 const fctAddressUtil = require('factom/src/addresses');
 
 class CLIBuilder {
     constructor() {
-
     }
 
     host(host) {
@@ -58,18 +58,22 @@ class CLI {
 
     async call(method, params) {
 
-        const response = await this._axios.post('/', {
-            jsonrpc: '2.0',
-            id: Math.floor(Math.random() * 10000),
-            method: method,
-            params: params
-        });
+        const response = await this._axios.post(
+            '/',
+            {
+                jsonrpc: '2.0',
+                id: Math.floor(Math.random() * 10000),
+                method: method,
+                params: params
+            },
+            {
+                transformResponse: [data => JSONBig.parse(data)]
+            }
+        );
 
         const data = response.data;
 
         if (data.error !== undefined) throw new Error(JSON.stringify(data.error));
-
-        console.log(JSON.stringify(data, undefined, 2));
 
         return data.result;
     }
