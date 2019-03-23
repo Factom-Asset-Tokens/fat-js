@@ -374,8 +374,8 @@ const properties = await cli.getDaemonProperties();
 
 /*
 {
-  "fatdversion": "0.0.0",
-  "apiversion": "v0"
+  "fatdversion": "r162.3d7f272",
+  "apiversion": "1"
 }
 */
 ```
@@ -431,8 +431,8 @@ const response = await cli.call('get-daemon-properties',{}) //method, params obj
 
 /*
 {
-  "fatdversion": "0.0.0",
-  "apiversion": "v0"
+  "fatdversion": "r162.3d7f272",
+  "apiversion": "1"
 }
 */
 ```
