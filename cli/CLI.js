@@ -1,9 +1,11 @@
+const constant = require('../constant');
 const axios = require('axios');
+const JSONBig = require('json-bigint')({strict: true});
+const Joi = require('joi-browser');
 const fctAddressUtil = require('factom/src/addresses');
 
 class CLIBuilder {
     constructor() {
-
     }
 
     host(host) {
@@ -24,10 +26,16 @@ class CLIBuilder {
         return this;
     }
 
+    //
+    timeout(timeout) {
+        this._timeout = timeout;
+    }
+
     build() {
         return new CLI(this);
     }
 }
+
 
 class CLI {
     constructor(builder) {
@@ -36,41 +44,101 @@ class CLI {
         this._port = builder._port || 8078;
         this._username = builder._username;
         this._password = builder._password;
+
+        if (this._username && !this._password || this._password && !this._username) throw new Error('Must specify both username and password to use RPC authentication');
+
+        this._timeout = builder._timeout || 5000;
+
+        this._axios = axios.create({
+            baseURL: 'http://' + this._host + ':' + this._port + '/v1',
+            timeout: this._timeout,
+            auth: (this._username && this._password) ? {username: this._username, password: this._password} : undefined
+        });
     }
 
-    getTokenCLI(tokenChainId) {
-        return new BaseTokenCLI(this, tokenChainId);
+    async call(method, params) {
+
+        const response = await this._axios.post(
+            '/',
+            {
+                jsonrpc: '2.0',
+                id: Math.floor(Math.random() * 10000),
+                method: method,
+                params: params
+            },
+            {
+                transformResponse: [data => JSONBig.parse(data)]
+            }
+        );
+
+        const data = response.data;
+
+        if (data.error !== undefined) throw new Error(JSON.stringify(data.error));
+
+        return data.result;
     }
 
-    getTypedTokenCLI(type, tokenId) {
+    async getTokenCLI(tokenChainId, type) {
         switch (type) {
-            case 'FAT-0': {
-                return new FAT0TokenCLI(this, tokenId);
+            case constant.FAT0: {
+                return new FAT0CLI(this, tokenChainId);
             }
-            case 'FAT-1': {
-                return new FAT1TokenCLI(this, tokenId);
+            case constant.FAT1: {
+                return new FAT1CLI(this, tokenChainId);
             }
-            default:
-                throw new Error("Unsupported FAT token type " + type);
+            default: {
+                const issuanceEntry = await new BaseTokenCLI(this, tokenChainId).getIssuance();
+                return this.getTokenCLI(tokenChainId, issuanceEntry.issuance.type);
+            }
+        }
+    }
+
+    getTokenCLISync(tokenChainId, type) {
+        switch (type) {
+            case constant.FAT0: {
+                return new FAT0CLI(this, tokenChainId);
+            }
+            case constant.FAT1: {
+                return new FAT1CLI(this, tokenChainId);
+            }
+            default: {
+                throw new Error('Invalid FAT type string: ' + type);
+            }
         }
     }
 
     getTrackedTokens() {
-        return call(this, 'get-daemon-tokens');
+        return this.call('get-daemon-tokens');
     }
 
     getDaemonProperties() {
-        return call(this, 'get-daemon-properties');
+        return this.call('get-daemon-properties');
+    }
+
+    getSyncStatus() {
+        return this.call('get-sync-status');
     }
 }
 
+const getTransactionsSchema = Joi.object().keys({
+    entryhash: Joi.string().length(64),
+    addresses: Joi.array().items(Joi.string().length(52)),
+    page: Joi.number().integer().min(0),
+    limit: Joi.number().integer().min(0),
+    order: Joi.string().valid(['asc', 'desc']),
+});
+
 class BaseTokenCLI {
-    constructor(rpc, tokenChainId) {
-        if (!(rpc instanceof CLI)) throw new Error("Must include an RPc object of type CLI");
-        this._rpc = rpc;
+    constructor(cli, tokenChainId) {
+        if (!(cli instanceof CLI)) throw new Error("Must include an RPc object of type CLI");
+        this._cli = cli;
 
         if (!tokenChainId || tokenChainId.length !== 64) throw new Error("You must include a valid token chain ID to construct BaseTokenCLI");
         this._tokenChainId = tokenChainId;
+    }
+
+    getCLI() {
+        return this._cli;
     }
 
     getTokenChainId() {
@@ -78,32 +146,31 @@ class BaseTokenCLI {
     }
 
     getIssuance() {
-        return call(this._rpc, 'get-issuance', generateTokenCLIParams(this));
+        return this._cli.call('get-issuance', generateTokenCLIParams(this));
     }
 
     getTransaction(txId) {
         if (txId.length !== 64) throw new Error("You must include a valid 32 Byte tx ID (entryhash)");
-        return call(this._rpc, 'get-transaction', generateTokenCLIParams(this, {'entryhash': txId}));
+        return this._cli.call('get-transaction', generateTokenCLIParams(this, {'entryhash': txId}));
     }
 
-    getTransactions(entryhash, address, start, limit) {
-        if (entryhash && entryhash.length !== 32) throw new Error("You must include a valid 32 Byte tx ID (entryhash)");
-        if (address && !fctAddressUtil.isValidFctPublicAddress(address)) throw new Error("You must include a valid public Factoid address");
-        return call(this._rpc, 'get-transactions', generateTokenCLIParams(this, {
-            entryhash,
-            address,
-            start,
-            limit
-        }));
+    getTransactions(params) {
+        const validation = Joi.validate(params, getTransactionsSchema);
+        if (validation.error) throw new Error('Params validation error - ' + validation.error.details[0].message);
+        if (params && params.addresses && !params.addresses.every(fctAddressUtil.isValidPublicFctAddress)) {
+            throw new Error("At least one of the Factoid addresses is invalid.");
+        }
+
+        return this._cli.call('get-transactions', generateTokenCLIParams(this, params));
     }
 
     getBalance(address) {
-        if (!fctAddressUtil.isValidFctPublicAddress(address)) throw new Error("You must include a valid public Factoid address");
-        return call(this._rpc, 'get-balance', generateTokenCLIParams(this, {address}));
+        if (!fctAddressUtil.isValidPublicFctAddress(address)) throw new Error("You must include a valid public Factoid address");
+        return this._cli.call('get-balance', generateTokenCLIParams(this, {address}));
     }
 
     getStats() {
-        return call(this._rpc, 'get-stats', generateTokenCLIParams(this));
+        return this._cli.call('get-stats', generateTokenCLIParams(this));
     }
 
     sendTransaction(transaction) {
@@ -115,69 +182,7 @@ class BaseTokenCLI {
             content: entry.content.toString('hex')
         };
 
-        return call(this._rpc, 'send-transaction', generateTokenCLIParams(this, params));
-    }
-
-    getToken(nftokenid) {
-        return call(this._rpc, 'get-nf-token', generateTokenCLIParams(this, {nftokenid}));
-    }
-
-    getNFBalance(address, page, limit, order) {
-        if (!fctAddressUtil.isValidFctPublicAddress(address)) throw new Error("You must include a valid public Factoid address");
-        return call(this._rpc, 'get-nf-balance', generateTokenCLIParams(this, {address, page, limit, order}));
-    }
-
-    getNFTokens(page, limit, order) {
-        return call(this._rpc, 'get-nf-tokens', generateTokenCLIParams(this, {page, limit, order}));
-    }
-}
-
-//Token Specific Token RPCs (Optional, wraps response in class from corresponding token type)
-const FAT0Transaction = require('../0/Transaction').Transaction;
-const FAT0Issuance = require('../0/Issuance').Issuance;
-
-class FAT0TokenCLI extends BaseTokenCLI {
-    constructor(rpc, tokenChainId) {
-        super(rpc, tokenChainId);
-    }
-
-    async getIssuance() {
-        const issuance = await super.getIssuance();
-        return new FAT0Issuance(issuance);
-    }
-
-    async getTransaction(txId) {
-        const transaction = await super.getTransaction(txId);
-        return new FAT0Transaction(transaction.data);
-    }
-
-    async getTransactions(txId, address, start, limit) {
-        const transactions = await super.getTransactions(txId, address, start, limit);
-        return transactions.map(tx => new FAT0Transaction(tx.data));
-    }
-}
-
-const FAT1Transaction = require('../1/Transaction').Transaction;
-const FAT1Issuance = require('../1/Issuance').Issuance;
-
-class FAT1TokenCLI extends BaseTokenCLI {
-    constructor(rpc, tokenChainId) {
-        super(rpc, tokenChainId);
-    }
-
-    async getIssuance() {
-        const issuance = await super.getIssuance();
-        return new FAT1Issuance(issuance);
-    }
-
-    async getTransaction(txId) {
-        const transaction = await super.getTransaction(txId);
-        return new FAT1Transaction(transaction.data);
-    }
-
-    async getTransactions(txId, fa, start, limit) {
-        const transactions = await super.getTransactions(txId, fa, start, limit);
-        return transactions.map(tx => new FAT1Transaction(tx.data));
+        return this._cli.call('send-transaction', generateTokenCLIParams(this, params));
     }
 }
 
@@ -187,27 +192,10 @@ function generateTokenCLIParams(tokenRPC, params) {
     }, params);
 }
 
-async function call(rpc, method, params) {
-    if (!(rpc instanceof CLI)) throw new Error("Must include a valid CLI instance to call endpoint");
-
-    //TODO: Basic HTTP Auth
-
-    const response = await axios.post('http://' + rpc._host + ':' + rpc._port + '/v1', {
-        jsonrpc: '2.0',
-        id: Math.floor(Math.random() * 10000),
-        method: method,
-        params: params
-    });
-
-    const data = response.data;
-
-    if (data.error !== undefined) throw new Error(JSON.stringify(data.error));
-
-    return data.result;
-}
-
 module.exports = {
     CLIBuilder,
     BaseTokenCLI,
-    TypedTokenCLI: FAT0TokenCLI,
 };
+
+const FAT0CLI = require('../0/CLI').CLI;
+const FAT1CLI = require('../1/CLI').CLI;

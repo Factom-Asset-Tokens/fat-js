@@ -1,4 +1,3 @@
-const crypto = require('crypto');
 const nacl = require('tweetnacl/nacl-fast').sign;
 const {Entry, Chain} = require('factom');
 const util = require('../util');
@@ -8,7 +7,6 @@ const fctIdentityUtil = require('factom-identity-lib/src/validation');
 const fctUtil = require('factom/src/util');
 
 const RCD_TYPE_1 = Buffer.from('01', 'hex');
-
 
 class IssuanceBuilder {
 
@@ -25,12 +23,6 @@ class IssuanceBuilder {
         this._type = 'FAT-0'
     }
 
-    name(name) {
-        if (!name) throw new Error("Token name must be defined");
-        this._name = name;
-        return this;
-    }
-
     symbol(symbol) {
         if (!symbol) throw new Error("Token symbol must be defined");
         if (!new RegExp('[A-Z ]+').test(symbol)) throw new Error("Token symbol must only contain capital letters A-Z");
@@ -41,13 +33,15 @@ class IssuanceBuilder {
 
     supply(supply) {
         if (isNaN(supply)) throw new Error("Supply must be a number");
-        if (supply <= 0) throw new Error("Supply must be > 0");
+        if (supply === 0 || supply < -1) throw new Error("Supply must be equal to -1(infinite) or greater than 0");
         this._supply = supply;
         return this;
     }
 
     build() {
         //validate required fields
+
+        if (this._supply === undefined) this._supply = -1; //unlimited supply by default
 
         return new Issuance(this);
     }
@@ -58,10 +52,8 @@ class Issuance {
 
         if (builder instanceof IssuanceBuilder) {
             this._type = builder._type;
-            this._name = builder._name;
             this._symbol = builder._symbol;
             this._supply = builder._supply;
-            this._salt = crypto.randomBytes(32).toString('hex');
 
             this._content = JSON.stringify(this);
 
@@ -72,7 +64,11 @@ class Issuance {
             this._tokenChainId = util.getTokenChainId(builder._tokenId, builder._rootChainId);
 
             const index = Buffer.from('0');
-            const timestamp = Buffer.from(Math.round(new Date().getTime() / 1000).toString());
+
+            const unixSeconds = Math.round(new Date().getTime() / 1000).toString()
+            this._timestamp = unixSeconds;
+
+            const timestamp = Buffer.from(unixSeconds);
             const chainId = Buffer.from(this._tokenChainId, 'hex');
             const content = Buffer.from(this._content);
 
@@ -87,15 +83,15 @@ class Issuance {
 
         } else if (typeof builder === 'object') {
             this._type = builder.issuance.type;
-            this._name = builder.issuance.name;
             this._symbol = builder.issuance.symbol;
             this._supply = builder.issuance.supply;
-            this._salt = builder.issuance.salt;
             this._content = JSON.stringify(this);
 
             this._tokenId = builder.tokenid;
             this._rootChainId = builder.issuerid;
             this._tokenChainId = util.getTokenChainId(this._tokenId, this._rootChainId);
+            this._entryhash = builder.entryhash;
+            this._timestamp = builder.timestamp;
         }
 
         Object.freeze(this);
@@ -113,12 +109,16 @@ class Issuance {
         return this._rootChainId;
     }
 
-    getType() {
-        return this._type;
+    getEntryhash() {
+        return this._entryhash;
     }
 
-    getName() {
-        return this._name;
+    getTimestamp() {
+        return this._timestamp;
+    }
+
+    getType() {
+        return this._type;
     }
 
     getSymbol() {

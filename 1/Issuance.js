@@ -1,4 +1,3 @@
-const crypto = require('crypto');
 const nacl = require('tweetnacl/nacl-fast').sign;
 const {Entry, Chain} = require('factom');
 const util = require('../util');
@@ -25,12 +24,6 @@ class IssuanceBuilder {
         this._type = 'FAT-1'
     }
 
-    name(name) {
-        if (!name) throw new Error("Token name must be defined");
-        this._name = name;
-        return this;
-    }
-
     symbol(symbol) {
         if (!symbol) throw new Error("Token symbol must be defined");
         if (!new RegExp('[A-Z ]+').test(symbol)) throw new Error("Token symbol must only contain capital letters A-Z");
@@ -41,13 +34,14 @@ class IssuanceBuilder {
 
     supply(supply) {
         if (isNaN(supply)) throw new Error("Supply must be a number");
-        if (supply <= 0) throw new Error("Supply must be > 0");
+        if (supply === 0 || supply < -1) throw new Error("Supply must be equal to -1(infinite) or greater than 0");
         this._supply = supply;
         return this;
     }
 
     build() {
         //validate required fields
+        if (this._supply === undefined) this._supply = -1; //unlimited supply by default
 
         return new Issuance(this);
     }
@@ -58,10 +52,8 @@ class Issuance {
 
         if (builder instanceof IssuanceBuilder) {
             this._type = builder._type;
-            this._name = builder._name;
             this._symbol = builder._symbol;
             this._supply = builder._supply;
-            this._salt = crypto.randomBytes(32).toString('hex');
 
             this._content = JSON.stringify(this);
 
@@ -82,20 +74,19 @@ class Issuance {
 
             const signature = [nacl.detached(fctUtil.sha512(Buffer.concat([index, timestamp, chainId, content])), key.secretKey)];
 
-
             this._extIds = [timestamp, rcd, signature];
 
         } else if (typeof builder === 'object') {
             this._type = builder.issuance.type;
-            this._name = builder.issuance.name;
             this._symbol = builder.issuance.symbol;
             this._supply = builder.issuance.supply;
-            this._salt = builder.issuance.salt;
             this._content = JSON.stringify(this);
 
             this._tokenId = builder.tokenid;
             this._rootChainId = builder.issuerid;
             this._tokenChainId = util.getTokenChainId(this._tokenId, this._rootChainId);
+            this._entryhash = builder.entryhash;
+            this._timestamp = builder.timestamp;
         }
 
         Object.freeze(this);
@@ -113,12 +104,16 @@ class Issuance {
         return this._rootChainId;
     }
 
-    getType() {
-        return this._type;
+    getEntryhash() {
+        return this._entryhash;
     }
 
-    getName() {
-        return this._name;
+    getTimestamp() {
+        return this._timestamp;
+    }
+
+    getType() {
+        return this._type;
     }
 
     getSymbol() {
