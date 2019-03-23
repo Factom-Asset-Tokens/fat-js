@@ -2,6 +2,8 @@
 
 # fat-js
 
+[![npm (scoped)](https://img.shields.io/npm/v/@fat-token/fat-js.svg)](https://www.npmjs.com/package/@fat-token/fat-js)
+
 [![Build Status](https://travis-ci.com/Factom-Asset-Tokens/fat-js.svg?branch=master)](https://travis-ci.com/Factom-Asset-Tokens/fat-js)
 
 [![Coverage Status](https://coveralls.io/repos/github/Factom-Asset-Tokens/fat-js/badge.svg?branch=master)](https://coveralls.io/github/Factom-Asset-Tokens/fat-js?branch=master)
@@ -14,7 +16,7 @@ Currently supports **FAT-0** and **FAT-1** token standards.
 
 
 
-**Note:** FAT is experimental software. This commit has been tested with [fatd](https://github.com/Factom-Asset-Tokens/fatd) commit `d00c2122152efb107997618be997dc9df1f4f2dc`
+**Note:** FAT is experimental software. This commit has been tested with [fatd](https://github.com/Factom-Asset-Tokens/fatd) commit `f86ea5cc7cb416b63e06e43c817b30078c4a66dc`
 
 
 
@@ -24,7 +26,7 @@ NPM via package.json:
 
 ```json
 "dependencies":{
-	"@fat-token/fat-js": "0.1.0"
+	"@fat-token/fat-js": "0.1.1"
 }
 ```
 
