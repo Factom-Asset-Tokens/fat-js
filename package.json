@@ -1,6 +1,6 @@
 {
   "name": "@fat-token/fat-js",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Factom Asset Token (FAT) library in JS",
   "repository": "https://github.com/Factom-Asset-Tokens/fat-js.git",
   "main": "index.js",
@@ -8,6 +8,7 @@
     "lint": "eslint 0 1 cli",
     "test": "nyc mocha test/test.js",
     "build": "webpack",
+    "docs": "node .jsdoc.js",
     "prepublishOnly": "npm run lint && npm run build"
   },
   "directories": {
@@ -39,7 +40,8 @@
     "nyc": "^13.3.0",
     "sinon": "6.1.5",
     "webpack": "4.20.2",
-    "webpack-cli": "3.1.2"
+    "webpack-cli": "3.1.2",
+    "jsdoc-to-markdown": "4.0.1"
   },
   "publishConfig": {
     "access": "public"
