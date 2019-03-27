@@ -57,7 +57,7 @@ Get a set of FAT-1 transactions for the token. Adjust results by parameters. Res
 <a name="CLI0+getType"></a>
 
 ### clI0.getType() ⇒ <code>string</code>
-Get the type constant string of this CLI object. For example, "FAT-0"
+Get the type constant string of this CLI object. In this case, "FAT-0"
 
 **Kind**: instance method of [<code>CLI0</code>](#CLI0)  
 <a name="BaseTokenCLI+getCLI"></a>

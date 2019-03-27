@@ -1,12 +1,12 @@
 const constant = require('../constant');
 const fctAddressUtil = require('factom/src/addresses');
-const Joi = require('joi-browser');
+const Joi = require('joi-browser').extend(require('joi-factom'));
 const Transaction = require('./Transaction').Transaction;
 const Issuance = require('./Issuance').Issuance;
 const BaseTokenCLI = require('../cli/CLI').BaseTokenCLI;
 
 const getNFBalanceSchema = Joi.object().keys({
-    address: Joi.string().length(52).required(),
+    address: Joi.factom().factoidAddress('public').required(),
     page: Joi.number().integer().min(0),
     limit: Joi.number().integer().min(0),
     order: Joi.string().valid(['asc', 'desc']),
@@ -51,7 +51,7 @@ class CLI extends BaseTokenCLI {
      * @returns {Promise}
      */
     async getTransaction(entryhash) {
-        const transaction = await super.getTransaction(txId);
+        const transaction = await super.getTransaction(entryhash);
         return new Transaction(transaction);
     }
 

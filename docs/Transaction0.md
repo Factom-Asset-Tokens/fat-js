@@ -93,4 +93,4 @@ tx.getEntryHash(); // => "68f3ca3a8c9f7a0cb32dc9717347cb179b63096e051a60ce8be9c2
 
 ### transaction0.getTimestamp() ⇒ <code>number</code>
 **Kind**: instance method of [<code>Transaction0</code>](#Transaction0)  
-**Returns**: <code>number</code> - - Get the unix timestamp of when the Transaction was constructed  
+**Returns**: <code>number</code> - - Get the unix timestamp of when the Transaction was signed (locally built transactions) or committed to Factom (from RPC response JSON)  

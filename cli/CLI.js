@@ -1,7 +1,7 @@
 const constant = require('../constant');
 const axios = require('axios');
 const JSONBig = require('json-bigint')({strict: true});
-const Joi = require('joi-browser');
+const Joi = require('joi-browser').extend(require('joi-factom'));
 const fctAddressUtil = require('factom/src/addresses');
 
 /**
@@ -205,7 +205,7 @@ class CLI {
 
 const getTransactionsSchema = Joi.object().keys({
     entryhash: Joi.string().length(64),
-    addresses: Joi.array().items(Joi.string().length(52)),
+    addresses: Joi.array().items(Joi.factom().factoidAddress('public')),
     page: Joi.number().integer().min(0),
     limit: Joi.number().integer().min(0),
     order: Joi.string().valid(['asc', 'desc']),

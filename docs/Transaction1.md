@@ -70,4 +70,4 @@ Model A signed or unsigned FAT-1 Transaction
 
 ### transaction1.getTimestamp() ⇒ <code>number</code>
 **Kind**: instance method of [<code>Transaction1</code>](#Transaction1)  
-**Returns**: <code>number</code> - - Get the unix timestamp of when the Transaction was constructed  
+**Returns**: <code>number</code> - - Get the unix timestamp of when the Transaction was signed (locally built transactions) or committed to Factom (from RPC response JSON)  
