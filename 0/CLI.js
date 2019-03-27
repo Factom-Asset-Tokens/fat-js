@@ -8,8 +8,11 @@ const BaseTokenCLI = require('../cli/CLI').BaseTokenCLI;
  * The FAT-0 a CLI access object. Used to request data about a FAT-0 token
  * @alias CLI0
  * @class
- * @protected
  * @extends BaseTokenCLI
+ * @protected
+ * @example
+ * const tokenCLI = await cli.getTokenCLI('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec');
+ * const transaction = await tokenCLI.getTransaction('d9b6ca250c97fdbe48eb3972a7d4b906aac54f2048982acfcb6019bc2a018be9');
  */
 class CLI extends BaseTokenCLI {
     /**
@@ -59,7 +62,7 @@ class CLI extends BaseTokenCLI {
     }
 
     /**
-     * Get the type constant string of this CLI object. For example, "FAT-0"
+     * Get the type constant string of this CLI object. In this case, "FAT-0"
      * @method
      * @returns {string}
      */

@@ -337,7 +337,7 @@ class Transaction {
 
     /**
      * @method
-     * @returns {number} - Get the unix timestamp of when the Transaction was constructed
+     * @returns {number} - Get the unix timestamp of when the Transaction was signed (locally built transactions) or committed to Factom (from RPC response JSON)
      */
     getTimestamp() {
         return this._timestamp;
