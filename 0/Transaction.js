@@ -119,12 +119,25 @@ class TransactionBuilder {
     }
 
     /**
+     * [ALIAS FOR sk1(sk1)] Set the SK1 private key of the token's issuing identity. Required for coinbase transactions
+     * @method
+     * @deprecated
+     * @param {string} sk1 - The SK1 private key string of the issuing identity
+     * @returns {TransactionBuilder}
+     */
+    setIssuerSK1(sk1) {
+        if (!fctIdentityUtil.isValidSk1(sk1)) throw new Error("You must include a valid SK1 Key to sign a coinbase transaction");
+        this._sk1 = sk1;
+        return this;
+    }
+
+    /**
      * Set the SK1 private key of the token's issuing identity. Required for coinbase transactions
      * @method
      * @param {string} sk1 - The SK1 private key string of the issuing identity
      * @returns {TransactionBuilder}
      */
-    setIssuerSK1(sk1) {
+    sk1(sk1) {
         if (!fctIdentityUtil.isValidSk1(sk1)) throw new Error("You must include a valid SK1 Key to sign a coinbase transaction");
         this._sk1 = sk1;
         return this;

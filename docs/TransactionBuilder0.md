@@ -12,7 +12,8 @@ Build & Model A FAT-0 Transaction
     * [.coinbaseInput(amount)](#TransactionBuilder0+coinbaseInput) ⇒ <code>TransactionBuilder</code>
     * [.output(fa, amount)](#TransactionBuilder0+output) ⇒ <code>TransactionBuilder</code>
     * [.burnOutput(amount)](#TransactionBuilder0+burnOutput) ⇒ <code>TransactionBuilder</code>
-    * [.setIssuerSK1(sk1)](#TransactionBuilder0+setIssuerSK1) ⇒ <code>TransactionBuilder</code>
+    * ~~[.setIssuerSK1(sk1)](#TransactionBuilder0+setIssuerSK1) ⇒ <code>TransactionBuilder</code>~~
+    * [.sk1(sk1)](#TransactionBuilder0+sk1) ⇒ <code>TransactionBuilder</code>
     * [.metadata(metadata)](#TransactionBuilder0+metadata) ⇒ <code>TransactionBuilder</code>
     * [.build()](#TransactionBuilder0+build) ⇒ <code>Transaction</code>
 
@@ -103,7 +104,20 @@ Set up a burn output for the transaction, which will destroy tokens
 
 <a name="TransactionBuilder0+setIssuerSK1"></a>
 
-### transactionBuilder0.setIssuerSK1(sk1) ⇒ <code>TransactionBuilder</code>
+### ~~transactionBuilder0.setIssuerSK1(sk1) ⇒ <code>TransactionBuilder</code>~~
+***Deprecated***
+
+[ALIAS FOR sk1(sk1)] Set the SK1 private key of the token's issuing identity. Required for coinbase transactions
+
+**Kind**: instance method of [<code>TransactionBuilder0</code>](#TransactionBuilder0)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| sk1 | <code>string</code> | The SK1 private key string of the issuing identity |
+
+<a name="TransactionBuilder0+sk1"></a>
+
+### transactionBuilder0.sk1(sk1) ⇒ <code>TransactionBuilder</code>
 Set the SK1 private key of the token's issuing identity. Required for coinbase transactions
 
 **Kind**: instance method of [<code>TransactionBuilder0</code>](#TransactionBuilder0)  
