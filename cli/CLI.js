@@ -3,6 +3,7 @@ const axios = require('axios');
 const JSONBig = require('json-bigint')({strict: true});
 const Joi = require('joi-browser').extend(require('joi-factom'));
 const fctAddressUtil = require('factom/src/addresses');
+const compatibility = require('./compatibility');
 
 /**
  * Build a CLI object, defining the connection parameters to fatd and other network dependencies
@@ -120,8 +121,9 @@ class CLI {
             }
         );
 
-        const data = response.data;
+        compatibility.checkVersion(response.headers['fatd-version']);
 
+        const data = response.data;
         if (data.error !== undefined) throw new Error(JSON.stringify(data.error));
 
         return data.result;

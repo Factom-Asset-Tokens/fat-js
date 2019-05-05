@@ -1,6 +1,6 @@
 {
   "name": "@fat-token/fat-js",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Factom Asset Token (FAT) library in JS",
   "repository": "https://github.com/Factom-Asset-Tokens/fat-js.git",
   "main": "index.js",
@@ -22,7 +22,8 @@
     "axios": "0.18.0",
     "joi-browser": "13.4.0",
     "joi-factom": "1.1.0",
-    "json-bigint": "0.3.0"
+    "json-bigint": "0.3.0",
+    "semver": "6.0.0"
   },
   "devDependencies": {
     "@babel/core": "7.1.2",
