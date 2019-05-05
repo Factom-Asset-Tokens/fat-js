@@ -303,7 +303,8 @@ class Transaction {
             this._metadata = builder.data.metadata;
 
             this._entryhash = builder.entryhash;
-            this._timestamp = builder.timestamp;        }
+            this._timestamp = builder.timestamp;
+        }
 
         Object.freeze(this);
     }

@@ -30,6 +30,16 @@ describe('FAT-0 CLI Integration', function () {
             const issuance = await tokenCLI.getIssuance();
             assert.isDefined(issuance);
             assert.instanceOf(issuance, Issuance);
+
+            //regression testing
+            assert.strictEqual(issuance.getType(), 'FAT-0');
+            assert.strictEqual(issuance.getTokenId(), 'test');
+            assert.strictEqual(issuance.getSymbol(), 'T0');
+            assert.strictEqual(issuance.getSupply(), -1);
+            assert.strictEqual(issuance.getIssuerIdentityRootChainId(), '888888ab72e748840d82c39213c969a11ca6cb026f1d3da39fd82b95b3c1fced');
+            assert.strictEqual(issuance.getTokenChainId(), tokenChainId);
+            assert.strictEqual(issuance.getEntryhash(), 'ed9ca1fb36d6231aa5cc32b04dc5f69f2e8531d986126f8df4bd85c097f799f1');
+            assert.strictEqual(issuance.getTimestamp(), 1550612940);
         });
 
         it('get-transaction', async function () {
@@ -38,8 +48,13 @@ describe('FAT-0 CLI Integration', function () {
             const transaction = await tokenCLI.getTransaction('68f3ca3a8c9f7a0cb32dc9717347cb179b63096e051a60ce8be9c292d29795af');
             assert.isDefined(transaction);
             assert.instanceOf(transaction, Transaction);
+
+            //regression testing
+            assert.strictEqual(JSON.stringify(transaction.getInputs()), JSON.stringify({FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC: 10}));
+            assert.strictEqual(JSON.stringify(transaction.getOutputs()), JSON.stringify({FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM: 10}));
+            assert.isUndefined(transaction.metadata);
             assert.strictEqual(transaction.getEntryhash(), '68f3ca3a8c9f7a0cb32dc9717347cb179b63096e051a60ce8be9c292d29795af');
-            assert.isNumber(transaction.getTimestamp());
+            assert.strictEqual(transaction.getTimestamp(), 1550696040);
         });
 
         it('get-transactions', async function () {
@@ -66,6 +81,13 @@ describe('FAT-0 CLI Integration', function () {
             const stats = await tokenCLI.getStats();
             assert.isDefined(stats);
             assert.isObject(stats);
+
+            //regression testing
+            assert.isNumber(stats.circulating);
+            assert.isNumber(stats.burned);
+            assert.isNumber(stats.transactions);
+            assert.isNumber(stats.issuancets);
+            assert.isNumber(stats.lasttxts);
         });
 
         it('send-transaction', async function () {
@@ -78,6 +100,11 @@ describe('FAT-0 CLI Integration', function () {
 
             const result = await tokenCLI.sendTransaction(tx);
             assert.isObject(result);
+
+            //regression testing
+            assert.strictEqual(result.chainid, tokenChainId);
+            assert.isString(result.txid);
+            assert.isString(result.entryhash);
         });
 
         it('send-transaction(With metadata)', async function () {
