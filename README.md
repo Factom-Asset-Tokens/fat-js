@@ -16,7 +16,7 @@ Currently supports **FAT-0** and **FAT-1** token standards.
 
 
 
-**Note:** FAT is experimental software. This commit has been tested with [fatd](https://github.com/Factom-Asset-Tokens/fatd) commit `f86ea5cc7cb416b63e06e43c817b30078c4a66dc`
+**Note:** FAT is experimental software. This commit has been tested with [fatd](https://github.com/Factom-Asset-Tokens/fatd) version `v0.5.1` - commit `39a50ed13112530f1b8ec07f3a1e6d58d87e8769`
 
 
 
