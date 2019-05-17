@@ -8,7 +8,7 @@ const testTokenChainId = '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc006
 
 describe('Transaction Unit', function () {
 
-    let TransactionBuilder = require('../../1/Transaction').TransactionBuilder;
+    let TransactionBuilder = require('../../1/TransactionBuilder');
 
     it('Builder', function () {
         let tx = new TransactionBuilder(testTokenChainId)

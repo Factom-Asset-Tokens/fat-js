@@ -1,7 +1,7 @@
 const constant = require('../constant');
 const fctAddressUtil = require('factom/src/addresses');
 const Joi = require('joi-browser').extend(require('joi-factom'));
-const Transaction = require('./Transaction').Transaction;
+const Transaction = require('./Transaction');
 const Issuance = require('./Issuance').Issuance;
 const BaseTokenCLI = require('../cli/CLI').BaseTokenCLI;
 
