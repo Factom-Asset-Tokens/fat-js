@@ -66,7 +66,7 @@ Set up a Factoid address input for the transaction
 | Param | Type | Description |
 | --- | --- | --- |
 | fs | <code>string</code> | The private Factoid address to use as the input of the transaction |
-| amount | <code>number</code> | The integer amount of token units to send. Must be a safe integer |
+| amount | <code>number</code> \| <code>string</code> \| <code>BigNumber</code> | The integer amount of token units to send. Native JS Numbers (e.x. 123), strings (e.x. "123"), and BigNumbers(e.x. new BigNumber("9999999999999999") are allowed as long as they represent integers |
 
 <a name="TransactionBuilder0+coinbaseInput"></a>
 
@@ -77,19 +77,19 @@ Set up a coinbase input for the transaction, which mints tokens
 
 | Param | Type | Description |
 | --- | --- | --- |
-| amount | <code>number</code> | The integer amount of token units to send |
+| amount | <code>number</code> \| <code>string</code> \| <code>BigNumber</code> | The integer amount of token units to send. Native JS Numbers (e.x. 123), strings (e.x. '123'), and BigNumbers(e.x. new BigNumber("9999999999999999") are allowed as long as they represent integers |
 
 <a name="TransactionBuilder0+output"></a>
 
 ### transactionBuilder0.output(fa, amount) ⇒ <code>TransactionBuilder</code>
-Set up a Factoid address output input for the transaction
+Set up a Factoid address output for the transaction
 
 **Kind**: instance method of [<code>TransactionBuilder0</code>](#TransactionBuilder0)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | fa | <code>string</code> | The public Factoid address destination of the output |
-| amount | <code>number</code> | The integer amount of token units to recieve. Must be a safe integer |
+| amount | <code>number</code> \| <code>string</code> \| <code>BigNumber</code> | The integer amount of token units to receive at the destination address. Native JS Numbers (e.x. 123), strings (e.x. "123"), and BigNumbers(e.x. new BigNumber("9999999999999999") are allowed as long as they represent integers |
 
 <a name="TransactionBuilder0+burnOutput"></a>
 
@@ -100,7 +100,7 @@ Set up a burn output for the transaction, which will destroy tokens
 
 | Param | Type | Description |
 | --- | --- | --- |
-| amount | <code>number</code> | The integer amount of token units to send |
+| amount | <code>number</code> \| <code>string</code> \| <code>BigNumber</code> | The integer amount of token units to receive at the destination address. Native JS Numbers (e.x. 123), strings (e.x. "123"), and BigNumbers(e.x. new BigNumber("9999999999999999") are allowed as long as they represent integers |
 
 <a name="TransactionBuilder0+setIssuerSK1"></a>
 

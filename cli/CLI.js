@@ -298,11 +298,11 @@ class BaseTokenCLI {
     }
 
     /**
-     * Get the numeric balance of a Factoid address on the token
+     * Get the numeric balance of a Factoid address on the token. Returned as type BigNumber(https://www.npmjs.com/package/bignumber.js)
      * @method
      * @async
      * @param {string} address - The public Factoid address to get the balance for
-     * @returns {BigNumber}
+     * @returns {Promise}
      */
     async getBalance(address) {
         if (!fctAddressUtil.isValidPublicFctAddress(address)) throw new Error("You must include a valid public Factoid address");
@@ -311,7 +311,9 @@ class BaseTokenCLI {
     }
 
     /**
-     * Get statistics for the token. stats.circulating, stats.burned and stats.transactions are all of type BigNumber
+     * Get statistics for the token.
+     * stats.circulating, stats.burned and stats.transactions are all of type BigNumber(https://www.npmjs.com/package/bignumber.js)
+     *
      * @method
      * @async
      * @returns {Promise}

@@ -26,7 +26,7 @@ NPM via package.json:
 
 ```json
 "dependencies":{
-	"@fat-token/fat-js": "0.1.2"
+	"@fat-token/fat-js": "1.0.0"
 }
 ```
 
@@ -80,6 +80,12 @@ tx = new TransactionBuilder(tokenChainId)
             .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
             .metadata({type: 'fat-js test run', timestamp: new Date().getTime()})
             .build();
+
+//You can also use string or  BigNumber(https://github.com/MikeMcl/bignumber.js/) format for larger transactions than a native JS integer would support
+tx = new TransactionBuilder(testTokenChainId)
+            .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", '19007199254740991')
+            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", '19007199254740991')
+            .build();
 ```
 
 
@@ -97,7 +103,7 @@ let tx = new TransactionBuilder(tokenChainId)
 	.output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
 	.build();
 
-tx.getInputs(); // => {"FA1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm":150}
+tx.getInputs(); // => {"FA1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm": new BigNumber(150)}
 
 tx.getTokenChainId(); // => "013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec"
 
@@ -109,8 +115,8 @@ const response =
         timestamp: 1550696040,
         data:
             {
-                inputs: {FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC: 10},
-                outputs: {FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM: 10}
+                inputs: {FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC: new BigNumber(150)},
+                outputs: {FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM: new BigNumber(150)}
             }
     };
 
@@ -304,15 +310,16 @@ const transactions = await tokenCLI.getTransactions();
 ```
 
 
+
 ### Get Balance
 
-Get the numeric balance of a public Factoid address.
+Get the numeric balance of a public Factoid address. Returned as a [BigNumber](https://www.npmjs.com/package/bignumber.js)
 
 ```javascript
 let balance = await tokenCLI.getBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
 
 /*
-150
+new BigNumber(150)
 */
 ```
 

@@ -59,7 +59,7 @@ class TransactionBuilder {
      * Set up a Factoid address input for the transaction
      * @method
      * @param {string} fs - The private Factoid address to use as the input of the transaction
-     * @param {number} amount - The integer amount of token units to send. Must be a safe integer
+     * @param {(number|string|BigNumber)} amount - The integer amount of token units to send. Native JS Numbers (e.x. 123), strings (e.x. "123"), and BigNumbers(e.x. new BigNumber("9999999999999999") are allowed as long as they represent integers
      * @returns {TransactionBuilder}
      */
     input(fs, amount) {
@@ -79,7 +79,7 @@ class TransactionBuilder {
     /**
      * Set up a coinbase input for the transaction, which mints tokens
      * @method
-     * @param {number} amount - The integer amount of token units to send
+     * @param {(number|string|BigNumber)} amount - The integer amount of token units to send. Native JS Numbers (e.x. 123), strings (e.x. '123'), and BigNumbers(e.x. new BigNumber("9999999999999999") are allowed as long as they represent integers
      * @returns {TransactionBuilder}
      */
     coinbaseInput(amount) {
@@ -89,10 +89,10 @@ class TransactionBuilder {
     }
 
     /**
-     * Set up a Factoid address output input for the transaction
+     * Set up a Factoid address output for the transaction
      * @method
      * @param {string} fa - The public Factoid address destination of the output
-     * @param {number} amount - The integer amount of token units to recieve. Must be a safe integer
+     * @param {(number|string|BigNumber)} amount - The integer amount of token units to receive at the destination address. Native JS Numbers (e.x. 123), strings (e.x. "123"), and BigNumbers(e.x. new BigNumber("9999999999999999") are allowed as long as they represent integers
      * @returns {TransactionBuilder}
      */
     output(fa, amount) {
@@ -108,7 +108,7 @@ class TransactionBuilder {
     /**
      * Set up a burn output for the transaction, which will destroy tokens
      * @method
-     * @param {number} amount - The integer amount of token units to send
+     * @param {(number|string|BigNumber)} amount - The integer amount of token units to receive at the destination address. Native JS Numbers (e.x. 123), strings (e.x. "123"), and BigNumbers(e.x. new BigNumber("9999999999999999") are allowed as long as they represent integers
      * @returns {TransactionBuilder}
      */
     burnOutput(amount) {

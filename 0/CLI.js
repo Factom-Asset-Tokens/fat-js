@@ -5,7 +5,7 @@ const Issuance = require('./Issuance').Issuance;
 const BaseTokenCLI = require('../cli/CLI').BaseTokenCLI;
 
 /**
- * The FAT-0 a CLI access object. Used to request data about a FAT-0 token
+ * The FAT-0 CLI access object. Used to request data about a FAT-0 token
  * @alias CLI0
  * @class
  * @extends BaseTokenCLI

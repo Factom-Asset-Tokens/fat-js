@@ -35,6 +35,13 @@ describe('Transaction Unit', function () {
         //check factomjs entry
         assert.instanceOf(tx.getEntry(), Entry);
 
+        //check string values are supported as amounts
+        tx = new TransactionBuilder(testTokenChainId)
+            .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", '1234')
+            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", '1234')
+            .build();
+        assert.strictEqual(tx.getInputs()['FA2Qwmzp4xeXR4jWYrQnbPSXi5wLdVHy8p3ksAVSvyjLEX7jE3pN'].toString(), new BigNumber('1234').toString());
+
         //check values over max native JS integer accuracy are supported, not rounded off
         tx = new TransactionBuilder(testTokenChainId)
             .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", new BigNumber('19007199254740991'))
@@ -88,6 +95,12 @@ describe('Transaction Unit', function () {
         assert.throws(() => new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
             .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", 151)
             .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 0)
+            .build());
+
+        //test decimal amount
+        assert.throws(() => new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
+            .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", 1.1)
+            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 1.1)
             .build());
 
         //test invalid input address
