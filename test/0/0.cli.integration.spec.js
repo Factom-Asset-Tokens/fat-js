@@ -38,7 +38,7 @@ describe('FAT-0 CLI Integration', function () {
             assert.strictEqual(issuance.getSupply(), -1);
             assert.strictEqual(issuance.getIssuerIdentityRootChainId(), '888888ab72e748840d82c39213c969a11ca6cb026f1d3da39fd82b95b3c1fced');
             assert.strictEqual(issuance.getTokenChainId(), tokenChainId);
-            assert.strictEqual(issuance.getEntryhash(), 'ed9ca1fb36d6231aa5cc32b04dc5f69f2e8531d986126f8df4bd85c097f799f1');
+            assert.strictEqual(issuance.getEntryhash(), 'fc0f57ea3a4dc5b8ffc1a9c051f4b6ae0cd7137f9110b98e3c3eb08f132a5e18');
             assert.strictEqual(issuance.getTimestamp(), 1550612940);
         });
 

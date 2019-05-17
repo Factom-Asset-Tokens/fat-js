@@ -29,7 +29,17 @@ describe('FAT-1 CLI Integration', function () {
 
             const issuance = await tokenCLI.getIssuance();
             assert.isDefined(issuance);
-            assert.instanceOf(issuance, Issuance)
+            assert.instanceOf(issuance, Issuance);
+
+            //regression testing
+            assert.strictEqual(issuance.getType(), 'FAT-1');
+            assert.strictEqual(issuance.getTokenId(), 'testnf');
+            assert.strictEqual(issuance.getSymbol(), 'T1');
+            assert.strictEqual(issuance.getSupply(), -1);
+            assert.strictEqual(issuance.getIssuerIdentityRootChainId(), '888888ab72e748840d82c39213c969a11ca6cb026f1d3da39fd82b95b3c1fced');
+            assert.strictEqual(issuance.getTokenChainId(), tokenChainId);
+            assert.strictEqual(issuance.getEntryhash(), '80568d0f194a1a65d101d70099d820ea90d08badd94fef3944c53841952a603b');
+            assert.strictEqual(issuance.getTimestamp(), 1550698020);
         });
 
         it('get-transaction', async function () {
@@ -40,6 +50,13 @@ describe('FAT-1 CLI Integration', function () {
             assert.instanceOf(transaction, Transaction);
             assert.strictEqual(transaction.getEntryhash(), 'abba93b0acfaacffa081c25467ec9e18f0314f77787cbba58ed97491e59db07c');
             assert.isNumber(transaction.getTimestamp());
+
+            //regression testing
+            assert.strictEqual(JSON.stringify(transaction.getInputs()), JSON.stringify({FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC: [34317712]}));
+            assert.strictEqual(JSON.stringify(transaction.getOutputs()), JSON.stringify({FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM: [34317712]}));
+            assert.isUndefined(transaction.metadata);
+            assert.strictEqual(transaction.getEntryhash(), 'abba93b0acfaacffa081c25467ec9e18f0314f77787cbba58ed97491e59db07c');
+            assert.strictEqual(transaction.getTimestamp(), 1550698680);
         });
 
         it('get-transactions', async function () {
@@ -76,6 +93,8 @@ describe('FAT-1 CLI Integration', function () {
             const token = await tokenCLI.getNFToken(12);
             assert.isDefined(token);
             assert.isObject(token);
+            assert.strictEqual(token.id, 12);
+            assert.isTrue(require('factom/src/addresses').isValidFctAddress(token.owner));
         });
 
         it('get-nf-tokens', async function () {
@@ -93,6 +112,13 @@ describe('FAT-1 CLI Integration', function () {
             const stats = await tokenCLI.getStats();
             assert.isDefined(stats);
             assert.isObject(stats);
+
+            //regression testing
+            assert.isNumber(stats.circulating);
+            assert.isNumber(stats.burned);
+            assert.isNumber(stats.transactions);
+            assert.isNumber(stats.issuancets);
+            assert.isNumber(stats.lasttxts);
         });
 
         it('send-transaction', async function () {
@@ -107,6 +133,11 @@ describe('FAT-1 CLI Integration', function () {
 
             const result = await tokenCLI.sendTransaction(tx);
             assert.isObject(result);
+
+            //regression testing
+            assert.strictEqual(result.chainid, tokenChainId);
+            assert.isString(result.txid);
+            assert.isString(result.entryhash);
         });
 
         it('send-transaction(With metadata)', async function () {
