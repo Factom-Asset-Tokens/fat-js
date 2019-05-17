@@ -2,6 +2,7 @@ const constant = require('../constant');
 const nacl = require('tweetnacl/nacl-fast').sign;
 const fctAddressUtil = require('factom/src/addresses');
 const fctIdentityUtil = require('factom-identity-lib/src/validation');
+const BigNumber = require('bignumber.js');
 
 /**
  * Build & Model A FAT-0 Transaction
@@ -67,8 +68,8 @@ class TransactionBuilder {
 
         if (!fctAddressUtil.isValidPrivateAddress(fs)) throw new Error("Input address must be a valid private Factoid address");
 
-        if (!Number.isSafeInteger(amount)) throw new Error('Amount must be a safe integer (less than 2^53 - 1)');
-        if (isNaN(amount) || !Number.isInteger(amount) || amount < 1) throw new Error("Input amount must be a positive nonzero integer");
+        amount = new BigNumber(amount);
+        if (amount.toString().includes('.') || amount < 1) throw new Error("Input amount must be a positive nonzero integer");
 
         this._keys.push(nacl.keyPair.fromSeed(fctAddressUtil.addressToKey(fs)));
         this._inputs[fctAddressUtil.getPublicAddress(fs)] = amount;
@@ -96,8 +97,9 @@ class TransactionBuilder {
      */
     output(fa, amount) {
         if (!fctAddressUtil.isValidPublicFctAddress(fa)) throw new Error("Output address must be a valid public Factoid address");
-        if (!Number.isSafeInteger(amount)) throw new Error('Amount must be a safe integer (less than 2^53 - 1)');
-        if (isNaN(amount) || !Number.isInteger(amount) || amount < 1) throw new Error("Output amount must be a positive nonzero integer");
+
+        amount = new BigNumber(amount);
+        if (amount.toString().includes('.') || amount < 1) throw new Error("Input amount must be a positive nonzero integer");
 
         this._outputs[fa] = amount;
         return this;
@@ -164,9 +166,9 @@ class TransactionBuilder {
     build() {
         if (Object.keys(this._inputs).length === 0 || Object.keys(this._outputs).length === 0) throw new Error("Must have at least one input and one output");
 
-        const inputSum = Object.values(this._inputs).reduce((amount, sum) => amount + sum, 0);
-        const outputSum = Object.values(this._outputs).reduce((amount, sum) => amount + sum, 0);
-        if (inputSum !== outputSum) throw new Error("Input and output amount sums must match (" + inputSum + " != " + outputSum + ")");
+        const inputSum = Object.values(this._inputs).reduce((amount, sum) => amount.plus(sum), new BigNumber(0));
+        const outputSum = Object.values(this._outputs).reduce((amount, sum) => amount.plus(sum), new BigNumber(0));
+        if (!inputSum.isEqualTo(outputSum)) throw new Error("Input and output amount sums must match (" + inputSum + " != " + outputSum + ")");
 
         if (Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) {
             if (!this._sk1) throw new Error('You must include a valid issuer sk1 key to perform a coinbase transaction')

@@ -1,6 +1,7 @@
 const util = require('../../util');
 const constant = require('../../constant');
 const assert = require('chai').assert;
+const BigNumber = require('bignumber.js');
 
 let TransactionBuilder = require('../../1/TransactionBuilder');
 let Transaction = require('../../1/Transaction');
@@ -73,8 +74,8 @@ describe('FAT-1 CLI Integration', function () {
 
             const balance = await tokenCLI.getBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
             assert.isDefined(balance);
-            assert.isNumber(balance);
-            assert.isAbove(balance, 0);
+            assert.instanceOf(balance, BigNumber);
+            assert.isAbove(balance.toNumber(), 0);
         });
 
         it('get-nf-balance', async function () {
@@ -104,21 +105,6 @@ describe('FAT-1 CLI Integration', function () {
             assert.isDefined(tokens);
             assert.isArray(tokens);
             assert.isTrue(tokens.every(token => typeof token === 'object'));
-        });
-
-        it('get-stats', async function () {
-            const tokenCLI = await cli.getTokenCLI(tokenChainId);
-
-            const stats = await tokenCLI.getStats();
-            assert.isDefined(stats);
-            assert.isObject(stats);
-
-            //regression testing
-            assert.isNumber(stats.circulating);
-            assert.isNumber(stats.burned);
-            assert.isNumber(stats.transactions);
-            assert.isNumber(stats.issuancets);
-            assert.isNumber(stats.lasttxts);
         });
 
         it('send-transaction', async function () {

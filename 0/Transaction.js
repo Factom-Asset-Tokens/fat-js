@@ -4,6 +4,8 @@ const {Entry} = require('factom');
 const fctUtil = require('factom/src/util');
 const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
 const TransactionBuilder = require('./TransactionBuilder');
+const JSONBig = require('json-bigint')({strict: true});
+const BigNumber = require('bignumber.js');
 
 /**
  * Model A signed or unsigned FAT-0 Transaction
@@ -50,7 +52,7 @@ class Transaction {
             this._outputs = builder._outputs;
             this._metadata = builder._metadata;
 
-            this._content = JSON.stringify({inputs: this._inputs, outputs: this._outputs, metadata: this._metadata}); //snapshot the tx object
+            this._content = JSONBig.stringify({inputs: this._inputs, outputs: this._outputs, metadata: this._metadata}); //snapshot the tx object
 
             const unixSeconds = Math.round(new Date().getTime() / 1000);
             this._timestamp = unixSeconds;
@@ -98,9 +100,15 @@ class Transaction {
             }
         } else { //from object
             if (!builder.data.inputs) throw new Error("Valid FAT-0 transactions must include inputs");
+            Object.keys(builder.data.inputs).forEach((address) => {
+                builder.data.inputs[address] = new BigNumber(builder.data.inputs[address])
+            });
             this._inputs = builder.data.inputs;
 
             if (!builder.data.outputs) throw new Error("Valid FAT-0 transactions must include outputs");
+            Object.keys(builder.data.outputs).forEach((address) => {
+                builder.data.outputs[address] = new BigNumber(builder.data.outputs[address])
+            });
             this._outputs = builder.data.outputs;
 
             this._metadata = builder.data.metadata;

@@ -1,8 +1,9 @@
 const constant = require('../../constant');
 const assert = require('chai').assert;
+const BigNumber = require('bignumber.js');
+const JSONBig = require('json-bigint')({strict: true});
 
 const TransactionBuilder = require('../../0/TransactionBuilder');
-
 const Transaction = require('../../0/Transaction');
 const Issuance = require('../../0/Issuance').Issuance;
 
@@ -50,8 +51,8 @@ describe('FAT-0 CLI Integration', function () {
             assert.instanceOf(transaction, Transaction);
 
             //regression testing
-            assert.strictEqual(JSON.stringify(transaction.getInputs()), JSON.stringify({FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC: 10}));
-            assert.strictEqual(JSON.stringify(transaction.getOutputs()), JSON.stringify({FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM: 10}));
+            assert.strictEqual(JSONBig.stringify(transaction.getInputs()), JSONBig.stringify({FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC: new BigNumber(10)}));
+            assert.strictEqual(JSONBig.stringify(transaction.getOutputs()), JSONBig.stringify({FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM: new BigNumber(10)}));
             assert.isUndefined(transaction.metadata);
             assert.strictEqual(transaction.getEntryhash(), '68f3ca3a8c9f7a0cb32dc9717347cb179b63096e051a60ce8be9c292d29795af');
             assert.strictEqual(transaction.getTimestamp(), 1550696040);
@@ -71,8 +72,8 @@ describe('FAT-0 CLI Integration', function () {
 
             const balance = await tokenCLI.getBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
             assert.isDefined(balance);
-            assert.isNumber(balance);
-            assert.isAbove(balance, 0);
+            assert.instanceOf(balance, BigNumber);
+            assert.isAbove(balance.toNumber(), 0);
         });
 
         it('get-stats', async function () {
@@ -83,9 +84,15 @@ describe('FAT-0 CLI Integration', function () {
             assert.isObject(stats);
 
             //regression testing
-            assert.isNumber(stats.circulating);
-            assert.isNumber(stats.burned);
-            assert.isNumber(stats.transactions);
+            assert.instanceOf(stats.circulating, BigNumber);
+            assert.isAbove(stats.circulating.toNumber(), 0);
+
+            assert.instanceOf(stats.burned, BigNumber);
+            assert.isAbove(stats.burned.toNumber(), 0);
+
+            assert.instanceOf(stats.transactions, BigNumber);
+            assert.isAbove(stats.transactions.toNumber(), 0);
+
             assert.isNumber(stats.issuancets);
             assert.isNumber(stats.lasttxts);
         });
@@ -127,6 +134,18 @@ describe('FAT-0 CLI Integration', function () {
                 .coinbaseInput(10)
                 .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 10)
                 .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+                .build();
+
+            const result = await tokenCLI.sendTransaction(tx);
+            assert.isObject(result);
+        });
+
+        it('send-transaction(burn)', async function () {
+            const tokenCLI = await cli.getTokenCLI(tokenChainId);
+
+            let tx = new TransactionBuilder(tokenChainId)
+                .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 1)
+                .burnOutput(1)
                 .build();
 
             const result = await tokenCLI.sendTransaction(tx);

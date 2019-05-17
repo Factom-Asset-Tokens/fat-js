@@ -1,6 +1,7 @@
 const constant = require('../constant');
 const axios = require('axios');
 const JSONBig = require('json-bigint')({strict: true});
+const BigNumber = require('bignumber.js');
 const Joi = require('joi-browser').extend(require('joi-factom'));
 const fctAddressUtil = require('factom/src/addresses');
 const compatibility = require('./compatibility');
@@ -297,25 +298,30 @@ class BaseTokenCLI {
     }
 
     /**
-     * Get the balance of a Factoid address on the token
+     * Get the numeric balance of a Factoid address on the token
      * @method
      * @async
      * @param {string} address - The public Factoid address to get the balance for
-     * @returns {Promise}
+     * @returns {BigNumber}
      */
-    getBalance(address) {
+    async getBalance(address) {
         if (!fctAddressUtil.isValidPublicFctAddress(address)) throw new Error("You must include a valid public Factoid address");
-        return this._cli.call('get-balance', generateTokenCLIParams(this, {address}));
+        const balance = await this._cli.call('get-balance', generateTokenCLIParams(this, {address}));
+        return new BigNumber(balance);
     }
 
     /**
-     * Get statistics for the token
+     * Get statistics for the token. stats.circulating, stats.burned and stats.transactions are all of type BigNumber
      * @method
      * @async
      * @returns {Promise}
      */
-    getStats() {
-        return this._cli.call('get-stats', generateTokenCLIParams(this));
+    async getStats() {
+        const stats = await this._cli.call('get-stats', generateTokenCLIParams(this));
+        stats.circulating = new BigNumber(stats.circulating);
+        stats.burned = new BigNumber(stats.burned);
+        stats.transactions = new BigNumber(stats.transactions);
+        return stats;
     }
 
     /**

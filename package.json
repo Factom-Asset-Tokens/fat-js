@@ -23,6 +23,7 @@
     "joi-browser": "13.4.0",
     "joi-factom": "1.1.0",
     "json-bigint": "0.3.0",
+    "bignumber.js": "8.1.1",
     "semver": "6.0.0"
   },
   "devDependencies": {
