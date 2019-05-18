@@ -22,16 +22,6 @@ Currently supports **FAT-0** and **FAT-1** token standards.
 
 ## Installation
 
-NPM via package.json:
-
-```json
-"dependencies":{
-	"@fat-token/fat-js": "1.0.0"
-}
-```
-
-or
-
 NPM CLI:
 
 ```
