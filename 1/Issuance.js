@@ -39,6 +39,22 @@ class IssuanceBuilder {
         return this;
     }
 
+    /**
+     * Set arbitrary metadata for the token issuance
+     * @method
+     * @param {*} metadata - The metadata. Must be JSON stringifyable
+     * @returns {IssuanceBuilder}
+     */
+    metadata(metadata) {
+        try {
+            JSON.stringify(metadata)
+        } catch (e) {
+            throw new Error("Transaction metadata bust be a valid JSON object or primitive");
+        }
+        this._metadata = metadata;
+        return this;
+    }
+
     build() {
         //validate required fields
         if (this._supply === undefined) this._supply = -1; //unlimited supply by default
