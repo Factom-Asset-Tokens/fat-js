@@ -155,7 +155,7 @@ tx = new TransactionBuilder(testTokenChainId)
                     metadata: {type: 'fat-js test run', timestamp: new Date().getTime()},
                 }
             ])
-            .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+            .sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
             .build();
 ```
 

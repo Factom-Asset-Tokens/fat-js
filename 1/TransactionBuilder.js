@@ -24,7 +24,7 @@ const fctIdentityUtil = require('factom-identity-lib/src/validation');
  * tx = new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
  * .coinbaseInput([10])
  * .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [10])
- * .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+ * .sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
  *  .build();
  *
  * //burn transaction
@@ -50,7 +50,7 @@ const fctIdentityUtil = require('factom-identity-lib/src/validation');
  *     metadata: {type: 'fat-js test run', timestamp: new Date().getTime()},
  * }
  * ])
- * .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+ * .sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
  * .build();
  */
 class TransactionBuilder {
@@ -127,18 +127,6 @@ class TransactionBuilder {
         if (Object.keys(this._outputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) throw new Error('Cannot add a duplicate burn output to a burn transaction');
         this.output(constant.COINBASE_ADDRESS_PUBLIC, ids);
         return this;
-    }
-
-    /**
-     * [ALIAS FOR sk1(sk1)] Set the SK1 private key of the token's issuing identity. Required for coinbase transactions
-     *
-     * @method
-     * @deprecated
-     * @param {string} sk1 - The SK1 private key string of the issuing identity
-     * @returns {TransactionBuilder}
-     */
-    setIssuerSK1(sk1) {
-        return this.sk1(sk1);
     }
 
     /**

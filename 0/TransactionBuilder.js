@@ -24,7 +24,7 @@ const BigNumber = require('bignumber.js');
  * tx = new TransactionBuilder(tokenChainId)
  * .coinbaseInput(10)
  * .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 10)
- * .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+ * .sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
  * .build();
  *
  * //burn transaction
@@ -69,7 +69,7 @@ class TransactionBuilder {
         if (!fctAddressUtil.isValidPrivateAddress(fs)) throw new Error("Input address must be a valid private Factoid address");
 
         amount = new BigNumber(amount);
-        if (amount.toString().includes('.') || amount < 1) throw new Error("Input amount must be a positive nonzero integer");
+        if (!amount.isInteger() || amount.isLessThan(1)) throw new Error("Input amount must be a positive nonzero integer");
 
         this._keys.push(nacl.keyPair.fromSeed(fctAddressUtil.addressToKey(fs)));
         this._inputs[fctAddressUtil.getPublicAddress(fs)] = amount;
@@ -99,7 +99,7 @@ class TransactionBuilder {
         if (!fctAddressUtil.isValidPublicFctAddress(fa)) throw new Error("Output address must be a valid public Factoid address");
 
         amount = new BigNumber(amount);
-        if (amount.toString().includes('.') || amount < 1) throw new Error("Input amount must be a positive nonzero integer");
+        if (!amount.isInteger() || amount.isLessThan(1)) throw new Error("Input amount must be a positive nonzero integer");
 
         this._outputs[fa] = amount;
         return this;
@@ -118,20 +118,6 @@ class TransactionBuilder {
     }
 
     /**
-     * [ALIAS FOR sk1(sk1)] Set the SK1 private key of the token's issuing identity. Required for coinbase transactions
-     * @method
-     * @deprecated
-     * @param {string} sk1 - The SK1 private key string of the issuing identity
-     * @returns {TransactionBuilder}
-     */
-    setIssuerSK1(sk1) {
-        if (!fctIdentityUtil.isValidSk1(sk1)) throw new Error("You must include a valid SK1 Key to sign a coinbase transaction");
-        this._sk1 = sk1;
-        return this;
-    }
-
-    /**
-     * Set the SK1 private key of the token's issuing identity. Required for coinbase transactions
      * @method
      * @param {string} sk1 - The SK1 private key string of the issuing identity
      * @returns {TransactionBuilder}
