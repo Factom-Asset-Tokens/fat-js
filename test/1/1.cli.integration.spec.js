@@ -155,7 +155,7 @@ describe('FAT-1 CLI Integration', function () {
                         metadata: {type: 'fat-js test run', timestamp: new Date().getTime()},
                     }
                 ])
-                .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+                .sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
                 .build();
 
             const result = await tokenCLI.sendTransaction(tx);
@@ -170,7 +170,7 @@ describe('FAT-1 CLI Integration', function () {
             const tx = new TransactionBuilder(tokenChainId)
                 .coinbaseInput([randomId])
                 .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [randomId])
-                .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+                .sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
                 .build();
 
             const result = await tokenCLI.sendTransaction(tx);

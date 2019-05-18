@@ -73,7 +73,7 @@ describe('FAT-0 CLI Integration', function () {
             const balance = await tokenCLI.getBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
             assert.isDefined(balance);
             assert.instanceOf(balance, BigNumber);
-            assert.isAbove(balance.toNumber(), 0);
+            assert.isTrue(balance.isGreaterThan(0));
         });
 
         it('get-stats', async function () {
@@ -85,13 +85,16 @@ describe('FAT-0 CLI Integration', function () {
 
             //regression testing
             assert.instanceOf(stats.circulating, BigNumber);
-            assert.isAbove(stats.circulating.toNumber(), 0);
+            assert.isTrue(stats.circulating.isInteger());
+            assert.isTrue(stats.circulating.isGreaterThan(0));
 
             assert.instanceOf(stats.burned, BigNumber);
-            assert.isAbove(stats.burned.toNumber(), 0);
+            assert.isTrue(stats.burned.isInteger());
+            assert.isTrue(stats.burned.isGreaterThan(0));
 
             assert.instanceOf(stats.transactions, BigNumber);
-            assert.isAbove(stats.transactions.toNumber(), 0);
+            assert.isTrue(stats.transactions.isInteger());
+            assert.isTrue(stats.transactions.isGreaterThan(0));
 
             assert.isNumber(stats.issuancets);
             assert.isNumber(stats.lasttxts);
@@ -133,7 +136,7 @@ describe('FAT-0 CLI Integration', function () {
             let tx = new TransactionBuilder(tokenChainId)
                 .coinbaseInput(10)
                 .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 10)
-                .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+                .sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
                 .build();
 
             const result = await tokenCLI.sendTransaction(tx);
