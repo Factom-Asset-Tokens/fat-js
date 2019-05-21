@@ -1,11 +1,10 @@
 const fctCryptoValidation = require('factom-identity-lib/src/validation');
 const fctIdentityUtil = require('factom-identity-lib/src/validation');
 const BigNumber = require('bignumber.js');
-const JSONBig = require('json-bigint')({strict: true});
 
 /**
- * Build & Model A FAT-0 Issuance
- * @alias IssuanceBuilder0
+ * Build & Model A FAT-1 Issuance
+ * @alias IssuanceBuilder1
  * @public
  * @class
  */
@@ -27,7 +26,7 @@ class IssuanceBuilder {
         if (!fctCryptoValidation.isValidSk1(sk1)) throw new Error("Supplied key is not a valid sk1 private key");
         this._sk1 = sk1;
 
-        this._type = 'FAT-0'
+        this._type = 'FAT-1'
     }
 
     /**
@@ -65,7 +64,7 @@ class IssuanceBuilder {
      */
     metadata(metadata) {
         try {
-            JSONBig.stringify(metadata)
+            JSON.stringify(metadata)
         } catch (e) {
             throw new Error("Transaction metadata bust be a valid JSON object or primitive");
         }
@@ -80,11 +79,10 @@ class IssuanceBuilder {
      */
     build() {
         //validate required fields
-
-        if (this._supply === undefined) this._supply = new BigNumber(-1); //unlimited supply by default
+        if (this._supply === undefined) this._supply = -1; //unlimited supply by default
 
         return new (require('./Issuance'))(this);
     }
 }
 
-module.exports = IssuanceBuilder;
+module.exports = IssuanceBuilder

@@ -15,6 +15,11 @@ const IssuanceBuilder = require('./IssuanceBuilder');
  * @class
  */
 class Issuance {
+
+    /**
+     * @constructor
+     * @param {(IssuanceBuilder | Object)} builder - The IssuanceBuilder or object to construct the issuance from
+     */
     constructor(builder) {
 
         if (builder instanceof IssuanceBuilder) {
@@ -135,7 +140,7 @@ class Issuance {
     /**
      * Get the maximum circulating supply for this FAT token issuance
      * @method
-     * @returns {number} [supply=-1] - The maximum number of circulating tokens allowed
+     * @returns {BigNumber} [supply=-1] - The maximum number of circulating tokens allowed
      */
     getSupply() {
         return this._supply;
