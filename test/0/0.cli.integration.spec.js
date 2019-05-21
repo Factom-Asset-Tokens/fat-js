@@ -5,7 +5,7 @@ const JSONBig = require('json-bigint')({strict: true});
 
 const TransactionBuilder = require('../../0/TransactionBuilder');
 const Transaction = require('../../0/Transaction');
-const Issuance = require('../../0/Issuance').Issuance;
+const Issuance = require('../../0/Issuance');
 
 const tokenChainId = '0cccd100a1801c0cf4aa2104b15dec94fe6f45d0f3347b016ed20d81059494df';
 

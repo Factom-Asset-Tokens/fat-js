@@ -1,6 +1,6 @@
 const constant = require('../constant');
 const Transaction = require('./Transaction');
-const Issuance = require('./Issuance').Issuance;
+const Issuance = require('./Issuance');
 
 const BaseTokenCLI = require('../cli/CLI').BaseTokenCLI;
 
