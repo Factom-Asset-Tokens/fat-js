@@ -146,42 +146,94 @@ class Issuance {
         Object.freeze(this);
     }
 
+    /**
+     * Get the Factom Chain ID for this token issuance
+     * @method
+     * @returns {string} - The Factom Chain ID calculated from rootChainID and tokenId
+     */
     getTokenChainId() {
         return this._tokenChainId;
     }
 
+    /**
+     * Get the token ID string for this token issuance
+     * @method
+     * @returns {string} - The token ID string chosen by the issuer
+     */
     getTokenId() {
         return this._tokenId;
     }
 
+    /**
+     * Get identity's Factom Chain ID string for this token
+     * @method
+     * @returns {string} - The token ID string chosen by the issuer
+     */
     getIssuerIdentityRootChainId() {
         return this._rootChainId;
     }
 
+    /**
+     * Get the entryhash of this issuance object. Only populated for entries parsed from fatd
+     * @method
+     * @returns {string} - The Factom Entryhash
+     */
     getEntryhash() {
         return this._entryhash;
     }
 
+    /**
+     * Get the timestamp in unix seconds of when this issuance object was signed
+     * @method
+     * @returns {number} - The signing timestamp
+     */
     getTimestamp() {
         return this._timestamp;
     }
 
+    /**
+     * Get the type string constant of which type of FAT token this issuance represent
+     * @method
+     * @returns {string} - Returns "FAT-0"
+     */
     getType() {
         return this._type;
     }
 
+    /**
+     * Get the symbol string of this FAT token represent. E.x. MYT
+     * @method
+     * @returns {string} - The symbol string chosen by the issuer
+     */
     getSymbol() {
         return this._symbol;
     }
 
+    /**
+     * Get the maximum circulating supply for this FAT token issuance
+     * @method
+     * @returns {number} [supply=-1] - The maximum number of circulating tokens allowed
+     */
     getSupply() {
         return this._supply;
     }
 
+    /**
+     * Get the metadata included with the FAT token issuance, if present
+     * @method
+     * @returns {*} - The issuances's metadata (if present, undefined if not)
+     */
     getMetadata() {
         return this._metadata;
     }
 
+    /**
+     * Get the Chain object representing the first entry (chain establishment entry) on the token chain
+     * Can be submitted directly to Factom
+     * @method
+     * @see https://github.com/PaulBernier/factomjs/blob/master/src/chain.js
+     * @returns {Chain} - The Chain object for the issuance
+     */
     getChain() {
         return new Chain(Entry.builder()
             .extId(Buffer.from("token"))
@@ -191,6 +243,13 @@ class Issuance {
             .build())
     }
 
+    /**
+     * Get the Entry object representing the initialization entry (token establishment entry)
+     * Can be submitted directly to Factom
+     * @method
+     * @see https://github.com/PaulBernier/factomjs/blob/master/src/entry.js
+     * @returns {Entry} - The complete entry establishing the token's issuance
+     */
     getEntry() {
         return Entry.builder()
             .chainId(this._tokenChainId)
