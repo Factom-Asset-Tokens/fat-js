@@ -77,8 +77,27 @@ tx.getEntryHash(); // => "68f3ca3a8c9f7a0cb32dc9717347cb179b63096e051a60ce8be9c2
 <a name="Transaction0+getEntry"></a>
 
 ### transaction0.getEntry() ⇒ <code>Entry</code>
+Get the factom-js Entry object representing the signed FAT transaction. Can be submitted directly to Factom
+
 **Kind**: instance method of [<code>Transaction0</code>](#Transaction0)  
 **Returns**: <code>Entry</code> - - Get the Factom-JS Factom entry representation of the transaction, including extids & other signatures  
+**See**: https://github.com/PaulBernier/factomjs/blob/master/src/entry.js  
+**Example**  
+```js
+const { FactomCli } = require('factom');
+     const cli = new FactomCli(); // Default factomd connection to localhost:8088 and walletd connection to localhost:8089
+
+     const tokenChainId = '013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec';
+
+     const tx = new TransactionBuilder(tokenChainId)
+     .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 150)
+     .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
+     .build();
+
+     const entry = tx.getEntry(); //get the signed transaction entry
+
+     await cli.add(entry, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //commit the transaction entry to the token chain
+```
 <a name="Transaction0+getTokenChainId"></a>
 
 ### transaction0.getTokenChainId() ⇒ <code>string</code>
