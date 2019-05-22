@@ -48,9 +48,9 @@ class Issuance {
 
             const key = nacl.keyPair.fromSeed(fctIdentityCrypto.extractSecretFromIdentityKey(builder._sk1));
 
-            const rcd = [Buffer.concat([constant.RCD_TYPE_1, Buffer.from(key.publicKey)])];
+            const rcd = Buffer.concat([constant.RCD_TYPE_1, Buffer.from(key.publicKey)]);
 
-            const signature = [nacl.detached(fctUtil.sha512(Buffer.concat([index, timestamp, chainId, content])), key.secretKey)];
+            const signature = nacl.detached(fctUtil.sha512(Buffer.concat([index, timestamp, chainId, content])), key.secretKey);
 
             this._extIds = [timestamp, rcd, signature];
 
