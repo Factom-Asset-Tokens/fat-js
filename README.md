@@ -482,9 +482,9 @@ const tx = new TransactionBuilder(tokenChainId)
 	.output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
 	.build();
 
-const entry = tx.getEntry();
+const entry = tx.getEntry(); //get the signed transaction entry
 
-await cli.add(entry, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym");
+await cli.add(entry, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //commit the transaction entry to the token chain
 ```
 
 
@@ -503,12 +503,12 @@ const issuance = new IssuanceBuilder("mytoken", "888888d027c59579fc47a6fc6c4a5c0
             .metadata({'abc': 123})
             .build();
 
-const chain = tx.getChain(); //get the chain establishment entry
-const entry = tx.getEntry(); //get the signed issuance entry
+const chain = tx.getChain(); //get the Factom chain the token issuance will reside on
+const entry = tx.getEntry(); //get the signed issuance entry to commit to the chain
 
-await cli.add(chain, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym");
+await cli.add(chain, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //create the token chain on Factom
 
-await cli.add(entry, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym");
+await cli.add(entry, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //commit the signed issuance entry to the token chain
 ```
 
 
