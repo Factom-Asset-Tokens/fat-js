@@ -523,6 +523,8 @@ await cli.add(entry, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //
 Get token chain ID from token ID and issuer root chain ID
 
 ```javascript
+const util = require('fat-js').util
+
 const chainId = util.getTokenChainId('mytoken', '888888b2e7c7c63655fa85e0b0c43b4b036a6bede51d38964426f122f61c5584').toString('hex')
 
 /*
