@@ -158,7 +158,7 @@ class Transaction {
      * @see https://github.com/PaulBernier/factomjs/blob/master/src/entry.js
      * @returns {Entry} - Get the Factom-JS Factom entry representation of the transaction, including extids & other signatures
      * @example
-     * const { FactomCli } = require('factom');
+     * const {FactomCli, Entry, Chain} = require('factom');
      const cli = new FactomCli(); // Default factomd connection to localhost:8088 and walletd connection to localhost:8089
 
      const tokenChainId = '013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec';
@@ -168,7 +168,8 @@ class Transaction {
      .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
      .build();
 
-     const entry = tx.getEntry(); //get the signed transaction entry
+     //"cast" the entry object to prevent compatibility issues
+     const entry = Entry.builder(tx.getEntry()).build();
 
      await cli.add(entry, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //commit the transaction entry to the token chain
      */

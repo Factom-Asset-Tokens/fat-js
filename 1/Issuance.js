@@ -10,7 +10,7 @@ const IssuanceBuilder = require('./IssuanceBuilder');
 
 /**
  * Build & Model A FAT-0 Issuance
- * @alias Issuance0
+ * @alias Issuance1
  * @public
  * @class
  */
@@ -175,7 +175,7 @@ class Issuance {
      * @see https://github.com/PaulBernier/factomjs/blob/master/src/entry.js
      * @returns {Entry} - The complete entry establishing the token's issuance
      * @example
-     * const { FactomCli } = require('factom');
+     * const {FactomCli, Entry, Chain} = require('factom');
      const cli = new FactomCli(); // Default factomd connection to localhost:8088 and walletd connection to localhost:8089
 
      const tokenChainId = '013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec';
@@ -186,11 +186,11 @@ class Issuance {
      .metadata({'abc': 123})
      .build();
 
-     const chain = tx.getChain(); //get the Factom chain the token issuance will reside on
-     const entry = tx.getEntry(); //get the signed issuance entry to commit to the chain
+     //"cast" the chain and entry objects to prevent compatibility issues
+     const chain = new Chain(Entry.builder(issuance.getChain().firstEntry).build());
+     const entry = Entry.builder(issuance.getEntry()).build();
 
      await cli.add(chain, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //create the token chain on Factom
-
      await cli.add(entry, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //commit the signed issuance entry to the token chain
      */
     getEntry() {
