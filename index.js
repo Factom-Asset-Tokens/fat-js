@@ -1,5 +1,7 @@
 module.exports = Object.assign({},
     require('./cli/CLI'),
+    require('./util'),
+    require('./constant'),
     {
         FAT0: {
             TransactionBuilder: require('./0/TransactionBuilder'),
