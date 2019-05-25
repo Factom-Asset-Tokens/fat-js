@@ -12,7 +12,6 @@ Build & Model A FAT-1 Transaction
     * [.coinbaseInput(ids)](#TransactionBuilder1+coinbaseInput) ⇒ <code>TransactionBuilder</code>
     * [.output(fa, ids)](#TransactionBuilder1+output) ⇒ <code>TransactionBuilder</code>
     * [.burnOutput(ids)](#TransactionBuilder1+burnOutput) ⇒ <code>TransactionBuilder</code>
-    * ~~[.setIssuerSK1(sk1)](#TransactionBuilder1+setIssuerSK1) ⇒ <code>TransactionBuilder</code>~~
     * [.sk1(sk1)](#TransactionBuilder1+sk1) ⇒ <code>TransactionBuilder</code>
     * [.metadata(metadata)](#TransactionBuilder1+metadata) ⇒ <code>TransactionBuilder</code>
     * [.tokenMetadata(tokenMetadata)](#TransactionBuilder1+tokenMetadata) ⇒ <code>TransactionBuilder</code>
@@ -42,7 +41,7 @@ let tx = new TransactionBuilder(testTokenChainId)
 tx = new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
 .coinbaseInput([10])
 .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [10])
-.setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+.sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
  .build();
 
 //burn transaction
@@ -68,7 +67,7 @@ tx = new TransactionBuilder(testTokenChainId)
     metadata: {type: 'fat-js test run', timestamp: new Date().getTime()},
 }
 ])
-.setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+.sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
 .build();
 ```
 <a name="TransactionBuilder1+input"></a>
@@ -116,19 +115,6 @@ Set up a burn output for the transaction, which will destroy tokens
 | Param | Type | Description |
 | --- | --- | --- |
 | ids | <code>Array.&lt;object&gt;</code> | The token ID ranges to send to the output address |
-
-<a name="TransactionBuilder1+setIssuerSK1"></a>
-
-### ~~transactionBuilder1.setIssuerSK1(sk1) ⇒ <code>TransactionBuilder</code>~~
-***Deprecated***
-
-[ALIAS FOR sk1(sk1)] Set the SK1 private key of the token's issuing identity. Required for coinbase transactions
-
-**Kind**: instance method of [<code>TransactionBuilder1</code>](#TransactionBuilder1)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| sk1 | <code>string</code> | The SK1 private key string of the issuing identity |
 
 <a name="TransactionBuilder1+sk1"></a>
 

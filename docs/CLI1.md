@@ -116,7 +116,7 @@ Get the Factom token chain ID used to originally construct the BaseTokenCLI
 <a name="BaseTokenCLI+getBalance"></a>
 
 ### clI1.getBalance(address) ⇒ <code>Promise</code>
-Get the balance of a Factoid address on the token
+Get the numeric balance of a Factoid address on the token. Returned as type BigNumber(https://www.npmjs.com/package/bignumber.js)
 
 **Kind**: instance method of [<code>CLI1</code>](#CLI1)  
 
@@ -127,7 +127,8 @@ Get the balance of a Factoid address on the token
 <a name="BaseTokenCLI+getStats"></a>
 
 ### clI1.getStats() ⇒ <code>Promise</code>
-Get statistics for the token
+Get statistics for the token.
+stats.circulating, stats.burned and stats.transactions are all of type BigNumber(https://www.npmjs.com/package/bignumber.js)
 
 **Kind**: instance method of [<code>CLI1</code>](#CLI1)  
 <a name="BaseTokenCLI+sendTransaction"></a>

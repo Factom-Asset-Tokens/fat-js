@@ -22,16 +22,6 @@ Currently supports **FAT-0** and **FAT-1** token standards.
 
 ## Installation
 
-NPM via package.json:
-
-```json
-"dependencies":{
-	"@fat-token/fat-js": "0.1.2"
-}
-```
-
-or
-
 NPM CLI:
 
 ```
@@ -80,6 +70,12 @@ tx = new TransactionBuilder(tokenChainId)
             .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
             .metadata({type: 'fat-js test run', timestamp: new Date().getTime()})
             .build();
+
+//You can also use string or  BigNumber(https://github.com/MikeMcl/bignumber.js/) format for larger transactions than a native JS integer would support
+tx = new TransactionBuilder(testTokenChainId)
+            .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", '19007199254740991')
+            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", '19007199254740991')
+            .build();
 ```
 
 
@@ -97,7 +93,7 @@ let tx = new TransactionBuilder(tokenChainId)
 	.output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
 	.build();
 
-tx.getInputs(); // => {"FA1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm":150}
+tx.getInputs(); // => {"FA1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm": new BigNumber(150)}
 
 tx.getTokenChainId(); // => "013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec"
 
@@ -109,8 +105,8 @@ const response =
         timestamp: 1550696040,
         data:
             {
-                inputs: {FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC: 10},
-                outputs: {FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM: 10}
+                inputs: {FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC: new BigNumber(150)},
+                outputs: {FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM: new BigNumber(150)}
             }
     };
 
@@ -149,7 +145,7 @@ tx = new TransactionBuilder(testTokenChainId)
                     metadata: {type: 'fat-js test run', timestamp: new Date().getTime()},
                 }
             ])
-            .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+            .sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
             .build();
 ```
 
@@ -188,6 +184,110 @@ const response =
 tx = new Transaction(response);
 
 tx.getEntryHash(); // => "68f3ca3a8c9f7a0cb32dc9717347cb179b63096e051a60ce8be9c292d29795af"
+```
+
+
+
+# Issuance
+
+Build and model issuances of FAT tokens
+
+## FAT-0
+
+### [IssuanceBuilder](docs/IssuanceBuilder0.md)
+
+```javascript
+const IssuanceBuilder = require('fat-js').FAT0.IssuanceBuilder
+
+const issuance = new IssuanceBuilder("mytoken", "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
+            .symbol('TTK')
+            .supply(1000000)
+            .metadata({'abc': 123})
+            .build();
+```
+
+
+
+### [Issuance](docs/Issuance0.md)
+
+```javascript
+const Issuance = require('fat-js').FAT0.Issuance
+
+//From Builder
+const builder = new IssuanceBuilder("mytoken", "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
+            .symbol('TTK');
+
+let issuance = new Issuance(builder);
+
+issuance.getTokenChainId(); // => 013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec
+
+//Or from API response
+const data = {
+            "chainid": "eb55f75551acfb9c4d8dc1f09f11f2512d8aa98ebc1c0d05652ce8d92102fad8",
+            "tokenid": "test0",
+            "issuerid": "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762",
+            "entryhash": "d58588edb831afba683c69eb72bb8c825b198ae2ec02206d54926880727d91b1",
+            "timestamp": 1548276060,
+            "issuance": {
+                "type": "FAT-0",
+                "supply": 99999999,
+                "symbol": "T0"
+	}
+};
+
+issuance = new Issuance(data);
+
+issuance.getTimestamp(); // => 1548276060
+```
+
+
+
+## FAT-1
+
+### [IssuanceBuilder](docs/IssuanceBuilder1.md)
+
+```javascript
+const IssuanceBuilder = require('fat-js').FAT1.IssuanceBuilder
+
+const issuance = new IssuanceBuilder("mytoken", "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
+            .symbol('TNF')
+            .supply(-1)
+            .metadata({'abc': 123})
+            .build();
+```
+
+
+
+### [Issuance](docs/Issuance1.md)
+
+```javascript
+const Issuance = require('fat-js').FAT1.Issuance
+
+//From Builder
+const builder = new IssuanceBuilder("mytoken", "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
+            .symbol('TTK');
+
+let issuance = new Issuance(builder);
+
+issuance.getTokenChainId(); // => 013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec
+
+//Or from API response
+const data = {
+            "chainid": "eb55f75551acfb9c4d8dc1f09f11f2512d8aa98ebc1c0d05652ce8d92102fad8",
+            "tokenid": "test0",
+            "issuerid": "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762",
+            "entryhash": "d58588edb831afba683c69eb72bb8c825b198ae2ec02206d54926880727d91b1",
+            "timestamp": 1548276060,
+            "issuance": {
+                "type": "FAT-0",
+                "supply": 99999999,
+                "symbol": "T0"
+	}
+};
+
+issuance = new Issuance(data);
+
+issuance.getTimestamp(); // => 1548276060
 ```
 
 
@@ -304,15 +404,16 @@ const transactions = await tokenCLI.getTransactions();
 ```
 
 
+
 ### Get Balance
 
-Get the numeric balance of a public Factoid address.
+Get the numeric balance of a public Factoid address. Returned as a [BigNumber](https://www.npmjs.com/package/bignumber.js)
 
 ```javascript
 let balance = await tokenCLI.getBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
 
 /*
-150
+new BigNumber(150)
 */
 ```
 
@@ -338,6 +439,7 @@ let tokens = await tokenCLI.getNFBalance(params);
 ```
 
 
+
 ## Send A Transaction
 
 Send a FAT-0 or FAT-1 transaction.
@@ -361,14 +463,55 @@ const result = await tokenCLI.sendTransaction(tx);
 
 
 
-## Issuance Builder
+# Submitting Transactions & Issuances Directly to Factom
+
+After building and signing a FAT issuance or transaction, you can submit it directly to Factom without using fatd as an intermediary using the [factom-js library](https://github.com/PaulBernier/factomjs#chains-and-entries) 
+
+All you need to get started are Entry Credits and a Factomd endpoint
+
+## Transaction
 
 ```javascript
-const CLIBuilder = require('fat-js').FAT0.IssuanceBuilder
+const { FactomCli } = require('factom');
+const cli = new FactomCli(); // Default factomd connection to localhost:8088 and walletd connection to localhost:8089
+
+const tokenChainId = '013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec';
+
+const tx = new TransactionBuilder(tokenChainId)
+	.input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 150)
+	.output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
+	.build();
+
+//get the signed transaction entry
+//"cast" the chain and entry objects to prevent compatibility issues
+const entry = Entry.builder(tx.getEntry()).build();
+
+await cli.add(entry, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //commit the transaction entry to the token chain
+```
+
+
+
+## Issuance
+
+```javascript
+const { FactomCli } = require('factom');
+const cli = new FactomCli(); // Default factomd connection to localhost:8088 and walletd connection to localhost:8089
+
+const tokenChainId = '013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec';
+
 const issuance = new IssuanceBuilder("mytoken", "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
-                .supply(1000000)
-                .symbol('TTK')
-                .build()
+            .symbol('TTK')
+            .supply(1000000)
+            .metadata({'abc': 123})
+            .build();
+
+//"cast" the chain and entry objects to prevent compatibility issues
+const chain = new Chain(Entry.builder(issuance.getChain().firstEntry).build());
+const entry = Entry.builder(issuance.getEntry()).build();
+
+await cli.add(chain, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //create the token chain on Factom
+
+await cli.add(entry, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //commit the signed issuance entry to the token chain
 ```
 
 
@@ -380,6 +523,8 @@ const issuance = new IssuanceBuilder("mytoken", "888888d027c59579fc47a6fc6c4a5c0
 Get token chain ID from token ID and issuer root chain ID
 
 ```javascript
+const util = require('fat-js').util
+
 const chainId = util.getTokenChainId('mytoken', '888888b2e7c7c63655fa85e0b0c43b4b036a6bede51d38964426f122f61c5584').toString('hex')
 
 /*

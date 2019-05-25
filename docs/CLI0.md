@@ -1,7 +1,7 @@
 <a name="CLI0"></a>
 
 ## CLI0 ⇐ [<code>BaseTokenCLI</code>](#BaseTokenCLI)
-The FAT-0 a CLI access object. Used to request data about a FAT-0 token
+The FAT-0 CLI access object. Used to request data about a FAT-0 token
 
 **Kind**: global class  
 **Extends**: [<code>BaseTokenCLI</code>](#BaseTokenCLI)  
@@ -75,7 +75,7 @@ Get the Factom token chain ID used to originally construct the BaseTokenCLI
 <a name="BaseTokenCLI+getBalance"></a>
 
 ### clI0.getBalance(address) ⇒ <code>Promise</code>
-Get the balance of a Factoid address on the token
+Get the numeric balance of a Factoid address on the token. Returned as type BigNumber(https://www.npmjs.com/package/bignumber.js)
 
 **Kind**: instance method of [<code>CLI0</code>](#CLI0)  
 
@@ -86,7 +86,8 @@ Get the balance of a Factoid address on the token
 <a name="BaseTokenCLI+getStats"></a>
 
 ### clI0.getStats() ⇒ <code>Promise</code>
-Get statistics for the token
+Get statistics for the token.
+stats.circulating, stats.burned and stats.transactions are all of type BigNumber(https://www.npmjs.com/package/bignumber.js)
 
 **Kind**: instance method of [<code>CLI0</code>](#CLI0)  
 <a name="BaseTokenCLI+sendTransaction"></a>

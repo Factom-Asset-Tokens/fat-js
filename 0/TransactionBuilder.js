@@ -2,6 +2,7 @@ const constant = require('../constant');
 const nacl = require('tweetnacl/nacl-fast').sign;
 const fctAddressUtil = require('factom/src/addresses');
 const fctIdentityUtil = require('factom-identity-lib/src/validation');
+const BigNumber = require('bignumber.js');
 
 /**
  * Build & Model A FAT-0 Transaction
@@ -23,7 +24,7 @@ const fctIdentityUtil = require('factom-identity-lib/src/validation');
  * tx = new TransactionBuilder(tokenChainId)
  * .coinbaseInput(10)
  * .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 10)
- * .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+ * .sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
  * .build();
  *
  * //burn transaction
@@ -58,7 +59,7 @@ class TransactionBuilder {
      * Set up a Factoid address input for the transaction
      * @method
      * @param {string} fs - The private Factoid address to use as the input of the transaction
-     * @param {number} amount - The integer amount of token units to send. Must be a safe integer
+     * @param {(number|string|BigNumber)} amount - The integer amount of token units to send. Native JS Numbers (e.x. 123), strings (e.x. "123"), and BigNumbers(e.x. new BigNumber("9999999999999999") are allowed as long as they represent integers
      * @returns {TransactionBuilder}
      */
     input(fs, amount) {
@@ -67,8 +68,8 @@ class TransactionBuilder {
 
         if (!fctAddressUtil.isValidPrivateAddress(fs)) throw new Error("Input address must be a valid private Factoid address");
 
-        if (!Number.isSafeInteger(amount)) throw new Error('Amount must be a safe integer (less than 2^53 - 1)');
-        if (isNaN(amount) || !Number.isInteger(amount) || amount < 1) throw new Error("Input amount must be a positive nonzero integer");
+        amount = new BigNumber(amount);
+        if (!amount.isInteger() || amount.isLessThan(1)) throw new Error("Input amount must be a positive nonzero integer");
 
         this._keys.push(nacl.keyPair.fromSeed(fctAddressUtil.addressToKey(fs)));
         this._inputs[fctAddressUtil.getPublicAddress(fs)] = amount;
@@ -78,7 +79,7 @@ class TransactionBuilder {
     /**
      * Set up a coinbase input for the transaction, which mints tokens
      * @method
-     * @param {number} amount - The integer amount of token units to send
+     * @param {(number|string|BigNumber)} amount - The integer amount of token units to send. Native JS Numbers (e.x. 123), strings (e.x. '123'), and BigNumbers(e.x. new BigNumber("9999999999999999") are allowed as long as they represent integers
      * @returns {TransactionBuilder}
      */
     coinbaseInput(amount) {
@@ -88,16 +89,17 @@ class TransactionBuilder {
     }
 
     /**
-     * Set up a Factoid address output input for the transaction
+     * Set up a Factoid address output for the transaction
      * @method
      * @param {string} fa - The public Factoid address destination of the output
-     * @param {number} amount - The integer amount of token units to recieve. Must be a safe integer
+     * @param {(number|string|BigNumber)} amount - The integer amount of token units to receive at the destination address. Native JS Numbers (e.x. 123), strings (e.x. "123"), and BigNumbers(e.x. new BigNumber("9999999999999999") are allowed as long as they represent integers
      * @returns {TransactionBuilder}
      */
     output(fa, amount) {
         if (!fctAddressUtil.isValidPublicFctAddress(fa)) throw new Error("Output address must be a valid public Factoid address");
-        if (!Number.isSafeInteger(amount)) throw new Error('Amount must be a safe integer (less than 2^53 - 1)');
-        if (isNaN(amount) || !Number.isInteger(amount) || amount < 1) throw new Error("Output amount must be a positive nonzero integer");
+
+        amount = new BigNumber(amount);
+        if (!amount.isInteger() || amount.isLessThan(1)) throw new Error("Input amount must be a positive nonzero integer");
 
         this._outputs[fa] = amount;
         return this;
@@ -106,7 +108,7 @@ class TransactionBuilder {
     /**
      * Set up a burn output for the transaction, which will destroy tokens
      * @method
-     * @param {number} amount - The integer amount of token units to send
+     * @param {(number|string|BigNumber)} amount - The integer amount of token units to receive at the destination address. Native JS Numbers (e.x. 123), strings (e.x. "123"), and BigNumbers(e.x. new BigNumber("9999999999999999") are allowed as long as they represent integers
      * @returns {TransactionBuilder}
      */
     burnOutput(amount) {
@@ -116,20 +118,6 @@ class TransactionBuilder {
     }
 
     /**
-     * [ALIAS FOR sk1(sk1)] Set the SK1 private key of the token's issuing identity. Required for coinbase transactions
-     * @method
-     * @deprecated
-     * @param {string} sk1 - The SK1 private key string of the issuing identity
-     * @returns {TransactionBuilder}
-     */
-    setIssuerSK1(sk1) {
-        if (!fctIdentityUtil.isValidSk1(sk1)) throw new Error("You must include a valid SK1 Key to sign a coinbase transaction");
-        this._sk1 = sk1;
-        return this;
-    }
-
-    /**
-     * Set the SK1 private key of the token's issuing identity. Required for coinbase transactions
      * @method
      * @param {string} sk1 - The SK1 private key string of the issuing identity
      * @returns {TransactionBuilder}
@@ -164,9 +152,9 @@ class TransactionBuilder {
     build() {
         if (Object.keys(this._inputs).length === 0 || Object.keys(this._outputs).length === 0) throw new Error("Must have at least one input and one output");
 
-        const inputSum = Object.values(this._inputs).reduce((amount, sum) => amount + sum, 0);
-        const outputSum = Object.values(this._outputs).reduce((amount, sum) => amount + sum, 0);
-        if (inputSum !== outputSum) throw new Error("Input and output amount sums must match (" + inputSum + " != " + outputSum + ")");
+        const inputSum = Object.values(this._inputs).reduce((amount, sum) => amount.plus(sum), new BigNumber(0));
+        const outputSum = Object.values(this._outputs).reduce((amount, sum) => amount.plus(sum), new BigNumber(0));
+        if (!inputSum.isEqualTo(outputSum)) throw new Error("Input and output amount sums must match (" + inputSum + " != " + outputSum + ")");
 
         if (Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) {
             if (!this._sk1) throw new Error('You must include a valid issuer sk1 key to perform a coinbase transaction')

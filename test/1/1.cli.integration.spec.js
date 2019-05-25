@@ -1,10 +1,11 @@
 const util = require('../../util');
 const constant = require('../../constant');
 const assert = require('chai').assert;
+const BigNumber = require('bignumber.js');
 
 let TransactionBuilder = require('../../1/TransactionBuilder');
 let Transaction = require('../../1/Transaction');
-let Issuance = require('../../1/Issuance').Issuance;
+let Issuance = require('../../1/Issuance');
 
 const tokenChainId = '962a18328c83f370113ff212bae21aaf34e5252bc33d59c9db3df2a6bfda966f';
 
@@ -73,8 +74,8 @@ describe('FAT-1 CLI Integration', function () {
 
             const balance = await tokenCLI.getBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
             assert.isDefined(balance);
-            assert.isNumber(balance);
-            assert.isAbove(balance, 0);
+            assert.instanceOf(balance, BigNumber);
+            assert.isAbove(balance.toNumber(), 0);
         });
 
         it('get-nf-balance', async function () {
@@ -104,21 +105,6 @@ describe('FAT-1 CLI Integration', function () {
             assert.isDefined(tokens);
             assert.isArray(tokens);
             assert.isTrue(tokens.every(token => typeof token === 'object'));
-        });
-
-        it('get-stats', async function () {
-            const tokenCLI = await cli.getTokenCLI(tokenChainId);
-
-            const stats = await tokenCLI.getStats();
-            assert.isDefined(stats);
-            assert.isObject(stats);
-
-            //regression testing
-            assert.isNumber(stats.circulating);
-            assert.isNumber(stats.burned);
-            assert.isNumber(stats.transactions);
-            assert.isNumber(stats.issuancets);
-            assert.isNumber(stats.lasttxts);
         });
 
         it('send-transaction', async function () {
@@ -169,7 +155,7 @@ describe('FAT-1 CLI Integration', function () {
                         metadata: {type: 'fat-js test run', timestamp: new Date().getTime()},
                     }
                 ])
-                .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+                .sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
                 .build();
 
             const result = await tokenCLI.sendTransaction(tx);
@@ -184,7 +170,7 @@ describe('FAT-1 CLI Integration', function () {
             const tx = new TransactionBuilder(tokenChainId)
                 .coinbaseInput([randomId])
                 .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [randomId])
-                .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+                .sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
                 .build();
 
             const result = await tokenCLI.sendTransaction(tx);

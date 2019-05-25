@@ -4,6 +4,8 @@ const {Entry} = require('factom');
 const fctUtil = require('factom/src/util');
 const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
 const TransactionBuilder = require('./TransactionBuilder');
+const JSONBig = require('json-bigint')({strict: true});
+const BigNumber = require('bignumber.js');
 
 /**
  * Model A signed or unsigned FAT-0 Transaction
@@ -50,7 +52,7 @@ class Transaction {
             this._outputs = builder._outputs;
             this._metadata = builder._metadata;
 
-            this._content = JSON.stringify({inputs: this._inputs, outputs: this._outputs, metadata: this._metadata}); //snapshot the tx object
+            this._content = JSONBig.stringify({inputs: this._inputs, outputs: this._outputs, metadata: this._metadata}); //snapshot the tx object
 
             const unixSeconds = Math.round(new Date().getTime() / 1000);
             this._timestamp = unixSeconds;
@@ -98,9 +100,15 @@ class Transaction {
             }
         } else { //from object
             if (!builder.data.inputs) throw new Error("Valid FAT-0 transactions must include inputs");
+            Object.keys(builder.data.inputs).forEach((address) => {
+                builder.data.inputs[address] = new BigNumber(builder.data.inputs[address])
+            });
             this._inputs = builder.data.inputs;
 
             if (!builder.data.outputs) throw new Error("Valid FAT-0 transactions must include outputs");
+            Object.keys(builder.data.outputs).forEach((address) => {
+                builder.data.outputs[address] = new BigNumber(builder.data.outputs[address])
+            });
             this._outputs = builder.data.outputs;
 
             this._metadata = builder.data.metadata;
@@ -145,8 +153,25 @@ class Transaction {
     }
 
     /**
+     * Get the factom-js Entry object representing the signed FAT transaction. Can be submitted directly to Factom
      * @method
+     * @see https://github.com/PaulBernier/factomjs/blob/master/src/entry.js
      * @returns {Entry} - Get the Factom-JS Factom entry representation of the transaction, including extids & other signatures
+     * @example
+     * const {FactomCli, Entry, Chain} = require('factom');
+     const cli = new FactomCli(); // Default factomd connection to localhost:8088 and walletd connection to localhost:8089
+
+     const tokenChainId = '013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec';
+
+     const tx = new TransactionBuilder(tokenChainId)
+     .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 150)
+     .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
+     .build();
+
+     //"cast" the entry object to prevent compatibility issues
+     const entry = Entry.builder(tx.getEntry()).build();
+
+     await cli.add(entry, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //commit the transaction entry to the token chain
      */
     getEntry() {
         if (!this._tokenChainId) throw new Error('Can only get a valid Factom entry for a transaction built using TransactionBuilder');

@@ -5,8 +5,8 @@ const Chain = require('factom/src/chain').Chain;
 
 describe('Issuance Unit', function () {
 
-    let IssuanceBuilder = require('../../1/Issuance').IssuanceBuilder;
-    let Issuance = require('../../1/Issuance').Issuance;
+    let IssuanceBuilder = require('../../1/IssuanceBuilder');
+    let Issuance = require('../../1/Issuance');
 
     it('Builder', function () {
         let issuance = new IssuanceBuilder("mytoken", "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
@@ -17,7 +17,7 @@ describe('Issuance Unit', function () {
         assert.strictEqual(issuance.getIssuerIdentityRootChainId(), '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762');
         assert.strictEqual(issuance.getType(), constant.FAT1);
         assert.strictEqual(issuance.getSymbol(), 'TNFT');
-        assert.strictEqual(issuance.getSupply(), 1000000);
+        assert.isTrue(issuance.getSupply().isEqualTo(1000000));
 
         //Initial issuance specific
         assert.strictEqual(issuance.getTokenId(), 'mytoken');

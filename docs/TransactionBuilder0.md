@@ -12,7 +12,6 @@ Build & Model A FAT-0 Transaction
     * [.coinbaseInput(amount)](#TransactionBuilder0+coinbaseInput) ⇒ <code>TransactionBuilder</code>
     * [.output(fa, amount)](#TransactionBuilder0+output) ⇒ <code>TransactionBuilder</code>
     * [.burnOutput(amount)](#TransactionBuilder0+burnOutput) ⇒ <code>TransactionBuilder</code>
-    * ~~[.setIssuerSK1(sk1)](#TransactionBuilder0+setIssuerSK1) ⇒ <code>TransactionBuilder</code>~~
     * [.sk1(sk1)](#TransactionBuilder0+sk1) ⇒ <code>TransactionBuilder</code>
     * [.metadata(metadata)](#TransactionBuilder0+metadata) ⇒ <code>TransactionBuilder</code>
     * [.build()](#TransactionBuilder0+build) ⇒ <code>Transaction</code>
@@ -40,7 +39,7 @@ let tx = new TransactionBuilder(tokenChainId)
 tx = new TransactionBuilder(tokenChainId)
 .coinbaseInput(10)
 .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 10)
-.setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+.sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
 .build();
 
 //burn transaction
@@ -66,7 +65,7 @@ Set up a Factoid address input for the transaction
 | Param | Type | Description |
 | --- | --- | --- |
 | fs | <code>string</code> | The private Factoid address to use as the input of the transaction |
-| amount | <code>number</code> | The integer amount of token units to send. Must be a safe integer |
+| amount | <code>number</code> \| <code>string</code> \| <code>BigNumber</code> | The integer amount of token units to send. Native JS Numbers (e.x. 123), strings (e.x. "123"), and BigNumbers(e.x. new BigNumber("9999999999999999") are allowed as long as they represent integers |
 
 <a name="TransactionBuilder0+coinbaseInput"></a>
 
@@ -77,19 +76,19 @@ Set up a coinbase input for the transaction, which mints tokens
 
 | Param | Type | Description |
 | --- | --- | --- |
-| amount | <code>number</code> | The integer amount of token units to send |
+| amount | <code>number</code> \| <code>string</code> \| <code>BigNumber</code> | The integer amount of token units to send. Native JS Numbers (e.x. 123), strings (e.x. '123'), and BigNumbers(e.x. new BigNumber("9999999999999999") are allowed as long as they represent integers |
 
 <a name="TransactionBuilder0+output"></a>
 
 ### transactionBuilder0.output(fa, amount) ⇒ <code>TransactionBuilder</code>
-Set up a Factoid address output input for the transaction
+Set up a Factoid address output for the transaction
 
 **Kind**: instance method of [<code>TransactionBuilder0</code>](#TransactionBuilder0)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | fa | <code>string</code> | The public Factoid address destination of the output |
-| amount | <code>number</code> | The integer amount of token units to recieve. Must be a safe integer |
+| amount | <code>number</code> \| <code>string</code> \| <code>BigNumber</code> | The integer amount of token units to receive at the destination address. Native JS Numbers (e.x. 123), strings (e.x. "123"), and BigNumbers(e.x. new BigNumber("9999999999999999") are allowed as long as they represent integers |
 
 <a name="TransactionBuilder0+burnOutput"></a>
 
@@ -100,26 +99,11 @@ Set up a burn output for the transaction, which will destroy tokens
 
 | Param | Type | Description |
 | --- | --- | --- |
-| amount | <code>number</code> | The integer amount of token units to send |
-
-<a name="TransactionBuilder0+setIssuerSK1"></a>
-
-### ~~transactionBuilder0.setIssuerSK1(sk1) ⇒ <code>TransactionBuilder</code>~~
-***Deprecated***
-
-[ALIAS FOR sk1(sk1)] Set the SK1 private key of the token's issuing identity. Required for coinbase transactions
-
-**Kind**: instance method of [<code>TransactionBuilder0</code>](#TransactionBuilder0)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| sk1 | <code>string</code> | The SK1 private key string of the issuing identity |
+| amount | <code>number</code> \| <code>string</code> \| <code>BigNumber</code> | The integer amount of token units to receive at the destination address. Native JS Numbers (e.x. 123), strings (e.x. "123"), and BigNumbers(e.x. new BigNumber("9999999999999999") are allowed as long as they represent integers |
 
 <a name="TransactionBuilder0+sk1"></a>
 
 ### transactionBuilder0.sk1(sk1) ⇒ <code>TransactionBuilder</code>
-Set the SK1 private key of the token's issuing identity. Required for coinbase transactions
-
 **Kind**: instance method of [<code>TransactionBuilder0</code>](#TransactionBuilder0)  
 
 | Param | Type | Description |
