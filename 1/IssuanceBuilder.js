@@ -13,12 +13,12 @@ class IssuanceBuilder {
     /**
      * @constructor
      * @param {string} tokenId - arbitrary string to use as a token identifier
-     * @param {string} rootChainId - 64 character Factom Chain ID of the identity to issue the token under
-     * @param {string} sk1 - SK1 Private key belonging to the identity at rootChainId
+     * @param {string} identityChainId - 64 character Factom Chain ID of the identity to issue the token under
+     * @param {string} sk1 - SK1 Private key belonging to the identity at identityChainId
      */
-    constructor(tokenId, rootChainId, sk1) {
-        if (!fctIdentityUtil.isValidIdentityChainId(rootChainId)) throw new Error("You must include a valid issuer identity Root Chain Id to issue a FAT token");
-        this._rootChainId = rootChainId;
+    constructor(tokenId, identityChainId, sk1) {
+        if (!fctIdentityUtil.isValidIdentityChainId(identityChainId)) throw new Error("You must include a valid issuer identity Chain Id to issue a FAT token");
+        this._rootChainId = identityChainId;
 
         if (tokenId === undefined || typeof tokenId !== 'string') throw new Error('Token is a required string');
         this._tokenId = tokenId;

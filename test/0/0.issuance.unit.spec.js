@@ -13,7 +13,7 @@ describe('Issuance Unit', function () {
             .metadata({'abc': 123})
             .build();
 
-        assert.strictEqual(issuance.getIssuerIdentityRootChainId(), '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762');
+        assert.strictEqual(issuance.getIssuerChainId(), '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762');
         assert.strictEqual(issuance.getType(), constant.FAT0);
         assert.strictEqual(issuance.getSymbol(), 'TTK');
         assert.isTrue(issuance.getSupply().isEqualTo(1000000));

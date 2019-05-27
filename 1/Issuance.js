@@ -93,7 +93,7 @@ class Issuance {
      * @method
      * @returns {string} - The token ID string chosen by the issuer
      */
-    getIssuerIdentityRootChainId() {
+    getIssuerChainId() {
         return this._rootChainId;
     }
 

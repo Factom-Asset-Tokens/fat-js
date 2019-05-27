@@ -14,7 +14,7 @@ describe('Issuance Unit', function () {
             .supply(1000000)
             .build();
 
-        assert.strictEqual(issuance.getIssuerIdentityRootChainId(), '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762');
+        assert.strictEqual(issuance.getIssuerChainId(), '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762');
         assert.strictEqual(issuance.getType(), constant.FAT1);
         assert.strictEqual(issuance.getSymbol(), 'TNFT');
         assert.isTrue(issuance.getSupply().isEqualTo(1000000));
@@ -44,7 +44,7 @@ describe('Issuance Unit', function () {
 
         const issuance = new Issuance(data);
 
-        assert.strictEqual(issuance.getIssuerIdentityRootChainId(), '888888ab72e748840d82c39213c969a11ca6cb026f1d3da39fd82b95b3c1fced');
+        assert.strictEqual(issuance.getIssuerChainId(), '888888ab72e748840d82c39213c969a11ca6cb026f1d3da39fd82b95b3c1fced');
         assert.strictEqual(issuance.getType(), constant.FAT1);
         assert.strictEqual(issuance.getSymbol(), 'TNF1');
         assert.strictEqual(issuance.getSupply(), 99999999);
