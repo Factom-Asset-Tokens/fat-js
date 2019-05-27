@@ -21,7 +21,7 @@ const BigNumber = require('bignumber.js');
  *
  * tx.getInputs(); // => {"FA1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm":150}
  *
- * tx.getTokenChainId(); // => "013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec"
+ * tx.getChainId(); // => "013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec"
  *
  *
  * //or from API response
@@ -187,7 +187,7 @@ class Transaction {
      * @method
      * @returns {string} - Get the Factom chain ID of the transaction's token. Returns undefined if the Transaction was constructed from an object
      */
-    getTokenChainId() {
+    getChainId() {
         return this._tokenChainId;
     }
 

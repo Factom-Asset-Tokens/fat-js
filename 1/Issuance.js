@@ -75,7 +75,7 @@ class Issuance {
      * @method
      * @returns {string} - The Factom Chain ID calculated from rootChainID and tokenId
      */
-    getTokenChainId() {
+    getChainId() {
         return this._tokenChainId;
     }
 

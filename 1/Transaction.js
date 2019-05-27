@@ -166,7 +166,7 @@ class Transaction {
      * @method
      * @returns {string} - Get the Factom chain ID of the transaction's token. Returns undefined if the Transaction was constructed from an object
      */
-    getTokenChainId() {
+    getChainId() {
         return this._tokenChainId;
     }
 

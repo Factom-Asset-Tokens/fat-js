@@ -249,7 +249,7 @@ class BaseTokenCLI {
      * @method
      * @returns {string}
      */
-    getTokenChainId() {
+    getChainId() {
         return this._tokenChainId;
     }
 

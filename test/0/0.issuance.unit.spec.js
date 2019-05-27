@@ -21,7 +21,7 @@ describe('Issuance Unit', function () {
 
         //Initial issuance specific
         assert.strictEqual(issuance.getTokenId(), 'mytoken');
-        assert.isDefined(issuance.getTokenChainId());
+        assert.isDefined(issuance.getChainId());
 
         assert.instanceOf(issuance.getEntry(), Entry);
         assert.instanceOf(issuance.getChain(), Chain);

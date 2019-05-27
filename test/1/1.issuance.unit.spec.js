@@ -21,7 +21,7 @@ describe('Issuance Unit', function () {
 
         //Initial issuance specific
         assert.strictEqual(issuance.getTokenId(), 'mytoken');
-        assert.isDefined(issuance.getTokenChainId());
+        assert.isDefined(issuance.getChainId());
 
         assert.instanceOf(issuance.getEntry(), Entry);
         assert(issuance.getChain(), Chain);
@@ -50,7 +50,7 @@ describe('Issuance Unit', function () {
         assert.strictEqual(issuance.getSupply(), 99999999);
 
         assert.strictEqual(issuance.getTokenId(), 'testfat1-0');
-        assert.strictEqual(issuance.getTokenChainId(), 'eb55f75551acfb9c4d8dc1f09f11f2512d8aa98ebc1c0d05652ce8d92102fad8');
+        assert.strictEqual(issuance.getChainId(), 'eb55f75551acfb9c4d8dc1f09f11f2512d8aa98ebc1c0d05652ce8d92102fad8');
         assert.strictEqual(issuance.getEntryhash(), 'd58588edb831afba683c69eb72bb8c825b198ae2ec02206d54926880727d91b1');
         assert.strictEqual(issuance.getTimestamp(), 1548276060);
 
