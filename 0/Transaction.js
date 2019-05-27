@@ -1,95 +1,58 @@
 const constant = require('../constant');
 const nacl = require('tweetnacl/nacl-fast').sign;
 const {Entry} = require('factom');
-const fctAddressUtil = require('factom/src/addresses');
 const fctUtil = require('factom/src/util');
-const fctIdentityUtil = require('factom-identity-lib/src/validation');
 const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
+const TransactionBuilder = require('./TransactionBuilder');
+const JSONBig = require('json-bigint')({strict: true});
+const BigNumber = require('bignumber.js');
 
-class TransactionBuilder {
-    constructor(tokenChainId) {
-        if (!tokenChainId || tokenChainId.length !== 64) throw new Error('Token chain ID must be a valid Factom chain ID');
-        this._tokenChainId = tokenChainId;
-
-        this._keys = [];
-        this._inputs = {};
-        this._outputs = {};
-    }
-
-    input(fs, amount) {
-        //if this is setup as coinbase, prevent additional inputs
-        if (Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) throw new Error('Cannot add an additional input to a coinbase transaction');
-
-        if (!fctAddressUtil.isValidPrivateAddress(fs)) throw new Error("Input address must be a valid private Factoid address");
-
-        if (!Number.isSafeInteger(amount)) throw new Error('Amount must be a safe integer (less than 2^53 - 1)');
-        if (isNaN(amount) || !Number.isInteger(amount) || amount < 1) throw new Error("Input amount must be a positive nonzero integer");
-
-        this._keys.push(nacl.keyPair.fromSeed(fctAddressUtil.addressToKey(fs)));
-        this._inputs[fctAddressUtil.getPublicAddress(fs)] = amount;
-        return this;
-    }
-
-    coinbaseInput(amount) {
-        if (this._inputs.length > 0) throw new Error('Coinbase transactions may only have a single input');
-        this.input(constant.COINBASE_ADDRESS_PRIVATE, amount);
-        return this;
-    }
-
-    output(fa, amount) {
-        if (!fctAddressUtil.isValidPublicFctAddress(fa)) throw new Error("Output address must be a valid public Factoid address");
-        if (!Number.isSafeInteger(amount)) throw new Error('Amount must be a safe integer (less than 2^53 - 1)');
-        if (isNaN(amount) || !Number.isInteger(amount) || amount < 1) throw new Error("Output amount must be a positive nonzero integer");
-
-        this._outputs[fa] = amount;
-        return this;
-    }
-
-    burnOutput(amount) {
-        if (Object.keys(this._outputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) throw new Error('Cannot add a duplicate burn output to a burn transaction');
-        this.output(constant.COINBASE_ADDRESS_PUBLIC, amount);
-        return this;
-    }
-
-    setIssuerSK1(sk1) {
-        if (!fctIdentityUtil.isValidSk1(sk1)) throw new Error("You must include a valid SK1 Key to sign a coinbase transaction");
-        this._sk1 = sk1;
-        return this;
-    }
-
-    metadata(metadata) {
-        try {
-            JSON.stringify(metadata)
-        } catch (e) {
-            throw new Error("Transaction metadata bust be a valid JSON object or primitive");
-        }
-        this._metadata = metadata;
-        return this;
-    }
-
-    build() {
-        if (Object.keys(this._inputs).length === 0 || Object.keys(this._outputs).length === 0) throw new Error("Must have at least one input and one output");
-
-        const inputSum = Object.values(this._inputs).reduce((amount, sum) => amount + sum, 0);
-        const outputSum = Object.values(this._outputs).reduce((amount, sum) => amount + sum, 0);
-        if (inputSum !== outputSum) throw new Error("Input and output amount sums must match (" + inputSum + " != " + outputSum + ")");
-
-        if (Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) {
-            if (!this._sk1) throw new Error('You must include a valid issuer sk1 key to perform a coinbase transaction')
-        }
-
-        return new Transaction(this);
-    }
-}
-
+/**
+ * Model A signed or unsigned FAT-0 Transaction
+ * @alias Transaction0
+ * @protected
+ * @class
+ * @example
+ * //From transaction builder
+ * let tx = new TransactionBuilder(tokenChainId)
+ * .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 150)
+ * .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
+ * .build();
+ *
+ * tx.getInputs(); // => {"FA1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm":150}
+ *
+ * tx.getChainId(); // => "013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec"
+ *
+ *
+ * //or from API response
+ * const response =
+ * {
+ *     entryhash: '68f3ca3a8c9f7a0cb32dc9717347cb179b63096e051a60ce8be9c292d29795af',
+ *     timestamp: 1550696040,
+ *     data:
+ *         {
+ *             inputs: {FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC: 10},
+ *             outputs: {FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM: 10}
+ *         }
+ * };
+ *
+ * tx = new Transaction(response);
+ *
+ * tx.getEntryHash(); // => "68f3ca3a8c9f7a0cb32dc9717347cb179b63096e051a60ce8be9c292d29795af"
+ */
 class Transaction {
+
+    /**
+     * @constructor
+     * @param {(TransactionBuilder|object)} builder - Either a TransactionBuilder object or a FAT-0 transaction object content
+     */
     constructor(builder) {
         if (builder instanceof TransactionBuilder) {
             this._inputs = builder._inputs;
             this._outputs = builder._outputs;
             this._metadata = builder._metadata;
 
-            this._content = JSON.stringify({inputs: this._inputs, outputs: this._outputs, metadata: this._metadata}); //snapshot the tx object
+            this._content = JSONBig.stringify({inputs: this._inputs, outputs: this._outputs, metadata: this._metadata}); //snapshot the tx object
 
             const unixSeconds = Math.round(new Date().getTime() / 1000);
             this._timestamp = unixSeconds;
@@ -137,9 +100,15 @@ class Transaction {
             }
         } else { //from object
             if (!builder.data.inputs) throw new Error("Valid FAT-0 transactions must include inputs");
+            Object.keys(builder.data.inputs).forEach((address) => {
+                builder.data.inputs[address] = new BigNumber(builder.data.inputs[address])
+            });
             this._inputs = builder.data.inputs;
 
             if (!builder.data.outputs) throw new Error("Valid FAT-0 transactions must include outputs");
+            Object.keys(builder.data.outputs).forEach((address) => {
+                builder.data.outputs[address] = new BigNumber(builder.data.outputs[address])
+            });
             this._outputs = builder.data.outputs;
 
             this._metadata = builder.data.metadata;
@@ -151,22 +120,59 @@ class Transaction {
         Object.freeze(this);
     }
 
+    /**
+     * @method
+     * @returns {object} - The transaction's inputs
+     */
     getInputs() {
         return this._inputs;
     }
 
+    /**
+     * @method
+     * @returns {object} - The transaction's outputs
+     */
     getOutputs() {
         return this._outputs;
     }
 
+    /**
+     * @method
+     * @returns {*} - The transaction's metadata (if present, undefined if not)
+     */
     getMetadata() {
         return this._metadata;
     }
 
+    /**
+     * @method
+     * @returns {boolean} - Whether the transaction is a coinbase transaction or not
+     */
     isCoinbase() {
         return Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC) !== undefined;
     }
 
+    /**
+     * Get the factom-js Entry object representing the signed FAT transaction. Can be submitted directly to Factom
+     * @method
+     * @see https://github.com/PaulBernier/factomjs/blob/master/src/entry.js
+     * @returns {Entry} - Get the Factom-JS Factom entry representation of the transaction, including extids & other signatures
+     * @example
+     * const {FactomCli, Entry, Chain} = require('factom');
+     const cli = new FactomCli(); // Default factomd connection to localhost:8088 and walletd connection to localhost:8089
+
+     const tokenChainId = '013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec';
+
+     const tx = new TransactionBuilder(tokenChainId)
+     .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 150)
+     .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
+     .build();
+
+     //"cast" the entry object to prevent compatibility issues
+     const entry = Entry.builder(tx.getEntry()).build();
+
+     await cli.add(entry, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //commit the transaction entry to the token chain
+     */
     getEntry() {
         if (!this._tokenChainId) throw new Error('Can only get a valid Factom entry for a transaction built using TransactionBuilder');
 
@@ -177,20 +183,29 @@ class Transaction {
             .build();
     }
 
-    getTokenChainId() {
+    /**
+     * @method
+     * @returns {string} - Get the Factom chain ID of the transaction's token. Returns undefined if the Transaction was constructed from an object
+     */
+    getChainId() {
         return this._tokenChainId;
     }
 
+    /**
+     * @method
+     * @returns {string} - Get the Factom entryhash of the transaction. Only defined if the Transaction was constructed from an object
+     */
     getEntryhash() {
         return this._entryhash;
     }
 
+    /**
+     * @method
+     * @returns {number} - Get the unix timestamp of when the Transaction was signed (locally built transactions) or committed to Factom (from RPC response JSON)
+     */
     getTimestamp() {
         return this._timestamp;
     }
 }
 
-module.exports = {
-    Transaction,
-    TransactionBuilder
-};
+module.exports = Transaction;

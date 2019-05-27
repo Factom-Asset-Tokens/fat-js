@@ -9,7 +9,6 @@ describe('CLI Unit', function () {
         let cli = new CLIBuilder()
             .host(process.env.fatd)
             .port(1234)
-            .auth('my-user', 'my-pass')
             .build();
     });
 
@@ -17,7 +16,6 @@ describe('CLI Unit', function () {
         let cli = new CLIBuilder()
             .host(process.env.fatd)
             .port(1234)
-            .auth('my-user', 'my-pass')
             .build();
 
         let tokenCLI = cli.getTokenCLISync('0cccd100a1801c0cf4aa2104b15dec94fe6f45d0f3347b016ed20d81059494df', 'FAT-0');

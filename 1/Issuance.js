@@ -1,61 +1,39 @@
 const nacl = require('tweetnacl/nacl-fast').sign;
 const {Entry, Chain} = require('factom');
 const util = require('../util');
-const fctCryptoValidation = require('factom-identity-lib/src/validation');
+const constant = require('../constant');
 const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
-const fctIdentityUtil = require('factom-identity-lib/src/validation');
 const fctUtil = require('factom/src/util');
+const JSONBig = require('json-bigint')({strict: true});
 
-const RCD_TYPE_1 = Buffer.from('01', 'hex');
+const IssuanceBuilder = require('./IssuanceBuilder');
 
-
-class IssuanceBuilder {
-
-    constructor(tokenId, rootChainId, sk1) {
-        if (!fctIdentityUtil.isValidIdentityChainId(rootChainId)) throw new Error("You must include a valid issuer identity Root Chain Id to issue a FAT token");
-        this._rootChainId = rootChainId;
-
-        if (tokenId === undefined || typeof tokenId !== 'string') throw new Error('Token is a required string');
-        this._tokenId = tokenId;
-
-        if (!fctCryptoValidation.isValidSk1(sk1)) throw new Error("Supplied key is not a valid sk1 private key");
-        this._sk1 = sk1;
-
-        this._type = 'FAT-1'
-    }
-
-    symbol(symbol) {
-        if (!symbol) throw new Error("Token symbol must be defined");
-        if (!new RegExp('[A-Z ]+').test(symbol)) throw new Error("Token symbol must only contain capital letters A-Z");
-        if (symbol.length == 0 || symbol.length > 4) throw new Error("Token symbol must be 1 - 4 characters");
-        this._symbol = symbol;
-        return this;
-    }
-
-    supply(supply) {
-        if (isNaN(supply)) throw new Error("Supply must be a number");
-        if (supply === 0 || supply < -1) throw new Error("Supply must be equal to -1(infinite) or greater than 0");
-        this._supply = supply;
-        return this;
-    }
-
-    build() {
-        //validate required fields
-        if (this._supply === undefined) this._supply = -1; //unlimited supply by default
-
-        return new Issuance(this);
-    }
-}
-
+/**
+ * Build & Model A FAT-0 Issuance
+ * @alias Issuance1
+ * @public
+ * @class
+ */
 class Issuance {
+
+    /**
+     * @constructor
+     * @param {(IssuanceBuilder | Object)} builder - The IssuanceBuilder or object to construct the issuance from
+     */
     constructor(builder) {
 
         if (builder instanceof IssuanceBuilder) {
             this._type = builder._type;
             this._symbol = builder._symbol;
             this._supply = builder._supply;
+            this._metadata = builder._metadata;
 
-            this._content = JSON.stringify(this);
+            this._content = JSONBig.stringify({
+                type: this._type,
+                symbol: this._symbol,
+                supply: this._supply,
+                metadata: this._metadata
+            });
 
             this._tokenId = builder._tokenId;
             this._rootChainId = builder._rootChainId;
@@ -70,9 +48,9 @@ class Issuance {
 
             const key = nacl.keyPair.fromSeed(fctIdentityCrypto.extractSecretFromIdentityKey(builder._sk1));
 
-            const rcd = [Buffer.concat([RCD_TYPE_1, Buffer.from(key.publicKey)])];
+            const rcd = Buffer.concat([constant.RCD_TYPE_1, Buffer.from(key.publicKey)]);
 
-            const signature = [nacl.detached(fctUtil.sha512(Buffer.concat([index, timestamp, chainId, content])), key.secretKey)];
+            const signature = nacl.detached(fctUtil.sha512(Buffer.concat([index, timestamp, chainId, content])), key.secretKey);
 
             this._extIds = [timestamp, rcd, signature];
 
@@ -92,38 +70,95 @@ class Issuance {
         Object.freeze(this);
     }
 
-    getTokenChainId() {
+    /**
+     * Get the Factom Chain ID for this token issuance
+     * @method
+     * @returns {string} - The Factom Chain ID calculated from rootChainID and tokenId
+     */
+    getChainId() {
         return this._tokenChainId;
     }
 
+    /**
+     * Get the token ID string for this token issuance
+     * @method
+     * @returns {string} - The token ID string chosen by the issuer
+     */
     getTokenId() {
         return this._tokenId;
     }
 
-    getIssuerIdentityRootChainId() {
+    /**
+     * Get identity's Factom Chain ID string for this token
+     * @method
+     * @returns {string} - The token ID string chosen by the issuer
+     */
+    getIssuerChainId() {
         return this._rootChainId;
     }
 
+    /**
+     * Get the entryhash of this issuance object. Only populated for entries parsed from fatd
+     * @method
+     * @returns {string} - The Factom Entryhash
+     */
     getEntryhash() {
         return this._entryhash;
     }
 
+    /**
+     * Get the timestamp in unix seconds of when this issuance object was signed
+     * @method
+     * @returns {number} - The signing timestamp
+     */
     getTimestamp() {
         return this._timestamp;
     }
 
+    /**
+     * Get the type string constant of which type of FAT token this issuance represent
+     * @method
+     * @returns {string} - Returns "FAT-1"
+     */
     getType() {
         return this._type;
     }
 
+    /**
+     * Get the symbol string of this FAT token represent. E.x. MYT
+     * @method
+     * @returns {string} - The symbol string chosen by the issuer
+     */
     getSymbol() {
         return this._symbol;
     }
 
+    /**
+     * Get the maximum circulating supply for this FAT token issuance
+     * @method
+     * @returns {BigNumber} [supply=-1] - The maximum number of circulating tokens allowed
+     */
     getSupply() {
         return this._supply;
     }
 
+    /**
+     * Get the metadata included with the FAT token issuance, if present
+     * @method
+     * @returns {*} - The issuances's metadata (if present, undefined if not)
+     */
+    getMetadata() {
+        return this._metadata;
+    }
+
+    /**
+     * Get the Chain object representing the the token chain, including the first entry (chain establishment entry)
+     * Can be submitted directly to Factom using factom-js. After the chain is established the signed issuance entry
+     * may be placed on the new chain to issue the token (via getEntry())
+     * @method
+     * @see https://github.com/PaulBernier/factomjs/blob/master/src/chain.js
+     * @returns {Chain} - The Chain object for the issuance
+     */
     getChain() {
         return new Chain(Entry.builder()
             .extId(Buffer.from("token"))
@@ -133,6 +168,31 @@ class Issuance {
             .build())
     }
 
+    /**
+     * Get the Entry object representing the initialization entry (token establishment entry)
+     * Can be submitted directly to Factom
+     * @method
+     * @see https://github.com/PaulBernier/factomjs/blob/master/src/entry.js
+     * @returns {Entry} - The complete entry establishing the token's issuance
+     * @example
+     * const {FactomCli, Entry, Chain} = require('factom');
+     const cli = new FactomCli(); // Default factomd connection to localhost:8088 and walletd connection to localhost:8089
+
+     const tokenChainId = '013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec';
+
+     const issuance = new IssuanceBuilder("mytoken", "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
+     .symbol('TTK')
+     .supply(1000000)
+     .metadata({'abc': 123})
+     .build();
+
+     //"cast" the chain and entry objects to prevent compatibility issues
+     const chain = new Chain(Entry.builder(issuance.getChain().firstEntry).build());
+     const entry = Entry.builder(issuance.getEntry()).build();
+
+     await cli.add(chain, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //create the token chain on Factom
+     await cli.add(entry, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //commit the signed issuance entry to the token chain
+     */
     getEntry() {
         return Entry.builder()
             .chainId(this._tokenChainId)
@@ -142,7 +202,4 @@ class Issuance {
     }
 }
 
-module.exports = {
-    IssuanceBuilder,
-    Issuance
-};
+module.exports = Issuance;

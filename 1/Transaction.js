@@ -1,114 +1,22 @@
-const util = require('../util');
 const constant = require('../constant');
 const nacl = require('tweetnacl/nacl-fast').sign;
 const {Entry} = require('factom');
-const fctAddressUtil = require('factom/src/addresses');
 const fctUtil = require('factom/src/util');
-const fctIdentityUtil = require('factom-identity-lib/src/validation');
 const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
+const TransactionBuilder = require('./TransactionBuilder');
 
-class TransactionBuilder {
-    constructor(tokenChainId) {
-        if (!tokenChainId || tokenChainId.length !== 64) throw new Error('Token chain ID must be a valid Factom chain ID');
-        this._tokenChainId = tokenChainId;
-
-        this._keys = [];
-        this._inputs = {};
-        this._outputs = {};
-    }
-
-    input(fs, ids) {
-
-        //if this is setup as coinbase, prevent additional inputs
-        if (Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) throw new Error('Cannot add an additional input to a coinbase transaction');
-
-        if (!fctAddressUtil.isValidPrivateAddress(fs)) throw new Error("Input address must be a valid private Factoid address");
-        if (!util.validateNFIds(ids)) throw new Error("Invalid ID range: " + JSON.stringify(ids));
-
-        this._keys.push(nacl.keyPair.fromSeed(fctAddressUtil.addressToKey(fs)));
-        this._inputs[fctAddressUtil.getPublicAddress(fs)] = ids;
-        return this;
-    }
-
-    coinbaseInput(ids) {
-        if (this._inputs.length > 0) throw new Error('Coinbase transactions may only have a single input');
-
-        this.input(constant.COINBASE_ADDRESS_PRIVATE, ids);
-        return this;
-    }
-
-    output(fa, ids) {
-        if (!fctAddressUtil.isValidPublicFctAddress(fa)) throw new Error("Output address must be a valid public Factoid address");
-        if (!util.validateNFIds(ids)) throw new Error("Invalid ID range: " + JSON.stringify(ids));
-
-        // if (!Array.isArray(ids)) this._outputs[fa] = [ids];
-        else this._outputs[fa] = ids;
-        return this;
-    }
-
-    burnOutput(ids) {
-        if (Object.keys(this._outputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) throw new Error('Cannot add a duplicate burn output to a burn transaction');
-        this.output(constant.COINBASE_ADDRESS_PUBLIC, ids);
-        return this;
-    }
-
-    setIssuerSK1(sk1) {
-        if (!fctIdentityUtil.isValidSk1(sk1)) throw new Error("You must include a valid SK1 Key to sign a coinbase transaction");
-        this._sk1 = sk1;
-        return this;
-    }
-
-    metadata(metadata) {
-        try {
-            JSON.stringify(metadata)
-        } catch (e) {
-            throw new Error("Transaction metadata bust be a valid JSON object or primitive");
-        }
-        this._metadata = metadata;
-        return this;
-    }
-
-    tokenMetadata(tokenMetadata) {
-
-        if (!Array.isArray(tokenMetadata)) throw new Error('Token metadata must be an array');
-        if (!tokenMetadata.every(meta => typeof meta === 'object' && Object.keys(meta).length === 2 && meta.ids !== undefined && meta.metadata !== undefined)) throw new Error('Every metadata range representation must have only keys ids(Array) and metadata(JSON stringifiable value)');
-
-        const allIds = tokenMetadata.reduce((all, rangeMeta) => {
-            return all.concat(rangeMeta.ids);
-        }, []);
-
-        if (!util.validateNFIds(allIds)) throw new Error('Invalid token metadata, must not contain any duplicates or overlapping ranges');
-
-        this._tokenMetadata = tokenMetadata;
-        return this;
-    }
-
-    build() {
-        if (Object.keys(this._inputs).length === 0 || Object.keys(this._outputs).length === 0) throw new Error("Must have at least one input and one output");
-
-        if (Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) {
-            if (!this._sk1) throw new Error('You must include a valid issuer sk1 key to perform a coinbase transaction')
-        }
-
-        //evaluate the token ids in inputs/outputs. Should be the same set
-        let allInputIds = [];
-        Object.values(this._inputs).forEach(ids => allInputIds = allInputIds.concat(util.expandNFIds(ids)));
-        allInputIds.sort();
-
-        let allOutputIds = [];
-        Object.values(this._outputs).forEach(ids => allOutputIds = allOutputIds.concat(util.expandNFIds(ids)));
-        allOutputIds.sort();
-
-        if (JSON.stringify(allInputIds) !== JSON.stringify(allOutputIds)) throw new Error('Input and output token IDS do not match');
-
-        //restrict tokenmetadata to coinbase transactions
-        if (this._tokenMetadata !== undefined && !Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) throw new Error('You may only specify tokenmetadata for coinbase transactions');
-
-        return new Transaction(this);
-    }
-}
-
+/**
+ * Model A signed or unsigned FAT-1 Transaction
+ * @alias Transaction1
+ * @protected
+ * @class
+ */
 class Transaction {
+
+    /**
+     * @constructor
+     * @param {(TransactionBuilder|object)} builder - Either a TransactionBuilder object or a FAT-0 transaction object content
+     */
     constructor(builder) {
         if (builder instanceof TransactionBuilder) {
             this._inputs = builder._inputs;
@@ -177,31 +85,73 @@ class Transaction {
             this._metadata = builder.data.metadata;
 
             this._entryhash = builder.entryhash;
-            this._timestamp = builder.timestamp;        }
+            this._timestamp = builder.timestamp;
+        }
 
         Object.freeze(this);
     }
 
+    /**
+     * @method
+     * @returns {object} - The transaction's inputs
+     */
     getInputs() {
         return this._inputs;
     }
 
+    /**
+     * @method
+     * @returns {object} - The transaction's outputs
+     */
     getOutputs() {
         return this._outputs;
     }
 
+    /**
+     * @method
+     * @returns {*} - The transaction's metadata (if present, undefined if not)
+     */
     getMetadata() {
         return this._metadata;
     }
 
+    /**
+     * @method
+     * @returns {object[]} - The token metadata (if present, undefined if not)
+     */
     getTokenMetadata() {
         return this._tokenMetadata;
     }
 
+    /**
+     * @method
+     * @returns {boolean} - Whether the transaction is a coinbase transaction or not
+     */
     isCoinbase() {
         return Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC) !== undefined;
     }
 
+    /**
+     * Get the factom-js Entry object representing the signed FAT transaction. Can be submitted directly to Factom
+     * @method
+     * @see https://github.com/PaulBernier/factomjs/blob/master/src/entry.js
+     * @returns {Entry} - Get the Factom-JS Factom entry representation of the transaction, including extids & other signatures
+     * @example
+     * const {FactomCli, Entry, Chain} = require('factom');
+     const cli = new FactomCli(); // Default factomd connection to localhost:8088 and walletd connection to localhost:8089
+
+     const tokenChainId = '013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec';
+
+     const tx = new TransactionBuilder(tokenChainId)
+     .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", [150])
+     .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [150])
+     .build();
+
+     //"cast" the entry object to prevent compatibility issues
+     const entry = Entry.builder(tx.getEntry()).build();
+
+     await cli.add(entry, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //commit the transaction entry to the token chain
+     */
     getEntry() {
         if (!this._tokenChainId) throw new Error('Can only get a valid Factom entry for a transaction built using TransactionBuilder');
 
@@ -212,20 +162,29 @@ class Transaction {
             .build();
     }
 
-    getTokenChainId() {
+    /**
+     * @method
+     * @returns {string} - Get the Factom chain ID of the transaction's token. Returns undefined if the Transaction was constructed from an object
+     */
+    getChainId() {
         return this._tokenChainId;
     }
 
+    /**
+     * @method
+     * @returns {string} - Get the Factom entryhash of the transaction. Only defined if the Transaction was constructed from an object
+     */
     getEntryhash() {
         return this._entryhash;
     }
 
+    /**
+     * @method
+     * @returns {number} - Get the unix timestamp of when the Transaction was signed (locally built transactions) or committed to Factom (from RPC response JSON)
+     */
     getTimestamp() {
         return this._timestamp;
     }
 }
 
-module.exports = {
-    Transaction,
-    TransactionBuilder
-};
+module.exports = Transaction;

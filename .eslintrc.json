@@ -21,6 +21,7 @@
         "linebreak-style": [
             "error",
             "unix"
-        ]
+        ],
+        "no-console": "off"
     }
 }

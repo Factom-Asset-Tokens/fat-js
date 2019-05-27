@@ -16,21 +16,11 @@ Currently supports **FAT-0** and **FAT-1** token standards.
 
 
 
-**Note:** FAT is experimental software. This commit has been tested with [fatd](https://github.com/Factom-Asset-Tokens/fatd) commit `f86ea5cc7cb416b63e06e43c817b30078c4a66dc`
+**Note:** FAT is experimental software. This commit has been tested with [fatd](https://github.com/Factom-Asset-Tokens/fatd) version `v0.5.1` - commit `39a50ed13112530f1b8ec07f3a1e6d58d87e8769`
 
 
 
 ## Installation
-
-NPM via package.json:
-
-```json
-"dependencies":{
-	"@fat-token/fat-js": "0.1.1"
-}
-```
-
-or
 
 NPM CLI:
 
@@ -60,9 +50,9 @@ Build and use FAT transactions
 
 ## FAT-0
 
-### Transaction Builder
+### [Transaction Builder](docs/TransactionBuilder0.md)
 
-#### Examples
+#### Example
 
 ```javascript
 const TransactionBuilder = require('fat-js').FAT0.TransactionBuilder
@@ -74,66 +64,25 @@ let tx = new TransactionBuilder(tokenChainId)
 	.output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
 	.build();
 
-//coinbase transaction
-tx = new TransactionBuilder(tokenChainId)
-             .coinbaseInput(10)
-             .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 10)
-             .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
-             .build();
-
-//burn transaction
-tx = new TransactionBuilder(tokenChainId)
-            .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", 150)
-            .burnOutput(150)
-            .build();
-
-//transaction metadata
+//with metadata
 tx = new TransactionBuilder(tokenChainId)
             .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", 150)
             .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
             .metadata({type: 'fat-js test run', timestamp: new Date().getTime()})
             .build();
+
+//You can also use string or  BigNumber(https://github.com/MikeMcl/bignumber.js/) format for larger transactions than a native JS integer would support
+tx = new TransactionBuilder(testTokenChainId)
+            .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", '19007199254740991')
+            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", '19007199254740991')
+            .build();
 ```
 
-#### Methods
-
-- `new TransactionBuilder(tokenChainId)` - **TransactionBuilder**
-  - Params
-    - `tokenChainId` - **string** - required
-      - The Factom chain ID of the destination FAT-0 token chain
-- `builder.input(fs, amount)` - **TransactionBuilder**
-  - Params
-    - `fs` - **string** - required
-      - The private key corresponding to the input Factoid address. Used to sign the FAT transaction
-    - `amount` - **integer** - required
-      - The number of fungible FAT tokens to send from the input address, in the least divisible balance unit
-- `builder.coinbaseInput(amount)` - **TransactionBuilder**
-  - Params
-    - `amount` - **integer** - required
-      - The number of fungible FAT tokens to mint from the coinbase address. Coinbase transactions may only have a single input. Coinbase transactions must specify a sk1 issuer private key via `builder.setIssuerSK1(sk1)`
-
-- `builder.output(fa, amount)` - **TransactionBuilder**
-  - Params
-    - `fa` - **string** - required
-      - The public Factoid address output of the transaction
-    - `amount` - **integer** - required
-      - The number of fungible FAT tokens to send to the output address, in the least divisible balance unit
-- `builder.burnOutput(amount)` - **TransactionBuilder**
-  - Params
-    - `amount` - **integer** - required
-      - The number of fungible FAT tokens to send to the burn address in the transaction
-- `builder.metadata(metadata)` - **TransactionBuilder**
-  - Params
-    - `metadata` - **string | number | object** - required
-      - The metadata to include with the transaction. Must be JSON stringifiable
-- `build()` - **Transaction**
-  - The complete, built FAT-0 transaction object
 
 
+### [Transaction](docs/Transaction0.md)
 
-### Transaction
-
-#### Examples
+#### Example
 
 ```javascript
 const Transaction = require('fat-js').FAT0.Transaction
@@ -144,9 +93,9 @@ let tx = new TransactionBuilder(tokenChainId)
 	.output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
 	.build();
 
-tx.getInputs(); // => {"FA1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm":150}
+tx.getInputs(); // => {"FA1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm": new BigNumber(150)}
 
-tx.getTokenChainId(); // => "013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec"
+tx.getChainId(); // => "013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec"
 
 
 //or from API response
@@ -156,8 +105,8 @@ const response =
         timestamp: 1550696040,
         data:
             {
-                inputs: {FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC: 10},
-                outputs: {FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM: 10}
+                inputs: {FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC: new BigNumber(150)},
+                outputs: {FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM: new BigNumber(150)}
             }
     };
 
@@ -168,80 +117,12 @@ tx.getEntryHash(); // => "68f3ca3a8c9f7a0cb32dc9717347cb179b63096e051a60ce8be9c2
 
 
 
-#### Methods
-
-- `new Transaction(params)` - **Transaction**
-
-  - Params
-    - `params` - **TransactionBuilder | object** - required
-      - An instance of TransactionBuilder or a transaction JSON object from the fatd RPC endpoint
-
-- `tx.getInputs()` - **object**
-
-  - The inputs of the transaction
-
-  - ```json
-    {"FA1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm":150}
-    ```
-
-- `tx.getOutputs()` - **object**
-
-  - The outputs of the transaction
-
-  - ```json
-    {"FA1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm":150}
-    ```
-
-- `tx.getMetadata()` - **variable type**
-
-  - The metadata submitted with the transaction, if include . Return type is variable based on original input.
-
-  - ```json
-    {"name": 'my metadata', "value": 123}
-    ```
-
-- `tx.isCoinbase()` - **boolean**
-
-  - Check if the transaction a coinbase tx (token minting transaction, from coinbase address `FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC`)
-
-  - ```json
-    false
-    ```
-
-- `tx.getTokenChainId()` - **string**
-
-  - The Factom chain ID of the transaction. Only returned for txs built using TransactionBuilder, otherwise undefined
-
-  - ```json
-    "013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec"
-    ```
-
-- `tx.getEntryhash()` - **string**
-
-  - The Factom entry hash of the transaction. Only returned for txs returned from the fatd RPC
-
-  - ```json
-    "abba93b0acfaacffa081c25467ec9e18f0314f77787cbba58ed97491e59db07c"
-    ```
-
-- `tx.getTimestamp()` - **number**
-
-  - The Factom unix timestamp of the transaction. Only returned for txs returned from the fatd RPC
-
-  - ```json
-    1550696040
-    ```
-
-- `tx.getEntry()` - **[factom-js](https://github.com/PaulBernier/factomjs/blob/master/src/entry.js#L26) Entry**
-
-  - The factom-js entry object for submission to Factom. Only returned for transactions built using TransactionBuilder. See factom-js [docs](https://github.com/PaulBernier/factomjs#add-an-entry) 
-
 
 ## FAT-1
 
-### Transaction Builder
+### [Transaction Builder](docs/TransactionBuilder1.md)
 
-#### Examples
+#### Example
 
 ```javascript
 const TransactionBuilder = require('fat-js').FAT1.TransactionBuilder
@@ -254,26 +135,6 @@ const tokenChainId = '013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2a
             .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [{min: 0, max: 3}, 150])
             .build();
 
-//coinbase transaction
-tx = new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
-            .coinbaseInput([10])
-            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [10])
-            .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
-            .build();
-
-//burn transaction
-tx = new TransactionBuilder(testTokenChainId)
-            .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", [{min: 0, max: 3}, 150])
-            .burnOutput([{min: 0, max: 3}, 150])
-            .build();
-
-//transaction metadata
-tx = new TransactionBuilder(testTokenChainId)
-            .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", [10])
-            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [10])
-            .metadata({type: 'fat-js test run', timestamp: new Date().getTime()})
-            .build();
-
 //NF token metadata
 tx = new TransactionBuilder(testTokenChainId)
             .coinbaseInput([10])
@@ -284,73 +145,156 @@ tx = new TransactionBuilder(testTokenChainId)
                     metadata: {type: 'fat-js test run', timestamp: new Date().getTime()},
                 }
             ])
-            .setIssuerSK1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+            .sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
             .build();
 ```
 
-#### Methods
 
-- `new TransactionBuilder(tokenChainId)` - **TransactionBuilder**
-  - Params
-    - `tokenChainId` - **string** - required
-      - The Factom chain ID of the destination FAT-0 token chain
-- `builder.input(fs, ids)` - **TransactionBuilder**
-  - Params
-    - `fs` - **string** - required
-      - The private key corresponding to the input Factoid address. Used to sign the FAT transaction
-    - `ids` - **array** - required
-      - An array of valid integer NF token IDs, or token ID ranges of the form `{min: 0,max: 3}`
-- `builder.coinbaseInput(ids)` - **TransactionBuilder**
-  - Params
-    - `ids` - **array** - required
-      - An array of valid integer NF token IDs or token ID ranges of the form `{min: 0,max: 3}` to mint from the coinbase address. Coinbase transactions may only have a single input. Coinbase transactions must specify a sk1 issuer private key via `builder.setIssuerSK1(sk1)`
 
-- `builder.output(fa, ids)` - **TransactionBuilder**
+### [Transaction](docs/Transaction1.md)
 
-  - Params
-    - `fa` - **string** - required
-      - The public Factoid address output of the transaction
-    - `ids` - **integer** - required
-      - An array of valid integer NF token IDs or token ID ranges to send to the output address of the form `{min: 0,max: 3}` 
+#### Example
 
-- `builder.burnOutput(ids)` - **TransactionBuilder**
+```javascript
+const Transaction = require('fat-js').FAT1.Transaction
 
-  - Params
-    - `amount` - **integer** - required
-      - An array of valid integer NF token IDs or token ID ranges to send to the burn address in the transaction
+//From transaction builder
+let tx = new TransactionBuilder(testTokenChainId)
+            .input("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm", [{min: 0, max: 3}, 150])
+            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [{min: 0, max: 3}, 150])
+            .build();
 
-- `builder.metadata(metadata)` - **TransactionBuilder**
+tx.getInputs(); // => {"FA1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm":[{min: 0, max: 3}, 150]}
 
-  - Params
-    - `metadata` - **string | number | object** - required
-      - The metadata to include with the transaction. Must be JSON stringifiable
+tx.getChainId(); // => "013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec"
 
-- `builder.tokenMetadata(metadata)` - **TransactionBuilder**
 
-  - Params
+//or from API response
+const response =
+    {
+        entryhash: '68f3ca3a8c9f7a0cb32dc9717347cb179b63096e051a60ce8be9c292d29795af',
+        timestamp: 1550696040,
+        data:
+            {
+                inputs: {FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC: [{min: 0, max: 3}, 150]},
+                outputs: {FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM: [{min: 0, max: 3}, 150]}
+            }
+    };
 
-    - `metadata` - **array** - required
+tx = new Transaction(response);
 
-      - The token specific metadata to include with the transaction. Must be JSON stringifiable. Token metadata can may only be set in coinbase transactions
+tx.getEntryHash(); // => "68f3ca3a8c9f7a0cb32dc9717347cb179b63096e051a60ce8be9c292d29795af"
+```
 
-      - Must be of the form: 
 
-        ```javascript
-        {
-            "ids": [3, {"min": 4, "max": 5}],
-            "metadata": {"type": "fat-js test run", "value": new 1234}
-        }
-        ```
 
-- `build()` - **Transaction**
+# Issuance
 
-  - The complete, built FAT-0 transaction object
+Build and model issuances of FAT tokens
+
+## FAT-0
+
+### [IssuanceBuilder](docs/IssuanceBuilder0.md)
+
+```javascript
+const IssuanceBuilder = require('fat-js').FAT0.IssuanceBuilder
+
+const issuance = new IssuanceBuilder("mytoken", "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
+            .symbol('TTK')
+            .supply(1000000)
+            .metadata({'abc': 123})
+            .build();
+```
+
+
+
+### [Issuance](docs/Issuance0.md)
+
+```javascript
+const Issuance = require('fat-js').FAT0.Issuance
+
+//From Builder
+const builder = new IssuanceBuilder("mytoken", "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
+            .symbol('TTK');
+
+let issuance = new Issuance(builder);
+
+issuance.getChainId(); // => 013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec
+
+//Or from API response
+const data = {
+            "chainid": "eb55f75551acfb9c4d8dc1f09f11f2512d8aa98ebc1c0d05652ce8d92102fad8",
+            "tokenid": "test0",
+            "issuerid": "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762",
+            "entryhash": "d58588edb831afba683c69eb72bb8c825b198ae2ec02206d54926880727d91b1",
+            "timestamp": 1548276060,
+            "issuance": {
+                "type": "FAT-0",
+                "supply": 99999999,
+                "symbol": "T0"
+	}
+};
+
+issuance = new Issuance(data);
+
+issuance.getTimestamp(); // => 1548276060
+```
+
+
+
+## FAT-1
+
+### [IssuanceBuilder](docs/IssuanceBuilder1.md)
+
+```javascript
+const IssuanceBuilder = require('fat-js').FAT1.IssuanceBuilder
+
+const issuance = new IssuanceBuilder("mytoken", "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
+            .symbol('TNF')
+            .supply(-1)
+            .metadata({'abc': 123})
+            .build();
+```
+
+
+
+### [Issuance](docs/Issuance1.md)
+
+```javascript
+const Issuance = require('fat-js').FAT1.Issuance
+
+//From Builder
+const builder = new IssuanceBuilder("mytoken", "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
+            .symbol('TTK');
+
+let issuance = new Issuance(builder);
+
+issuance.getChainId(); // => 013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec
+
+//Or from API response
+const data = {
+            "chainid": "eb55f75551acfb9c4d8dc1f09f11f2512d8aa98ebc1c0d05652ce8d92102fad8",
+            "tokenid": "test0",
+            "issuerid": "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762",
+            "entryhash": "d58588edb831afba683c69eb72bb8c825b198ae2ec02206d54926880727d91b1",
+            "timestamp": 1548276060,
+            "issuance": {
+                "type": "FAT-0",
+                "supply": 99999999,
+                "symbol": "T0"
+	}
+};
+
+issuance = new Issuance(data);
+
+issuance.getTimestamp(); // => 1548276060
+```
 
 
 
 # CLI
 
-
+#### [Complete CLI Documentation](docs/CLI.md)
 
 ## Instantiate FAT CLI
 
@@ -382,31 +326,6 @@ const properties = await cli.getDaemonProperties();
 */
 ```
 
-
-
-### Get Tracked Tokens
-
-Get an array of the tokens that this fat daemon is currently tracking
-
-```javascript
-const tokens = await cli.getTrackedTokens();
-            
-/*
-[
-  {
-    "chainid": "013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec",
-    "tokenid": "testfat0-1",
-    "issuerid": "888888ab72e748840d82c39213c969a11ca6cb026f1d3da39fd82b95b3c1fced"
-  },
-  {
-    "chainid": "d82c39213c969a11ca6d352c148eec627sdf7b382ddf51b0736c369d918b",
-    "tokenid": "test",
-    "issuerid": "888888ab72e748840d82c39213c969a11ca6cb026f1d3da39fd82b95b3c1fced"
-  }
-]
-*/
-```
-
 ### Get Daemon Sync Status
 
 Get a object containing a readout of properties for the connected fatd node
@@ -426,22 +345,13 @@ const properties = await cli.getDaemonProperties();
 */
 ```
 
-### Manual RPC Call
-
-```javascript
-const response = await cli.call('get-daemon-properties',{}) //method, params object
-
-/*
-{
-  "fatdversion": "r162.3d7f272",
-  "apiversion": "1"
-}
-*/
-```
-
 
 
 ## Token CLI
+
+#### [Complete FAT-0 Token CLI Documentation](docs/CLI0.md)
+
+#### [Complete FAT-1 Token CLI Documentation](docs/CLI1.md)
 
 The token CLI allows access to both FAT-0 and FAT-1 data from fatd.
 
@@ -490,33 +400,20 @@ const transaction = await tokenCLI.getTransaction('d9b6ca250c97fdbe48eb3972a7d4b
 Get a paged list of FAT transactions.
 
 ```javascript
-const transactions = await tokenCLI.getTransactions(params);
+const transactions = await tokenCLI.getTransactions();
 ```
-
-- Params
-  - `params` - **object** - optional
-    - `addresses` - **Array<string>** - optional
-      - Filter transactions by public Factoid addresses. Return transactions with any of the `addresses` in the inputs or outputs of the transaction.
-    - `entryhash` - **string** - optional
-      - The Factom entryhash of the transaction to start the result set at
-    - `limit` - **number** - optional
-      - The integer limit of number of transactions returned
-    - `page` - **number** - optional
-      - The page count of the results returned
-    - `order` - **string** - optional
-      - The time order to return transactions in. Either `asc` or `desc`. Default `asc`
 
 
 
 ### Get Balance
 
-Get the numeric balance of a public Factoid address.
+Get the numeric balance of a public Factoid address. Returned as a [BigNumber](https://www.npmjs.com/package/bignumber.js)
 
 ```javascript
 let balance = await tokenCLI.getBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
 
 /*
-150
+new BigNumber(150)
 */
 ```
 
@@ -538,68 +435,6 @@ let tokens = await tokenCLI.getNFBalance(params);
   3,
   4
 ]
-*/
-```
-
-- Params
-  - `params` - **object** - optional
-    - `address` - **string** - required
-      - Filter transactions by public Factoid address. Return transactions with `address` in the inputs or outputs of the transaction.
-    - `limit` - **number** - optional
-      - The integer limit of number of transactions returned
-    - `page` - **number** - optional
-      - The page count of the results returned
-    - `order` - **string** - optional
-      - The time order to return transactions in. Either `asc` or `desc`. Default `asc`
-
-
-
-### Get All Non-Fungible Tokens
-
-Page through all tokens currently in circulation
-
-```javascript
-let tokens = await tokenCLI.getNFTokens(params);
-
-/*
-[
-  {
-    "nftokenid": 0,
-    "owner": "FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM"
-  },
-  {
-    "nftokenid": 1,
-    "owner": "FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM"
-  }
-]
-*/
-```
-
-- Params
-  - `params` - **object** - optional
-    - `limit` - **number** - optional
-      - The integer limit of number of transactions returned
-    - `page` - **number** - optional
-      - The page count of the results returned
-    - `order` - **string** - optional
-      - The time order to return transactions in. Either `asc` or `desc`. Default `asc`
-
-
-
-### Get Token Stats
-
-```javascript
-let stats = await tokenCLI.getStats();
-
-/*
-{
-  "supply": 99999999,
-  "circulating": 100039,
-  "burned": 0,
-  "transactions": 81,
-  "issuancets": 1548276060,
-  "lasttxts": 1549680840
-}
 */
 ```
 
@@ -628,14 +463,55 @@ const result = await tokenCLI.sendTransaction(tx);
 
 
 
-## Issuance Builder
+# Submitting Transactions & Issuances Directly to Factom
+
+After building and signing a FAT issuance or transaction, you can submit it directly to Factom without using fatd as an intermediary using the [factom-js library](https://github.com/PaulBernier/factomjs#chains-and-entries) 
+
+All you need to get started are Entry Credits and a Factomd endpoint
+
+## Transaction
 
 ```javascript
-const CLIBuilder = require('fat-js').FAT0.IssuanceBuilder
+const { FactomCli } = require('factom');
+const cli = new FactomCli(); // Default factomd connection to localhost:8088 and walletd connection to localhost:8089
+
+const tokenChainId = '013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec';
+
+const tx = new TransactionBuilder(tokenChainId)
+	.input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 150)
+	.output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
+	.build();
+
+//get the signed transaction entry
+//"cast" the chain and entry objects to prevent compatibility issues
+const entry = Entry.builder(tx.getEntry()).build();
+
+await cli.add(entry, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //commit the transaction entry to the token chain
+```
+
+
+
+## Issuance
+
+```javascript
+const { FactomCli } = require('factom');
+const cli = new FactomCli(); // Default factomd connection to localhost:8088 and walletd connection to localhost:8089
+
+const tokenChainId = '013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec';
+
 const issuance = new IssuanceBuilder("mytoken", "888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762", "sk11pz4AG9XgB1eNVkbppYAWsgyg7sftDXqBASsagKJqvVRKYodCU")
-                .supply(1000000)
-                .symbol('TTK')
-                .build()
+            .symbol('TTK')
+            .supply(1000000)
+            .metadata({'abc': 123})
+            .build();
+
+//"cast" the chain and entry objects to prevent compatibility issues
+const chain = new Chain(Entry.builder(issuance.getChain().firstEntry).build());
+const entry = Entry.builder(issuance.getEntry()).build();
+
+await cli.add(chain, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //create the token chain on Factom
+
+await cli.add(entry, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //commit the signed issuance entry to the token chain
 ```
 
 
@@ -647,7 +523,9 @@ const issuance = new IssuanceBuilder("mytoken", "888888d027c59579fc47a6fc6c4a5c0
 Get token chain ID from token ID and issuer root chain ID
 
 ```javascript
-const chainId = util.getTokenChainId('mytoken', '888888b2e7c7c63655fa85e0b0c43b4b036a6bede51d38964426f122f61c5584').toString('hex')
+const util = require('fat-js').util
+
+const chainId = util.getChainId('mytoken', '888888b2e7c7c63655fa85e0b0c43b4b036a6bede51d38964426f122f61c5584').toString('hex')
 
 /*
 0dce2c10a51a7df92e2e9e4f848da054509ff9761311bd58ebcc55df656fb409
