@@ -8,9 +8,9 @@ Build & Model A FAT-0 Issuance
 
 * [Issuance0](#Issuance0)
     * [new Issuance(builder)](#new_Issuance0_new)
-    * [.getTokenChainId()](#Issuance0+getTokenChainId) ⇒ <code>string</code>
+    * [.getChainId()](#Issuance0+getChainId) ⇒ <code>string</code>
     * [.getTokenId()](#Issuance0+getTokenId) ⇒ <code>string</code>
-    * [.getIssuerIdentityRootChainId()](#Issuance0+getIssuerIdentityRootChainId) ⇒ <code>string</code>
+    * [.getIssuerChainId()](#Issuance0+getIssuerChainId) ⇒ <code>string</code>
     * [.getEntryhash()](#Issuance0+getEntryhash) ⇒ <code>string</code>
     * [.getTimestamp()](#Issuance0+getTimestamp) ⇒ <code>number</code>
     * [.getType()](#Issuance0+getType) ⇒ <code>string</code>
@@ -28,9 +28,9 @@ Build & Model A FAT-0 Issuance
 | --- | --- | --- |
 | builder | <code>IssuanceBuilder</code> \| <code>Object</code> | The IssuanceBuilder or object to construct the issuance from |
 
-<a name="Issuance0+getTokenChainId"></a>
+<a name="Issuance0+getChainId"></a>
 
-### issuance0.getTokenChainId() ⇒ <code>string</code>
+### issuance0.getChainId() ⇒ <code>string</code>
 Get the Factom Chain ID for this token issuance
 
 **Kind**: instance method of [<code>Issuance0</code>](#Issuance0)  
@@ -42,9 +42,9 @@ Get the token ID string for this token issuance
 
 **Kind**: instance method of [<code>Issuance0</code>](#Issuance0)  
 **Returns**: <code>string</code> - - The token ID string chosen by the issuer  
-<a name="Issuance0+getIssuerIdentityRootChainId"></a>
+<a name="Issuance0+getIssuerChainId"></a>
 
-### issuance0.getIssuerIdentityRootChainId() ⇒ <code>string</code>
+### issuance0.getIssuerChainId() ⇒ <code>string</code>
 Get identity's Factom Chain ID string for this token
 
 **Kind**: instance method of [<code>Issuance0</code>](#Issuance0)  

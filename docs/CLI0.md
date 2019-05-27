@@ -13,7 +13,7 @@ The FAT-0 CLI access object. Used to request data about a FAT-0 token
     * [.getTransactions(params)](#CLI0+getTransactions) ⇒ <code>Promise</code>
     * [.getType()](#CLI0+getType) ⇒ <code>string</code>
     * [.getCLI()](#BaseTokenCLI+getCLI) ⇒ [<code>CLI</code>](#CLI)
-    * [.getTokenChainId()](#BaseTokenCLI+getTokenChainId) ⇒ <code>string</code>
+    * [.getChainId()](#BaseTokenCLI+getChainId) ⇒ <code>string</code>
     * [.getBalance(address)](#BaseTokenCLI+getBalance) ⇒ <code>Promise</code>
     * [.getStats()](#BaseTokenCLI+getStats) ⇒ <code>Promise</code>
     * [.sendTransaction()](#BaseTokenCLI+sendTransaction) ⇒ <code>Promise</code>
@@ -66,9 +66,9 @@ Get the type constant string of this CLI object. In this case, "FAT-0"
 Get the CLI object that was used to originally construct the BaseTokenCLI
 
 **Kind**: instance method of [<code>CLI0</code>](#CLI0)  
-<a name="BaseTokenCLI+getTokenChainId"></a>
+<a name="BaseTokenCLI+getChainId"></a>
 
-### clI0.getTokenChainId() ⇒ <code>string</code>
+### clI0.getChainId() ⇒ <code>string</code>
 Get the Factom token chain ID used to originally construct the BaseTokenCLI
 
 **Kind**: instance method of [<code>CLI0</code>](#CLI0)  

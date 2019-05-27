@@ -7,7 +7,7 @@ Build & Model A FAT-1 Issuance
 **Access**: public  
 
 * [IssuanceBuilder1](#IssuanceBuilder1)
-    * [new IssuanceBuilder(tokenId, rootChainId, sk1)](#new_IssuanceBuilder1_new)
+    * [new IssuanceBuilder(tokenId, identityChainId, sk1)](#new_IssuanceBuilder1_new)
     * [.symbol(symbol)](#IssuanceBuilder1+symbol) ⇒ <code>IssuanceBuilder</code>
     * [.supply(supply)](#IssuanceBuilder1+supply) ⇒ <code>IssuanceBuilder</code>
     * [.metadata(metadata)](#IssuanceBuilder1+metadata) ⇒ <code>IssuanceBuilder</code>
@@ -15,13 +15,13 @@ Build & Model A FAT-1 Issuance
 
 <a name="new_IssuanceBuilder1_new"></a>
 
-### new IssuanceBuilder(tokenId, rootChainId, sk1)
+### new IssuanceBuilder(tokenId, identityChainId, sk1)
 
 | Param | Type | Description |
 | --- | --- | --- |
 | tokenId | <code>string</code> | arbitrary string to use as a token identifier |
-| rootChainId | <code>string</code> | 64 character Factom Chain ID of the identity to issue the token under |
-| sk1 | <code>string</code> | SK1 Private key belonging to the identity at rootChainId |
+| identityChainId | <code>string</code> | 64 character Factom Chain ID of the identity to issue the token under |
+| sk1 | <code>string</code> | SK1 Private key belonging to the identity at identityChainId |
 
 <a name="IssuanceBuilder1+symbol"></a>
 

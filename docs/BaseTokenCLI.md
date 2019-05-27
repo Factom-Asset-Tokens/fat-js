@@ -9,7 +9,7 @@ Base Token CLI object. Provides an abstract interface to access token specific d
 * *[BaseTokenCLI](#BaseTokenCLI)*
     * *[new BaseTokenCLI(cli, tokenChainId)](#new_BaseTokenCLI_new)*
     * *[.getCLI()](#BaseTokenCLI+getCLI) ⇒ [<code>CLI</code>](#CLI)*
-    * *[.getTokenChainId()](#BaseTokenCLI+getTokenChainId) ⇒ <code>string</code>*
+    * *[.getChainId()](#BaseTokenCLI+getChainId) ⇒ <code>string</code>*
     * *[.getIssuance()](#BaseTokenCLI+getIssuance) ⇒ <code>Promise</code>*
     * *[.getTransaction(entryhash)](#BaseTokenCLI+getTransaction) ⇒ <code>Promise</code>*
     * *[.getTransactions(params)](#BaseTokenCLI+getTransactions) ⇒ <code>Promise</code>*
@@ -32,9 +32,9 @@ Base Token CLI object. Provides an abstract interface to access token specific d
 Get the CLI object that was used to originally construct the BaseTokenCLI
 
 **Kind**: instance method of [<code>BaseTokenCLI</code>](#BaseTokenCLI)  
-<a name="BaseTokenCLI+getTokenChainId"></a>
+<a name="BaseTokenCLI+getChainId"></a>
 
-### *baseTokenCLI.getTokenChainId() ⇒ <code>string</code>*
+### *baseTokenCLI.getChainId() ⇒ <code>string</code>*
 Get the Factom token chain ID used to originally construct the BaseTokenCLI
 
 **Kind**: instance method of [<code>BaseTokenCLI</code>](#BaseTokenCLI)  

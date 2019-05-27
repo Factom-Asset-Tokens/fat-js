@@ -13,7 +13,7 @@ Model A signed or unsigned FAT-0 Transaction
     * [.getMetadata()](#Transaction0+getMetadata) ⇒ <code>\*</code>
     * [.isCoinbase()](#Transaction0+isCoinbase) ⇒ <code>boolean</code>
     * [.getEntry()](#Transaction0+getEntry) ⇒ <code>Entry</code>
-    * [.getTokenChainId()](#Transaction0+getTokenChainId) ⇒ <code>string</code>
+    * [.getChainId()](#Transaction0+getChainId) ⇒ <code>string</code>
     * [.getEntryhash()](#Transaction0+getEntryhash) ⇒ <code>string</code>
     * [.getTimestamp()](#Transaction0+getTimestamp) ⇒ <code>number</code>
 
@@ -35,7 +35,7 @@ let tx = new TransactionBuilder(tokenChainId)
 
 tx.getInputs(); // => {"FA1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm":150}
 
-tx.getTokenChainId(); // => "013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec"
+tx.getChainId(); // => "013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec"
 
 
 //or from API response
@@ -99,9 +99,9 @@ const {FactomCli, Entry, Chain} = require('factom');
 
      await cli.add(entry, "Es32PjobTxPTd73dohEFRegMFRLv3X5WZ4FXEwNN8kE2pMDfeMym"); //commit the transaction entry to the token chain
 ```
-<a name="Transaction0+getTokenChainId"></a>
+<a name="Transaction0+getChainId"></a>
 
-### transaction0.getTokenChainId() ⇒ <code>string</code>
+### transaction0.getChainId() ⇒ <code>string</code>
 **Kind**: instance method of [<code>Transaction0</code>](#Transaction0)  
 **Returns**: <code>string</code> - - Get the Factom chain ID of the transaction's token. Returns undefined if the Transaction was constructed from an object  
 <a name="Transaction0+getEntryhash"></a>
