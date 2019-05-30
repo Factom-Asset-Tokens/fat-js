@@ -63,7 +63,7 @@ class Issuance {
             this._type = builder.issuance.type;
             this._symbol = builder.issuance.symbol;
             this._supply = new BigNumber(builder.issuance.supply);
-            this._content = JSON.stringify(this);
+            this._metadata = builder.issuance.metadata;
 
             this._tokenId = builder.tokenid;
             this._rootChainId = builder.issuerid;
