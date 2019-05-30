@@ -36,7 +36,8 @@ describe('FAT-1 CLI Integration', function () {
             assert.strictEqual(issuance.getType(), 'FAT-1');
             assert.strictEqual(issuance.getTokenId(), 'testnf');
             assert.strictEqual(issuance.getSymbol(), 'T1');
-            assert.strictEqual(issuance.getSupply(), -1);
+            assert.instanceOf(issuance.getSupply(), BigNumber);
+            assert.isTrue(issuance.getSupply().isEqualTo(-1));
             assert.strictEqual(issuance.getIssuerChainId(), '888888ab72e748840d82c39213c969a11ca6cb026f1d3da39fd82b95b3c1fced');
             assert.strictEqual(issuance.getChainId(), tokenChainId);
             assert.strictEqual(issuance.getEntryhash(), '80568d0f194a1a65d101d70099d820ea90d08badd94fef3944c53841952a603b');

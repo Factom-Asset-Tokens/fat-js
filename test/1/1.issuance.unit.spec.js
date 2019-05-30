@@ -1,3 +1,5 @@
+const BigNumber = require('bignumber.js');
+
 const constant = require('../../constant');
 const assert = require('chai').assert;
 const Entry = require('factom/src/entry').Entry;
@@ -47,7 +49,9 @@ describe('Issuance Unit', function () {
         assert.strictEqual(issuance.getIssuerChainId(), '888888ab72e748840d82c39213c969a11ca6cb026f1d3da39fd82b95b3c1fced');
         assert.strictEqual(issuance.getType(), constant.FAT1);
         assert.strictEqual(issuance.getSymbol(), 'TNF1');
-        assert.strictEqual(issuance.getSupply(), 99999999);
+
+        assert.instanceOf(issuance.getSupply(), BigNumber);
+        assert.isTrue(issuance.getSupply().isEqualTo(99999999));
 
         assert.strictEqual(issuance.getTokenId(), 'testfat1-0');
         assert.strictEqual(issuance.getChainId(), 'eb55f75551acfb9c4d8dc1f09f11f2512d8aa98ebc1c0d05652ce8d92102fad8');

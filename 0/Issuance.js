@@ -4,6 +4,7 @@ const util = require('../util');
 const constant = require('../constant');
 const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
 const fctUtil = require('factom/src/util');
+const BigNumber = require('bignumber.js');
 const JSONBig = require('json-bigint')({strict: true});
 
 const IssuanceBuilder = require('./IssuanceBuilder');
@@ -61,7 +62,7 @@ class Issuance {
         } else if (typeof builder === 'object') {
             this._type = builder.issuance.type;
             this._symbol = builder.issuance.symbol;
-            this._supply = builder.issuance.supply;
+            this._supply = new BigNumber(builder.issuance.supply);
             this._content = JSON.stringify(this);
 
             this._tokenId = builder.tokenid;
