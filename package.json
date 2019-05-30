@@ -16,15 +16,15 @@
   },
   "license": "MIT",
   "dependencies": {
-    "factom": "1.0.0",
+    "factom": "1.2.1",
     "factom-identity-lib": "0.1.11",
     "tweetnacl": "1.0.1",
     "axios": "0.18.0",
     "joi-browser": "13.4.0",
     "joi-factom": "1.1.0",
     "json-bigint": "0.3.0",
-    "bignumber.js": "8.1.1",
-    "semver": "6.0.0"
+    "bignumber.js": "9.0.0",
+    "semver": "6.1.1"
   },
   "devDependencies": {
     "@babel/core": "7.1.2",
