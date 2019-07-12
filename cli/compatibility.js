@@ -19,9 +19,12 @@ function checkVersionCompatibility(version) {
     //Check supported versions for known version specific bugs
     if (semver.lte(version.toString(), '0.5.0')) console.warn('WARNING: You are using a version of fatd(', version.version, ') with known RPC bugs in the get-issuance method. Invalid entryhashes for issuances are returned from the API. Please upgrade fatd to version 0.5.1 or later');
 
+    //addition of get-balances method to get a
+    if (semver.lt(version, '0.6.0')) console.warn('WARNING: You are using a version of fatd(', version.version, ') that does not support the get-balances method yet. Calling the method will result in an error');
+
     //Check Maximum Version Support
     // This line's compare version should match the current highest fat-js tested version of fatd (usually latest)
-    if (semver.gt(version, '0.5.1')) console.warn('WARNING: You are using a newer version of fatd(', version.version, ') than this fat-js version was tested with. Some data structures and API behavior may not be forwards compatible');
+    if (semver.gt(version, '0.6.0')) console.warn('WARNING: You are using a newer version of fatd(', version.version, ') than this fat-js version was tested with. Some data structures and API behavior may not be forwards compatible');
 }
 
 module.exports.checkVersion = checkVersionCompatibility;

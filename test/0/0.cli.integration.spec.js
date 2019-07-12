@@ -59,6 +59,18 @@ describe('FAT-0 CLI Integration', function () {
             assert.strictEqual(transaction.getTimestamp(), 1550696040);
         });
 
+        it('get-transaction (amount over Number.MAX_SAFE_INTEGER)', async function () {
+            const tokenCLI = await cli.getTokenCLI(tokenChainId);
+
+            const transaction = await tokenCLI.getTransaction('a652d4db99ab853b6fb1404411ef36b1b3769c9cc91346807ede4015a3439985');
+            assert.isDefined(transaction);
+            assert.instanceOf(transaction, Transaction);
+
+            //regression testing for large numbers!
+            assert.strictEqual(JSONBig.stringify(transaction.getInputs()), JSONBig.stringify({FA1zT4aFpEvcnPqPCigB3fvGu4Q4mTXY22iiuV69DqE1pNhdF2MC: new BigNumber("9007199254740992")}));
+            assert.strictEqual(JSONBig.stringify(transaction.getOutputs()), JSONBig.stringify({FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM: new BigNumber("9007199254740992")}));
+        });
+
         it('get-transactions', async function () {
             const tokenCLI = await cli.getTokenCLI(tokenChainId);
 
@@ -74,7 +86,7 @@ describe('FAT-0 CLI Integration', function () {
             const balance = await tokenCLI.getBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
             assert.isDefined(balance);
             assert.instanceOf(balance, BigNumber);
-            assert.isTrue(balance.isGreaterThan(0));
+            assert.isTrue(balance.isGreaterThan(new BigNumber("9007199254743307"))); //test returned balance is over max int limit allowed by JS
         });
 
         it('get-stats', async function () {
