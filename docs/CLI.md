@@ -14,6 +14,7 @@ Base CLI object. Provides an interfaces to access fatd daemon calls & get token 
     * [.getTrackedTokens()](#CLI+getTrackedTokens) ⇒ <code>Promise</code>
     * [.getDaemonProperties()](#CLI+getDaemonProperties) ⇒ <code>Promise</code>
     * [.getSyncStatus()](#CLI+getSyncStatus) ⇒ <code>Promise</code>
+    * [.getBalances(address)](#CLI+getBalances) ⇒ <code>Promise</code>
 
 <a name="new_CLI_new"></a>
 
@@ -86,3 +87,14 @@ Get the properties of the FAT daemon
 Get the Factom sync status of the FAT daemon
 
 **Kind**: instance method of [<code>CLI</code>](#CLI)  
+<a name="CLI+getBalances"></a>
+
+### clI.getBalances(address) ⇒ <code>Promise</code>
+Get the numeric token balance counts for all tracked tokens for a public Factoid address
+
+**Kind**: instance method of [<code>CLI</code>](#CLI)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| address | <code>string</code> | The public Factoid address to get all token balances for |
+
