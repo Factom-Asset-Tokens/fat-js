@@ -83,6 +83,9 @@ class TransactionBuilder {
         if (!fctAddressUtil.isValidPrivateAddress(fs)) throw new Error("Input address must be a valid private Factoid address");
         if (!util.validateNFIds(ids)) throw new Error("Invalid ID range: " + JSON.stringify(ids));
 
+        //check that outputs does not contain this address
+        if (this._outputs[fctAddressUtil.getPublicAddress(fs)]) throw new Error("Input address already occurs in outputs");
+
         this._keys.push(nacl.keyPair.fromSeed(fctAddressUtil.addressToKey(fs)));
         this._inputs[fctAddressUtil.getPublicAddress(fs)] = ids;
         return this;
@@ -112,8 +115,10 @@ class TransactionBuilder {
         if (!fctAddressUtil.isValidPublicFctAddress(fa)) throw new Error("Output address must be a valid public Factoid address");
         if (!util.validateNFIds(ids)) throw new Error("Invalid ID range: " + JSON.stringify(ids));
 
-        // if (!Array.isArray(ids)) this._outputs[fa] = [ids];
-        else this._outputs[fa] = ids;
+        //check that inputs does not contain this address
+        if (this._inputs[fa]) throw new Error("Output address already occurs in inputs");
+
+        this._outputs[fa] = ids;
         return this;
     }
 

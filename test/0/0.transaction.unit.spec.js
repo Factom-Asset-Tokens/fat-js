@@ -134,6 +134,12 @@ describe('Transaction Unit', function () {
             .sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAub")
             .build());
 
+        //test same address in inputs & outputs
+        assert.throws(() => new TransactionBuilder(testTokenChainId)
+            .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 300)
+            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 300)
+            .build());
+
         //test coinbase transaction, no sk1 set
         assert.throws(() => new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
             .coinbaseInput(10)
