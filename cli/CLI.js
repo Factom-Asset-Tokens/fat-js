@@ -204,6 +204,22 @@ class CLI {
     getSyncStatus() {
         return this.call('get-sync-status');
     }
+
+    /**
+     * Get the numeric token balance counts for all tracked tokens for a public Factoid address
+     * @method
+     * @async
+     * @param {string} address - The public Factoid address to get all token balances for
+     * @returns {Promise}
+     */
+    async getBalances(address) {
+        if (!fctAddressUtil.isValidPublicFctAddress(address)) throw new Error('Invalid public Factoid address');
+        const balances = await this.call('get-balances', {address});
+
+        //force all values in the balance map to bignumber
+        Object.keys(balances).forEach((chainId) => balances[chainId] = new BigNumber(balances[chainId]))
+        return balances;
+    }
 }
 
 const getTransactionsSchema = Joi.object().keys({

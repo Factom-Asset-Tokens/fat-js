@@ -3,9 +3,9 @@ const constant = require('../../constant');
 const assert = require('chai').assert;
 const BigNumber = require('bignumber.js');
 
-let TransactionBuilder = require('../../1/TransactionBuilder');
-let Transaction = require('../../1/Transaction');
-let Issuance = require('../../1/Issuance');
+const TransactionBuilder = require('../../1/TransactionBuilder');
+const Transaction = require('../../1/Transaction');
+const Issuance = require('../../1/Issuance');
 
 const tokenChainId = '962a18328c83f370113ff212bae21aaf34e5252bc33d59c9db3df2a6bfda966f';
 

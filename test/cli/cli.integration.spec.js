@@ -1,5 +1,7 @@
 const assert = require('chai').assert;
-let CLIBuilder = require('../../cli/CLI').CLIBuilder;
+const BigNumber = require('bignumber.js');
+
+const CLIBuilder = require('../../cli/CLI').CLIBuilder;
 
 describe('CLI Integration', function () {
 
@@ -27,6 +29,15 @@ describe('CLI Integration', function () {
             const syncStatus = await cli.getSyncStatus();
             assert.isDefined(syncStatus);
             // assert.isArray(syncStatus);
+        });
+    });
+
+    describe('Global Token Methods', function () {
+        it('get-balances', async function () {
+            const balances = await cli.getBalances('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
+            assert.isObject(balances);
+            assert.isTrue(Object.values(balances).every(amount => amount instanceof BigNumber));
+            console.log(JSON.stringify(balances, undefined, 2))
         });
     });
 });

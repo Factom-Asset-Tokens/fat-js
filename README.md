@@ -16,7 +16,7 @@ Currently supports **FAT-0** and **FAT-1** token standards.
 
 
 
-**Note:** FAT is experimental software. This commit has been tested with [fatd](https://github.com/Factom-Asset-Tokens/fatd) version `v0.5.1` - commit `39a50ed13112530f1b8ec07f3a1e6d58d87e8769`
+**Note:** FAT is experimental software. This commit has been tested with [fatd](https://github.com/Factom-Asset-Tokens/fatd) version `v0.5.1` - commit `ba2857840683b004ebe2f18ac75d5539508c2abb`
 
 
 
@@ -341,6 +341,23 @@ const properties = await cli.getDaemonProperties();
     "factomheight": 70990
   },
   "id": 6482
+}
+*/
+```
+
+
+
+### Get Balance of Address For All Tracked Tokens Tokens
+
+Get the numeric count of tokens, either non fungible or fungible, for each token type (chain) an address owns greater than 0 of. The keys of the object returned are the chain Ids, and values are the balances, represented as BigNumbers
+
+```javascript
+const balances = await cli.getBalances('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
+
+/*
+{
+  "0cccd100a1801c0cf4aa2104b15dec94fe6f45d0f3347b016ed20d81059494df": new BigNumber("9007199254743301"),
+  "962a18328c83f370113ff212bae21aaf34e5252bc33d59c9db3df2a6bfda966f": new BigNumber("19248")
 }
 */
 ```
