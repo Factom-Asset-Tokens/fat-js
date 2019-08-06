@@ -44,38 +44,79 @@ class TransactionBuilder {
 
     /**
      * @constructor
-     * @param {string} tokenChainId - 64 character Factom Chain ID of the token to build the transaction for
+     * @param {Transaction|string} Transaction or tokenChainId - Unsigned transaction or 64 character Factom Chain ID of the token to build the transaction for
      */
-    constructor(tokenChainId) {
-        if (!tokenChainId || tokenChainId.length !== 64) throw new Error('Token chain ID must be a valid Factom chain ID');
-        this._tokenChainId = tokenChainId;
+    constructor(t) {
+        if ( t instanceof (require('./Transaction')) ) {
+            //support for external signatures
+            this._signatures = t._signatures;
+            this._keys = t._rcds.map(rcd => { return {'publicKey':Buffer.from(rcd, 1).slice(1)} } );
+            this._tokenChainId = t._tokenChainId;
+            this._inputs = t._inputs;
+            this._outputs = t._outputs;
+            this._timestamp = t._timestamp;
+            if ( t._metadata !== undefined ) {
+                this._metadata = t._metadata;
+            }
+        } else {
+            let tokenChainId = t;
+            if (!tokenChainId || tokenChainId.length !== 64) throw new Error('Token chain ID must be a valid Factom chain ID');
+            this._tokenChainId = tokenChainId;
 
-        this._keys = [];
-        this._inputs = {};
-        this._outputs = {};
+            this._keys = [];
+            this._inputs = {};
+            this._outputs = {};
+        } 
     }
 
     /**
      * Set up a Factoid address input for the transaction
      * @method
-     * @param {string} fs - The private Factoid address to use as the input of the transaction
+     * @param {string} fs - The private Factoid address to use as the input of the transaction or raw public key if signing externally
      * @param {(number|string|BigNumber)} amount - The integer amount of token units to send. Native JS Numbers (e.x. 123), strings (e.x. "123"), and BigNumbers(e.x. new BigNumber("9999999999999999") are allowed as long as they represent integers
      * @returns {TransactionBuilder}
      */
     input(fs, amount) {
+
+        if ( this._signatures !== undefined ) {
+            throw new Error("Attempting to add new input, expecting signatures only")
+        }
         //if this is setup as coinbase, prevent additional inputs
         if (Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) throw new Error('Cannot add an additional input to a coinbase transaction');
 
-        if (!fctAddressUtil.isValidPrivateAddress(fs)) throw new Error("Input address must be a valid private Factoid address");
+        //if it isn't a private address and instead a public address then, the fs should be a public key      
+        if (fctAddressUtil.isValidPrivateAddress(fs)) { //first check to see if valid private address
 
-        amount = new BigNumber(amount);
-        if (!amount.isInteger() || amount.isLessThan(1)) throw new Error("Input amount must be a positive nonzero integer");
+            amount = new BigNumber(amount);
+            if (!amount.isInteger() || amount.isLessThan(1)) throw new Error("Input amount must be a positive nonzero integer");
 
-        //check that outputs does not contain this address
-        if (this._outputs[fctAddressUtil.getPublicAddress(fs)]) throw new Error("Input address already occurs in outputs");
+            //check that outputs does not contain this address
+            if (this._outputs[fctAddressUtil.getPublicAddress(fs)]) throw new Error("Input address already occurs in outputs");
 
-        this._keys.push(nacl.keyPair.fromSeed(fctAddressUtil.addressToKey(fs)));
-        this._inputs[fctAddressUtil.getPublicAddress(fs)] = amount;
+            this._keys.push(nacl.keyPair.fromSeed(fctAddressUtil.addressToKey(fs)));
+            this._inputs[fctAddressUtil.getPublicAddress(fs)] = amount;
+
+        } else {
+
+            if ( fctAddressUtil.isValidPublicFctAddress(fs) ) { //check to see if user passed in a public fct address
+              throw new Error("Input address must be either a valid private Factoid address or a Factoid public key");
+            }
+
+            amount = new BigNumber(amount);
+            if (!amount.isInteger() || amount.isLessThan(1)) throw new Error("Input amount must be a positive nonzero integer");
+
+            // we'll have to assume that the fs is really the publicKey if we get this far, ultimately the tx will fail if not
+            let pubkey = fs;
+
+            //this will throw exception if not right length
+            let pubaddr = fctAddressUtil.keyToPublicFctAddress(pubkey);
+
+            //check that outputs does not contain this address
+            if (this._outputs[pubaddr]) throw new Error("Input address already occurs in outputs");
+
+            this._keys.push({publicKey: pubkey});
+            this._inputs[pubaddr] = amount;
+        }
         return this;
     }
 
@@ -99,6 +140,11 @@ class TransactionBuilder {
      * @returns {TransactionBuilder}
      */
     output(fa, amount) {
+
+        if ( this._signatures !== undefined ) {
+            throw new Error("Attempting to add new output, expecting signatures only")
+        }
+
         if (!fctAddressUtil.isValidPublicFctAddress(fa)) throw new Error("Output address must be a valid public Factoid address");
 
         amount = new BigNumber(amount);
@@ -141,12 +187,36 @@ class TransactionBuilder {
      * @returns {TransactionBuilder}
      */
     metadata(metadata) {
+        if ( this._signatures !== undefined ) {
+            throw new Error("Attempting to add new metadata, expecting signatures only")
+        }
         try {
             JSON.stringify(metadata)
         } catch (e) {
             throw new Error("Transaction metadata bust be a valid JSON object or primitive");
         }
         this._metadata = metadata;
+        return this;
+    }
+
+    /**
+     * Add a public key and signature to the transaction. This is used only in the case of unsigned transactions (usefull for hardware wallets).
+     * Public Key's /signatures need to be added in the same order as their corresponding inputs.
+     * @param {string|Array|Buffer} publicKey - FCT public key as hex string, uint8array, or buffer
+     * @param {Buffer} signature - Signature 
+     * @returns {TransactionBuilder} - TransactionBuilder instance.
+     */
+    pkSignature(publicKey, signature) {
+
+        let pk = Buffer.from(publicKey,'hex')
+
+        let index = Object.values(this._keys).findIndex( v => { return v.publicKey.equals(pk) } );
+
+        if ( index !== undefined ) {
+            this._signatures[index] = signature
+        } else {
+            throw new Error("Public Key (" + pk.toString('hex') + ") for provided signature not found in input list." )
+        }
         return this;
     }
 
@@ -164,6 +234,14 @@ class TransactionBuilder {
 
         if (Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) {
             if (!this._sk1) throw new Error('You must include a valid issuer sk1 key to perform a coinbase transaction')
+        }
+
+        if ( this._signatures !== undefined ) {
+            for (let i = 0; i < this._signatures.length; ++i) {
+                if ( this._signatures[i] === undefined ) {
+                    throw new Error('Missing signatures: All inputs must have an associated signature')
+                }
+            }
         }
 
         return new (require('./Transaction'))(this);

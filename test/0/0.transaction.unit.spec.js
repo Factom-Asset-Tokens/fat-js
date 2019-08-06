@@ -1,7 +1,10 @@
 const assert = require('chai').assert;
 const fctAddrUtils = require('factom/src/addresses');
+const fctUtil = require('factom/src/util');
 const Entry = require('factom/src/entry').Entry;
 const BigNumber = require('bignumber.js');
+
+const nacl = require('tweetnacl/nacl-fast').sign;
 
 const TransactionBuilder = require('../../0/TransactionBuilder');
 const testTokenChainId = '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762';
@@ -77,6 +80,62 @@ describe('Transaction Unit', function () {
         assert.isObject(tx.getMetadata());
         assert.strictEqual(JSON.stringify(tx.getMetadata()), JSON.stringify(meta));
 
+        //** Test External Signing
+        
+        //test signing with private key externally, this will simulate an external signature such as from the Ledger
+        let sk = fctAddrUtils.addressToKey("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm");
+        let key = nacl.keyPair.fromSeed(sk);
+ 
+        tx = new TransactionBuilder(testTokenChainId)
+            .input(key.publicKey, 150)
+            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
+            .build()
+            
+        //this should throw error for adding input to transaction error, when expecting signatures only
+        assert.throws(() => new TransactionBuilder(tx)
+            .input(key.publicKey, 150)
+            .pkSignature(key.publicKey, "abcdef0123456789")
+            .build())
+            
+        //this should throw error for having a publicKey that doesn't match input
+        assert.throws(() => new TransactionBuilder(tx)
+            .pkSignature("badc0de", "abcdef0123456789")
+            .build())
+
+        //this should throw a bad signature size
+        let txbadsig = new TransactionBuilder(tx)
+            .pkSignature(key.publicKey, "abcdef0123456789")
+            .build()
+        assert.throws(() => txbadsig.validateSignatures());
+
+        let extsig = nacl.detached(fctUtil.sha512(tx.getMarshalDataSig(0)), key.secretKey);
+        //this should throw error for adding input to transaction error, when expecting signatures only
+
+        let txgood = new TransactionBuilder(tx)
+            .pkSignature(key.publicKey, extsig)
+            .build()
+        //should have good signature
+        assert.isTrue(txgood.validateSignatures());
+
+        //test 1 unsigned input and 1 signed intput
+        tx = new TransactionBuilder(testTokenChainId)
+            .input(key.publicKey, 150)
+            .input("Fs2nnTh6MvL3NNRN9NtkLhN5tyb9mpEnqYKjhwrtHtgZ9Ramio61", 150)
+            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 300)
+            .build()
+        //should throw for not enough external signatures provided
+        assert.throws(() => new TransactionBuilder(tx)
+            .build())
+
+        //now provide a signature    
+        extsig = nacl.detached(fctUtil.sha512(tx.getMarshalDataSig(0)), key.secretKey);
+        txgood = new TransactionBuilder(tx)
+            .pkSignature(key.publicKey, extsig)
+            .build()
+
+        assert.isTrue(txgood.validateSignatures());
+
+        //** 
         //TX ERRORS:
 
         //test equal inputs & outputs

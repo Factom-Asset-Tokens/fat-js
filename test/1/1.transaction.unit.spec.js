@@ -1,5 +1,8 @@
 const util = require('../../util');
 const assert = require('chai').assert;
+const fctUtil = require('factom/src/util');
+const nacl = require('tweetnacl/nacl-fast').sign;
+
 
 const fctAddrUtils = require('factom/src/addresses');
 const Entry = require('factom/src/entry').Entry;
@@ -82,6 +85,45 @@ describe('Transaction Unit', function () {
 
         assert.isArray(tx.getTokenMetadata());
         assert.strictEqual(JSON.stringify(tx.getTokenMetadata()), JSON.stringify(tokenMeta));
+
+
+        //** Test External Signing
+
+        //test signing with private key externally, this will simulate an external signature such as from the Ledger
+        let sk = fctAddrUtils.addressToKey("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm");
+        let key = nacl.keyPair.fromSeed(sk);
+
+        tx = new TransactionBuilder(testTokenChainId)
+            .input(key.publicKey, [{min: 0, max: 3}, 150])
+            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [{min: 0, max: 3}, 150])
+            .build()
+
+        let extsig = nacl.detached(fctUtil.sha512(tx.getMarshalDataSig(0)), key.secretKey);
+
+        //this should throw error for adding input to transaction error, when expecting signatures only
+        assert.throws(() => new TransactionBuilder(tx)
+            .input(key.publicKey, [{min: 0, max: 3}, 150])
+            .pkSignature(key.publicKey, extsig)
+            .build())
+
+        //this should throw error for having a publicKey that doesn't match input
+        assert.throws(() => new TransactionBuilder(tx)
+            .pkSignature("badc0de", extsig)
+            .build())
+
+        //this should throw a bad signature size
+        let txbadsig = new TransactionBuilder(tx)
+            .pkSignature(key.publicKey, "abcdef0123456789")
+            .build()
+
+        assert.throws(() => txbadsig.validateSignatures());
+
+        let txgood = new TransactionBuilder(tx)
+            .pkSignature(key.publicKey, extsig)
+            .build()
+            console.log("Checkpoint 9")
+        //should have good signature
+        assert.isTrue(txgood.validateSignatures());
 
         //TX ERRORS:
 

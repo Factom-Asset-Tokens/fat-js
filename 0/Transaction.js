@@ -80,9 +80,19 @@ class Transaction {
                 this._extIds.push(this._rcds[0]);
                 this._extIds.push(this._signatures[0]);
 
+            } if ( builder._signatures !== undefined ) {
+                this._rcds = builder._keys.map(key => Buffer.concat([constant.RCD_TYPE_1, Buffer.from(key.publicKey)]));
+                this._timestamp = builder._timestamp;
+                this._signatures = builder._signatures;
+                this._extIds = [this._timestamp.toString()];
+                for (let i = 0; i < this._rcds.length; i++) {
+                    this._extIds.push(this._rcds[i]);
+                    this._extIds.push(this._signatures[i]);
+                }
             } else { //otherwise normal transaction
                 this._rcds = builder._keys.map(key => Buffer.concat([constant.RCD_TYPE_1, Buffer.from(key.publicKey)]));
                 let sigIndexCounter = 0;
+                let valid = true;
                 this._signatures = builder._keys.map(key => {
 
                     const index = Buffer.from(sigIndexCounter.toString());
@@ -91,9 +101,15 @@ class Transaction {
                     const content = Buffer.from(this._content);
 
                     sigIndexCounter++;
-                    return nacl.detached(fctUtil.sha512(Buffer.concat([index, timestamp, chainId, content])), key.secretKey);
+                    if ( key.secretKey !== undefined ) {
+                        return nacl.detached(fctUtil.sha512(Buffer.concat([index, timestamp, chainId, content])), key.secretKey);
+                    }
+                    valid = false;
+                    return undefined
                 });
-                for (let i = 0; i < this._rcds.length; i++) {
+                
+                // if signatures aren't all valid then don't create external id's
+                for (let i = 0; valid && i < this._rcds.length; i++) {
                     this._extIds.push(this._rcds[i]);
                     this._extIds.push(this._signatures[i]);
                 }
@@ -206,6 +222,43 @@ class Transaction {
     getTimestamp() {
         return this._timestamp;
     }
+
+    /**
+     * @method
+     * @param keyindex {number} - The input index to marshal to prep for hashing then signing
+     * @returns {Buffer} - Get the marshalled data that needs to be hashed then signed
+     */
+    getMarshalDataSig(keyindex) {
+        return getMarshalDataSig(this, keyindex);
+    }
+    
+    /**
+     * @method - validate all the signatures agasint the inputs. useful for external signing.
+     */  
+    validateSignatures() {
+        if ( this._signatures.length !== this._rcds.length ) {
+            throw new Error("Invalid number of signatures to inputs")
+        }
+        for( let i = 0; i < this._rcds.length; ++i ) {
+            if( !nacl.detached.verify(fctUtil.sha512(this.getMarshalDataSig(i)), this._signatures[i], Buffer.from(this._rcds[i], 1).slice(1)) ) {
+                throw new Error("Invalid Transaction Signature for input " + i.toString())
+            }
+        }
+        return true;
+    }
+}
+
+/**
+ * @method
+ * @param keyindex {number} - The input index to marshal to prep for hashing then signing
+ * @returns {Buffer} - Get the marshalled data that needs to be hashed then signed
+ */
+function getMarshalDataSig(tx,keyindex) {
+    const index = Buffer.from(keyindex.toString());
+    const timestamp = Buffer.from(tx._timestamp.toString());
+    const chainId = Buffer.from(tx._tokenChainId, 'hex');
+    const content = Buffer.from(tx._content);
+    return Buffer.concat([index,timestamp,chainId,content]);
 }
 
 module.exports = Transaction;
