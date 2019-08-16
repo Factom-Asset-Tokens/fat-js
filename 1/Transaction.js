@@ -38,36 +38,44 @@ class Transaction {
 
             this._tokenChainId = builder._tokenChainId;
 
-            //handle coinbase tx
-            if (Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) {
+            if ( builder._signatures !== undefined ) { //handle previously assembled transaction with added signatures
 
-                if (!builder._sk1) throw new Error("You must include a valid SK1 Key to sign a coinbase transaction");
+                if (Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) {//handle coinbase tx
+                    this._rcds = [Buffer.concat([constant.RCD_TYPE_1, Buffer.from(builder._id1)])];
+                } else {
+                    this._rcds = builder._keys.map(key => Buffer.concat([constant.RCD_TYPE_1, Buffer.from(key.publicKey)]));
+                }
 
-                const index = Buffer.from('0');
-                const timestamp = Buffer.from(unixSeconds.toString());
-                const chainId = Buffer.from(builder._tokenChainId, 'hex');
-                const content = Buffer.from(this._content);
+                if ( this._rcds.length != builder._signatures.length ) {
+                    throw new Error("Missmatch between public keys and the number of signatures provided");
+                }
 
-                const key = nacl.keyPair.fromSeed(fctIdentityCrypto.extractSecretFromIdentityKey(builder._sk1));
-
-                this._rcds = [Buffer.concat([constant.RCD_TYPE_1, Buffer.from(key.publicKey)])];
-
-                this._signatures = [nacl.detached(fctUtil.sha512(Buffer.concat([index, timestamp, chainId, content])), key.secretKey)];
-
-                this._extIds.push(this._rcds[0]);
-                this._extIds.push(this._signatures[0]);
-
-            } if ( builder._signatures !== undefined ) {
-                this._rcds = builder._keys.map(key => Buffer.concat([constant.RCD_TYPE_1, Buffer.from(key.publicKey)]));
                 this._timestamp = builder._timestamp;
                 this._signatures = builder._signatures;
                 this._extIds = [this._timestamp.toString()];
+
                 for (let i = 0; i < this._rcds.length; i++) {
                     this._extIds.push(this._rcds[i]);
                     this._extIds.push(this._signatures[i]);
                 }
+            } else if (Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) {//handle coinbase tx
+                if ( builder._sk1 !== undefined ) {
+                    const index = Buffer.from('0');
+                    const timestamp = Buffer.from(unixSeconds.toString());
+                    const chainId = Buffer.from(builder._tokenChainId, 'hex');
+                    const content = Buffer.from(this._content);
+                    const key = nacl.keyPair.fromSeed(fctIdentityCrypto.extractSecretFromIdentityKey(builder._sk1));
+                    this._rcds = [Buffer.concat([constant.RCD_TYPE_1, Buffer.from(key.publicKey)])];
+                    this._signatures = [nacl.detached(fctUtil.sha512(Buffer.concat([index, timestamp, chainId, content])), key.secretKey)];
+                    this._extIds.push(this._rcds[0]);
+                    this._extIds.push(this._signatures[0]);
+                } else if ( builder._id1 !== undefined ) {
+                    this._id1 = builder._id1;
+                    this._signatures = [undefined];
+                } else {
+                    throw new Error("You must include a valid SK1 Key to sign a coinbase transaction, or an ID1 Key to externally sign coinbase transaction.");
+                }
             } else { //otherwise normal transaction
-                this._rcds = builder._keys.map(key => Buffer.concat([constant.RCD_TYPE_1, Buffer.from(key.publicKey)]));
                 let sigIndexCounter = 0;
                 let valid = true;
                 this._signatures = builder._keys.map(key => {
@@ -84,9 +92,16 @@ class Transaction {
                     valid = false;
                     return undefined
                 });
-                for (let i = 0; valid && i < this._rcds.length; i++) {
-                    this._extIds.push(this._rcds[i]);
-                    this._extIds.push(this._signatures[i]);
+                if ( valid ) {
+                    this._rcds = builder._keys.map(key => Buffer.concat([constant.RCD_TYPE_1, Buffer.from(key.publicKey)]));
+                    // if signatures aren't all valid then don't create external id's
+                    for (let i = 0; valid && i < this._rcds.length; i++) {
+                        this._extIds.push(this._rcds[i]);
+                        this._extIds.push(this._signatures[i]);
+                    }
+                } else {
+                    //need to store off keys arrays for signatures on second pass
+                    this._keys = builder._keys;
                 }
             }
         } else { //from object

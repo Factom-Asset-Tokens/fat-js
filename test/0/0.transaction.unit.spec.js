@@ -3,11 +3,23 @@ const fctAddrUtils = require('factom/src/addresses');
 const fctUtil = require('factom/src/util');
 const Entry = require('factom/src/entry').Entry;
 const BigNumber = require('bignumber.js');
-
+const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
 const nacl = require('tweetnacl/nacl-fast').sign;
-
 const TransactionBuilder = require('../../0/TransactionBuilder');
+const base58 = require('base-58');
+const { IDENTITY_KEY_HEX_PREFIX_MAP } = require('factom-identity-lib/src/constant');
+
 const testTokenChainId = '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762';
+
+function createPublicIdentityAddr(prefix, idpk){
+    let addr = Buffer.concat([Buffer.from(IDENTITY_KEY_HEX_PREFIX_MAP[prefix],'hex'),Buffer.from(idpk,'hex')]);
+
+    if (addr.length !== 35) {
+        throw Error("Invalid public key provided");
+    }
+
+    return base58.encode(Buffer.concat([addr, fctIdentityCrypto.sha256d(addr).slice(0, 4)]));
+}
 
 describe('Transaction Unit', function () {
 
@@ -80,26 +92,36 @@ describe('Transaction Unit', function () {
         assert.isObject(tx.getMetadata());
         assert.strictEqual(JSON.stringify(tx.getMetadata()), JSON.stringify(meta));
 
-        //** Test External Signing
-        
+        //** Begin Test External Signing
+
         //test signing with private key externally, this will simulate an external signature such as from the Ledger
         let sk = fctAddrUtils.addressToKey("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm");
+        let sk2 = fctAddrUtils.addressToKey("Fs2nnTh6MvL3NNRN9NtkLhN5tyb9mpEnqYKjhwrtHtgZ9Ramio61");
+
         let key = nacl.keyPair.fromSeed(sk);
- 
+        let key2 = nacl.keyPair.fromSeed(sk2);
+        let pubaddr = fctAddrUtils.keyToPublicFctAddress(key.publicKey);
+
         tx = new TransactionBuilder(testTokenChainId)
-            .input(key.publicKey, 150)
+            .input(pubaddr, 150)
             .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
             .build()
-            
+
+        //gives error for bad input address, in this case providing a key instead of address
+        assert.throws(() =>  new TransactionBuilder(testTokenChainId)
+            .input(key.publicKey, 150)
+            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
+            .build())
+
         //this should throw error for adding input to transaction error, when expecting signatures only
         assert.throws(() => new TransactionBuilder(tx)
-            .input(key.publicKey, 150)
+            .input(pubaddr, 150)
             .pkSignature(key.publicKey, "abcdef0123456789")
             .build())
-            
+
         //this should throw error for having a publicKey that doesn't match input
         assert.throws(() => new TransactionBuilder(tx)
-            .pkSignature("badc0de", "abcdef0123456789")
+            .pkSignature(key2.publicKey, "abcdef0123456789")
             .build())
 
         //this should throw a bad signature size
@@ -119,10 +141,11 @@ describe('Transaction Unit', function () {
 
         //test 1 unsigned input and 1 signed intput
         tx = new TransactionBuilder(testTokenChainId)
-            .input(key.publicKey, 150)
+            .input(pubaddr, 150)
             .input("Fs2nnTh6MvL3NNRN9NtkLhN5tyb9mpEnqYKjhwrtHtgZ9Ramio61", 150)
             .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 300)
             .build()
+
         //should throw for not enough external signatures provided
         assert.throws(() => new TransactionBuilder(tx)
             .build())
@@ -134,6 +157,37 @@ describe('Transaction Unit', function () {
             .build()
 
         assert.isTrue(txgood.validateSignatures());
+
+
+        const idkey = nacl.keyPair.fromSeed(fctIdentityCrypto.extractSecretFromIdentityKey("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu"));
+        const idaddr = createPublicIdentityAddr('id1', idkey.publicKey)
+
+        //test coinbase transaction with external signature
+        tx = new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
+            .coinbaseInput(10)
+            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 10)
+            .id1(idaddr)
+            .build();
+
+        //should throw with attempt to pass a signature for a regular transaction
+        assert.throws(() => new TransactionBuilder(tx)
+            .pkSignature(key.publicKey, extsig)
+            .build())
+
+        //should throw with attempt to set the identity address on a assembled transaction
+        assert.throws(() => new TransactionBuilder(tx)
+            .id1(idaddr)
+            .build())
+
+        //make a signature and sign the data
+        extsig = nacl.detached(fctUtil.sha512(tx.getMarshalDataSig(0)), idkey.secretKey);
+
+        txgood = new TransactionBuilder(tx)
+            .id1Signature(idkey.publicKey, extsig)
+            .build()
+        assert.isTrue(txgood.validateSignatures());
+
+        //** End Test External Signing
 
         //** 
         //TX ERRORS:

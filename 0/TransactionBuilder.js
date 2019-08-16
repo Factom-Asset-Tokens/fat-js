@@ -3,6 +3,9 @@ const nacl = require('tweetnacl/nacl-fast').sign;
 const fctAddressUtil = require('factom/src/addresses');
 const fctIdentityUtil = require('factom-identity-lib/src/validation');
 const BigNumber = require('bignumber.js');
+const base58 = require('base-58');
+const { sha256d } = require('factom-identity-lib/src/crypto');
+const { IDENTITY_KEY_HEX_PREFIX_MAP } = require('factom-identity-lib/src/constant');
 
 /**
  * Build & Model A FAT-0 Transaction
@@ -49,8 +52,16 @@ class TransactionBuilder {
     constructor(t) {
         if ( t instanceof (require('./Transaction')) ) {
             //support for external signatures
+
+            //check if a coinbase transaction
+            if ( Object.keys(t._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC) ) {
+                this._id1 = t._id1
+            } else {
+                this._keys = t._keys
+            }
+
             this._signatures = t._signatures;
-            this._keys = t._rcds.map(rcd => { return {'publicKey':Buffer.from(rcd, 1).slice(1)} } );
+
             this._tokenChainId = t._tokenChainId;
             this._inputs = t._inputs;
             this._outputs = t._outputs;
@@ -58,15 +69,21 @@ class TransactionBuilder {
             if ( t._metadata !== undefined ) {
                 this._metadata = t._metadata;
             }
-        } else {
+        } else if (typeof t === 'string' || t instanceof String) {
+
             let tokenChainId = t;
-            if (!tokenChainId || tokenChainId.length !== 64) throw new Error('Token chain ID must be a valid Factom chain ID');
+
+            if (!tokenChainId || tokenChainId.length !== 64) {
+                throw new Error('Token chain ID must be a valid Factom chain ID');
+            }
             this._tokenChainId = tokenChainId;
 
             this._keys = [];
             this._inputs = {};
             this._outputs = {};
-        } 
+        } else {
+            throw new Error('Constructor expects either a previously assembled unsigned Transaction or a string containing the token chain id.');
+        }
     }
 
     /**
@@ -79,7 +96,7 @@ class TransactionBuilder {
     input(fs, amount) {
 
         if ( this._signatures !== undefined ) {
-            throw new Error("Attempting to add new input, expecting signatures only")
+            throw new Error("Attempting to add new input to a previously assembled transaction, expecting signatures only")
         }
         //if this is setup as coinbase, prevent additional inputs
         if (Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) throw new Error('Cannot add an additional input to a coinbase transaction');
@@ -98,24 +115,20 @@ class TransactionBuilder {
 
         } else {
 
-            if ( fctAddressUtil.isValidPublicFctAddress(fs) ) { //check to see if user passed in a public fct address
-              throw new Error("Input address must be either a valid private Factoid address or a Factoid public key");
+            // at this point the fs is should be the fa if we get this far
+            let fa = fs;
+            if ( !fctAddressUtil.isValidPublicFctAddress(fa) ) { //check to see if user passed in a public fct address
+              throw new Error("Input address must be either a valid private Factoid address or a Factoid public address");
             }
 
             amount = new BigNumber(amount);
             if (!amount.isInteger() || amount.isLessThan(1)) throw new Error("Input amount must be a positive nonzero integer");
 
-            // we'll have to assume that the fs is really the publicKey if we get this far, ultimately the tx will fail if not
-            let pubkey = fs;
-
-            //this will throw exception if not right length
-            let pubaddr = fctAddressUtil.keyToPublicFctAddress(pubkey);
-
             //check that outputs does not contain this address
-            if (this._outputs[pubaddr]) throw new Error("Input address already occurs in outputs");
+            if (this._outputs[fa]) throw new Error("Input address already occurs in outputs");
 
-            this._keys.push({publicKey: pubkey});
-            this._inputs[pubaddr] = amount;
+            this._keys.push({pubaddr: fa, publicKey:undefined});
+            this._inputs[fa] = amount;
         }
         return this;
     }
@@ -142,7 +155,7 @@ class TransactionBuilder {
     output(fa, amount) {
 
         if ( this._signatures !== undefined ) {
-            throw new Error("Attempting to add new output, expecting signatures only")
+            throw new Error("Attempting to add new output to previously assembled transaction, expecting signatures only")
         }
 
         if (!fctAddressUtil.isValidPublicFctAddress(fa)) throw new Error("Output address must be a valid public Factoid address");
@@ -181,6 +194,38 @@ class TransactionBuilder {
     }
 
     /**
+     * @method
+     * @param {string} id1 - The ID1 public key string of the issuing identity, external signature will be required in second pass
+     * @returns {TransactionBuilder}
+     */
+    id1(id1) {
+        if ( this._signatures !== undefined ) {
+            throw new Error("Attempting to add new ID1 key while expecting coinbase signature only.  Use id1Signature.")
+        }
+
+        this._id1 = extractIdentityPublicKey(id1);
+        return this;
+    }
+
+    /**
+     * @method
+     * @param {string} id1pubkey - The ID1 public key string of the issuing identity, external signature expected.
+     * @param {Buffer} signature - signature - Optional signature provided on second pass
+     * @returns {TransactionBuilder}
+     */
+    id1Signature(id1pubkey, signature) {
+        if ( this._id1 === undefined ) {
+            throw new Error("Attempting to pass a signature for invalid coinbase transaction.")
+        }
+        if ( !this._id1.equals(Buffer.from(id1pubkey,'hex')) ) {
+            throw new Error("ID1 Key is not equal coinbase ID1 Key requiring a signature");
+        }
+
+        this._signatures = [signature];
+        return this;
+    }
+
+    /**
      * Set arbitrary metadata for the transaction
      * @method
      * @param {*} metadata - The metadata. Must be JSON stringifyable
@@ -188,7 +233,7 @@ class TransactionBuilder {
      */
     metadata(metadata) {
         if ( this._signatures !== undefined ) {
-            throw new Error("Attempting to add new metadata, expecting signatures only")
+            throw new Error("Attempting to add new metadata to previously assembled transaction, expecting signatures only")
         }
         try {
             JSON.stringify(metadata)
@@ -207,12 +252,17 @@ class TransactionBuilder {
      * @returns {TransactionBuilder} - TransactionBuilder instance.
      */
     pkSignature(publicKey, signature) {
-
+        if ( this._id1 !== undefined ) {
+            throw new Error("Attempting to add a signature for a regular transaction to a coinbase transaction.")
+        }
         let pk = Buffer.from(publicKey,'hex')
 
-        let index = Object.values(this._keys).findIndex( v => { return v.publicKey.equals(pk) } );
+        let fa = fctAddressUtil.keyToPublicFctAddress(pk);
+
+        let index = Object.keys(this._inputs).findIndex( a => { return a === fa } );
 
         if ( index !== undefined ) {
+            this._keys[index].publicKey = pk
             this._signatures[index] = signature
         } else {
             throw new Error("Public Key (" + pk.toString('hex') + ") for provided signature not found in input list." )
@@ -233,7 +283,7 @@ class TransactionBuilder {
         if (!inputSum.isEqualTo(outputSum)) throw new Error("Input and output amount sums must match (" + inputSum + " != " + outputSum + ")");
 
         if (Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) {
-            if (!this._sk1) throw new Error('You must include a valid issuer sk1 key to perform a coinbase transaction')
+            if (!this._sk1 && !this._id1) throw new Error('You must include a valid issuer sk1 key to perform a coinbase transaction')
         }
 
         if ( this._signatures !== undefined ) {
@@ -247,5 +297,62 @@ class TransactionBuilder {
         return new (require('./Transaction'))(this);
     }
 }
+
+
+/**
+ * @method Method to verify the public identity address
+ * @param {string} id1 - The ID1 public key string of the issuing identity
+ * @returns {bool} returs true if key is a valid public key
+ */
+function isValidId1(key) {
+    prefix = 'id1'
+    if (typeof key !== 'string') {
+        return false;
+    }
+
+    let bytes;
+    if (key.slice(0, 3) === prefix) {
+        bytes = Buffer.from(base58.decode(key));
+    } else if (key.slice(0, 6) === IDENTITY_KEY_HEX_PREFIX_MAP[prefix]) {
+        bytes = Buffer.from(key, 'hex');
+    } else {
+        return false;
+    }
+
+    if (bytes.length !== 39) {
+        return false;
+    }
+
+    const checksum = sha256d(bytes.slice(0, 35)).slice(0, 4);
+    if (checksum.equals(bytes.slice(35, 39))) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * @method Method to extract the public key from a public identity address
+ * @param {string} id1 - The ID1 public key string of the issuing identity
+ * @returns {Buffer} The buffer of the raw public key
+ */
+function extractIdentityPublicKey(id1) {
+    if (!isValidId1(id1)) {
+        throw new Error("You must include a valid ID1 Key to map to an external signature");
+    }
+
+    //extract the identity public
+    let hexKey;
+
+    // Need to be decoded if human readable format
+    if (id1.slice(0, 2) === 'id') {
+        hexKey = Buffer.from(base58.decode(id1));
+    } else {
+        hexKey = Buffer.from(key, 'hex');
+    }
+
+    //return the public key
+    return Buffer.from(hexKey.slice(3, 35));
+    }
 
 module.exports = TransactionBuilder;

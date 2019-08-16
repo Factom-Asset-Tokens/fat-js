@@ -93,16 +93,21 @@ describe('Transaction Unit', function () {
         let sk = fctAddrUtils.addressToKey("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm");
         let key = nacl.keyPair.fromSeed(sk);
 
+        let pubaddr = fctAddrUtils.keyToPublicFctAddress(key.publicKey);
+        
         tx = new TransactionBuilder(testTokenChainId)
-            .input(key.publicKey, [{min: 0, max: 3}, 150])
+            .input(pubaddr, [{min: 0, max: 3}, 150])
             .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [{min: 0, max: 3}, 150])
             .build()
 
         let extsig = nacl.detached(fctUtil.sha512(tx.getMarshalDataSig(0)), key.secretKey);
-
+        assert.throws(() => new TransactionBuilder(testTokenChainId)
+            .input(key.publicKey, [{min: 0, max: 3}, 150])
+            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [{min: 0, max: 3}, 150])
+            .build())
         //this should throw error for adding input to transaction error, when expecting signatures only
         assert.throws(() => new TransactionBuilder(tx)
-            .input(key.publicKey, [{min: 0, max: 3}, 150])
+            .input(pubaddr, [{min: 0, max: 3}, 150])
             .pkSignature(key.publicKey, extsig)
             .build())
 
