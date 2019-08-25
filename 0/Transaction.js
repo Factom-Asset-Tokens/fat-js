@@ -239,9 +239,9 @@ class Transaction {
     }
 
     /**
-     * @method
+     * @method This method will provide the data that needs hashing and signing. Useful for external signing
      * @param keyindex {number} - The input index to marshal to prep for hashing then signing
-     * @returns {Buffer} - Get the marshalled data that needs to be hashed then signed
+     * @returns {Buffer} - Get the marshalled data that needs to be hashed then signed, this is the Buffer.concat([index,timestamp,chainId,content])
      */
     getMarshalDataSig(keyindex) {
         return getMarshalDataSig(this, keyindex);
@@ -249,6 +249,7 @@ class Transaction {
     
     /**
      * @method - validate all the signatures agasint the inputs. useful for external signing.
+     * @returns {bool} returns true if signatures are valid, throws error otherwise.
      */  
     validateSignatures() {
         if ( this._signatures.length !== this._rcds.length ) {
