@@ -3,10 +3,7 @@ const nacl = require('tweetnacl/nacl-fast').sign;
 const fctAddressUtil = require('factom/src/addresses');
 const fctIdentityUtil = require('factom-identity-lib/src/validation');
 const BigNumber = require('bignumber.js');
-const base58 = require('base-58');
-const { sha256d } = require('factom-identity-lib/src/crypto');
-const { IDENTITY_KEY_HEX_PREFIX_MAP } = require('factom-identity-lib/src/constant');
-
+const util = require('../util');
 /**
  * Build & Model A FAT-0 Transaction
  * @alias TransactionBuilder0
@@ -203,7 +200,7 @@ class TransactionBuilder {
             throw new Error("Attempting to add new ID1 key while expecting coinbase signature only.  Use id1Signature.")
         }
 
-        this._id1 = extractIdentityPublicKey(id1);
+        this._id1 = util.extractIdentityPublicKey(id1);
         return this;
     }
 
@@ -298,61 +295,5 @@ class TransactionBuilder {
     }
 }
 
-
-/**
- * @method Method to verify the public identity address
- * @param {string} id1 - The ID1 public key string of the issuing identity
- * @returns {bool} returs true if key is a valid public key
- */
-function isValidId1(key) {
-    prefix = 'id1'
-    if (typeof key !== 'string') {
-        return false;
-    }
-
-    let bytes;
-    if (key.slice(0, 3) === prefix) {
-        bytes = Buffer.from(base58.decode(key));
-    } else if (key.slice(0, 6) === IDENTITY_KEY_HEX_PREFIX_MAP[prefix]) {
-        bytes = Buffer.from(key, 'hex');
-    } else {
-        return false;
-    }
-
-    if (bytes.length !== 39) {
-        return false;
-    }
-
-    const checksum = sha256d(bytes.slice(0, 35)).slice(0, 4);
-    if (checksum.equals(bytes.slice(35, 39))) {
-        return true;
-    }
-
-    return false;
-}
-
-/**
- * @method Method to extract the public key from a public identity address
- * @param {string} id1 - The ID1 public key string of the issuing identity
- * @returns {Buffer} The buffer of the raw public key
- */
-function extractIdentityPublicKey(id1) {
-    if (!isValidId1(id1)) {
-        throw new Error("You must include a valid ID1 Key to map to an external signature");
-    }
-
-    //extract the identity public
-    let hexKey;
-
-    // Need to be decoded if human readable format
-    if (id1.slice(0, 2) === 'id') {
-        hexKey = Buffer.from(base58.decode(id1));
-    } else {
-        hexKey = Buffer.from(key, 'hex');
-    }
-
-    //return the public key
-    return Buffer.from(hexKey.slice(3, 35));
-    }
 
 module.exports = TransactionBuilder;

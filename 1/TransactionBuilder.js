@@ -207,7 +207,7 @@ class TransactionBuilder {
             throw new Error("Attempting to add new ID1 key while expecting coinbase signature only.  Use id1Signature.")
         }
 
-        this._id1 = extractIdentityPublicKey(id1);
+        this._id1 = util.extractIdentityPublicKey(id1);
         return this;
     }
 
@@ -304,7 +304,7 @@ class TransactionBuilder {
         if (Object.keys(this._inputs).length === 0 || Object.keys(this._outputs).length === 0) throw new Error("Must have at least one input and one output");
 
         if (Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) {
-            if (!this._sk1) throw new Error('You must include a valid issuer sk1 key to perform a coinbase transaction')
+            if (!this._sk1 && !this._id1) throw new Error('You must include a valid issuer sk1 key to perform a coinbase transaction')
         }
 
         //evaluate the token ids in inputs/outputs. Should be the same set

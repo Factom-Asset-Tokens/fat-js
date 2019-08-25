@@ -1,5 +1,9 @@
 const { Entry } = require('factom/src/entry');
 const { Chain } = require('factom/src/chain');
+const base58 = require('base-58');
+const { sha256d } = require('factom-identity-lib/src/crypto');
+const { IDENTITY_KEY_HEX_PREFIX_MAP } = require('factom-identity-lib/src/constant');
+const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
 
 /**
  * @module util
@@ -148,6 +152,80 @@ module.exports.countNFIds = function (ids) {
 module.exports.validateNFIds = function (ids) {
     return Array.isArray(ids) && ids.length > 0 && ids.every(isValidNFIdRepresentation) && hasNoDuplicatedNFId(ids);
 };
+
+
+/**
+ * @method Method to create the public identity address
+ * @param {string} id1 - The 'idX' prefix to generate the address
+ * @returns {string} encoded base58 identity address.
+ */
+module.exports.createPublicIdentityAddr = function (prefix, idpk)
+{
+    let addr = Buffer.concat([Buffer.from(IDENTITY_KEY_HEX_PREFIX_MAP[prefix],'hex'),Buffer.from(idpk,'hex')]);
+
+    if (addr.length !== 35) {
+        throw Error("Invalid public key provided");
+    }
+
+    return base58.encode(Buffer.concat([addr, fctIdentityCrypto.sha256d(addr).slice(0, 4)]));
+}
+
+
+/**
+ * @method Method to extract the public key from a public identity address
+ * @param {string} id1 - The ID1 public key string of the issuing identity
+ * @returns {Buffer} The buffer of the raw public key
+ */
+module.exports.extractIdentityPublicKey = function (id1) {
+    if (!isValidId1(id1)) {
+        throw new Error("You must include a valid ID1 Key to map to an external signature");
+    }
+
+    //extract the identity public
+    let hexKey;
+
+    // Need to be decoded if human readable format
+    if (id1.slice(0, 2) === 'id') {
+        hexKey = Buffer.from(base58.decode(id1));
+    } else {
+        hexKey = Buffer.from(key, 'hex');
+    }
+
+    //return the public key
+    return Buffer.from(hexKey.slice(3, 35));
+}
+
+/**
+ * @method Method to verify the public identity address
+ * @param {string} id1 - The ID1 public key string of the issuing identity
+ * @returns {bool} returs true if key is a valid public key
+ */
+function isValidId1(key) {
+    prefix = 'id1'
+    if (typeof key !== 'string') {
+        return false;
+    }
+
+    let bytes;
+    if (key.slice(0, 3) === prefix) {
+        bytes = Buffer.from(base58.decode(key));
+    } else if (key.slice(0, 6) === IDENTITY_KEY_HEX_PREFIX_MAP[prefix]) {
+        bytes = Buffer.from(key, 'hex');
+    } else {
+        return false;
+    }
+
+    if (bytes.length !== 39) {
+        return false;
+    }
+
+    const checksum = sha256d(bytes.slice(0, 35)).slice(0, 4);
+    if (checksum.equals(bytes.slice(35, 39))) {
+        return true;
+    }
+
+    return false;
+}
 
 function isValidNFIdRepresentation(id) {
     return Number.isInteger(id) || (typeof id === 'object' && Number.isInteger(id.min) && Number.isInteger(id.max) && id.max >= id.min && Object.keys(id).length === 2)

@@ -3,11 +3,14 @@ const assert = require('chai').assert;
 const fctUtil = require('factom/src/util');
 const nacl = require('tweetnacl/nacl-fast').sign;
 
+const TransactionBuilder = require('../../1/TransactionBuilder');
+const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
 
 const fctAddrUtils = require('factom/src/addresses');
 const Entry = require('factom/src/entry').Entry;
 
 const testTokenChainId = '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762';
+
 
 describe('Transaction Unit', function () {
 
@@ -93,18 +96,24 @@ describe('Transaction Unit', function () {
         let sk = fctAddrUtils.addressToKey("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm");
         let key = nacl.keyPair.fromSeed(sk);
 
+        let sk2 = fctAddrUtils.addressToKey("Fs2nnTh6MvL3NNRN9NtkLhN5tyb9mpEnqYKjhwrtHtgZ9Ramio61");
+        let key2 = nacl.keyPair.fromSeed(sk2);
+
         let pubaddr = fctAddrUtils.keyToPublicFctAddress(key.publicKey);
-        
+
         tx = new TransactionBuilder(testTokenChainId)
             .input(pubaddr, [{min: 0, max: 3}, 150])
             .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [{min: 0, max: 3}, 150])
             .build()
 
         let extsig = nacl.detached(fctUtil.sha512(tx.getMarshalDataSig(0)), key.secretKey);
+
+        //throws an error for providing a public key instead of FA address for input
         assert.throws(() => new TransactionBuilder(testTokenChainId)
             .input(key.publicKey, [{min: 0, max: 3}, 150])
             .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [{min: 0, max: 3}, 150])
             .build())
+
         //this should throw error for adding input to transaction error, when expecting signatures only
         assert.throws(() => new TransactionBuilder(tx)
             .input(pubaddr, [{min: 0, max: 3}, 150])
@@ -112,8 +121,10 @@ describe('Transaction Unit', function () {
             .build())
 
         //this should throw error for having a publicKey that doesn't match input
+
+        //gives error for bad input address, in this case providing a key instead of address
         assert.throws(() => new TransactionBuilder(tx)
-            .pkSignature("badc0de", extsig)
+            .pkSignature(key2.publicKey, extsig)
             .build())
 
         //this should throw a bad signature size
@@ -123,12 +134,44 @@ describe('Transaction Unit', function () {
 
         assert.throws(() => txbadsig.validateSignatures());
 
+        //create a good transaction
         let txgood = new TransactionBuilder(tx)
             .pkSignature(key.publicKey, extsig)
             .build()
-            console.log("Checkpoint 9")
+
         //should have good signature
         assert.isTrue(txgood.validateSignatures());
+        
+        //now test that coinbase txn can accept an external sig
+        
+        const idkey = nacl.keyPair.fromSeed(fctIdentityCrypto.extractSecretFromIdentityKey("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu"));
+        const idaddr = util.createPublicIdentityAddr('id1', idkey.publicKey)
+
+        //test coinbase transaction with external signature
+        tx = new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
+            .coinbaseInput([10])
+            .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [10])
+            .id1(idaddr)
+            .build();
+
+        //should throw with attempt to pass a signature for a regular transaction
+        assert.throws(() => new TransactionBuilder(tx)
+            .pkSignature(key.publicKey, extsig)
+            .build())
+
+        //should throw error with attempt to set the identity address on a assembled transaction
+        assert.throws(() => new TransactionBuilder(tx)
+            .id1(idaddr)
+            .build())
+
+        //make a signature and sign the data
+        extsig = nacl.detached(fctUtil.sha512(tx.getMarshalDataSig(0)), idkey.secretKey);
+
+        txgood = new TransactionBuilder(tx)
+            .id1Signature(idkey.publicKey, extsig)
+            .build()
+        assert.isTrue(txgood.validateSignatures());
+
 
         //TX ERRORS:
 

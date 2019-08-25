@@ -1,3 +1,4 @@
+const util = require('../../util');
 const assert = require('chai').assert;
 const fctAddrUtils = require('factom/src/addresses');
 const fctUtil = require('factom/src/util');
@@ -6,20 +7,8 @@ const BigNumber = require('bignumber.js');
 const fctIdentityCrypto = require('factom-identity-lib/src/crypto');
 const nacl = require('tweetnacl/nacl-fast').sign;
 const TransactionBuilder = require('../../0/TransactionBuilder');
-const base58 = require('base-58');
-const { IDENTITY_KEY_HEX_PREFIX_MAP } = require('factom-identity-lib/src/constant');
 
 const testTokenChainId = '888888d027c59579fc47a6fc6c4a5c0409c7c39bc38a86cb5fc0069978493762';
-
-function createPublicIdentityAddr(prefix, idpk){
-    let addr = Buffer.concat([Buffer.from(IDENTITY_KEY_HEX_PREFIX_MAP[prefix],'hex'),Buffer.from(idpk,'hex')]);
-
-    if (addr.length !== 35) {
-        throw Error("Invalid public key provided");
-    }
-
-    return base58.encode(Buffer.concat([addr, fctIdentityCrypto.sha256d(addr).slice(0, 4)]));
-}
 
 describe('Transaction Unit', function () {
 
@@ -96,10 +85,11 @@ describe('Transaction Unit', function () {
 
         //test signing with private key externally, this will simulate an external signature such as from the Ledger
         let sk = fctAddrUtils.addressToKey("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm");
-        let sk2 = fctAddrUtils.addressToKey("Fs2nnTh6MvL3NNRN9NtkLhN5tyb9mpEnqYKjhwrtHtgZ9Ramio61");
-
         let key = nacl.keyPair.fromSeed(sk);
+
+        let sk2 = fctAddrUtils.addressToKey("Fs2nnTh6MvL3NNRN9NtkLhN5tyb9mpEnqYKjhwrtHtgZ9Ramio61");
         let key2 = nacl.keyPair.fromSeed(sk2);
+
         let pubaddr = fctAddrUtils.keyToPublicFctAddress(key.publicKey);
 
         tx = new TransactionBuilder(testTokenChainId)
@@ -131,11 +121,12 @@ describe('Transaction Unit', function () {
         assert.throws(() => txbadsig.validateSignatures());
 
         let extsig = nacl.detached(fctUtil.sha512(tx.getMarshalDataSig(0)), key.secretKey);
-        //this should throw error for adding input to transaction error, when expecting signatures only
 
+        //this is a good transaction
         let txgood = new TransactionBuilder(tx)
             .pkSignature(key.publicKey, extsig)
             .build()
+
         //should have good signature
         assert.isTrue(txgood.validateSignatures());
 
@@ -160,7 +151,7 @@ describe('Transaction Unit', function () {
 
 
         const idkey = nacl.keyPair.fromSeed(fctIdentityCrypto.extractSecretFromIdentityKey("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu"));
-        const idaddr = createPublicIdentityAddr('id1', idkey.publicKey)
+        const idaddr = util.createPublicIdentityAddr('id1', idkey.publicKey)
 
         //test coinbase transaction with external signature
         tx = new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
