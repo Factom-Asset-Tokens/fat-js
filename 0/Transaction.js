@@ -120,7 +120,7 @@ class Transaction {
                 if ( valid ) {
                     this._rcds = builder._keys.map(key => Buffer.concat([constant.RCD_TYPE_1, Buffer.from(key.publicKey)]));
                     // if signatures aren't all valid then don't create external id's
-                    for (let i = 0; valid && i < this._rcds.length; i++) {
+                    for (let i = 0; i < this._rcds.length; i++) {
                         this._extIds.push(this._rcds[i]);
                         this._extIds.push(this._signatures[i]);
                     }
