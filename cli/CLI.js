@@ -1,3 +1,4 @@
+const https = require('https');
 const constant = require('../constant');
 const axios = require('axios');
 const JSONBig = require('json-bigint')({strict: true});
@@ -51,6 +52,31 @@ class CLIBuilder {
      */
     timeout(timeout) {
         this._timeout = timeout;
+        return this;
+    }
+
+    /**
+     * Enforce strict security on https connections to fatd (forbid self signed certs, etc)
+     * @method
+     * @param {boolean} [secure=true] - True if secure connection is desired, false if not
+     * @returns {CLIBuilder}
+     */
+    secure(secure) {
+        if (typeof secure !== 'boolean') throw new Error('Argument must be a boolean');
+        this._secure = secure;
+        return this;
+    }
+
+    /**
+     * Which transport protocol to use to contact fatd
+     * @method
+     * @param {number} [protocol="http"] - The protocol to use. Either "http" or "https"
+     * @returns {CLIBuilder}
+     */
+    protocol(protocol) {
+        if (protocol !== 'http' && protocol !== 'https') throw new Error('Invalid protocol string');
+        this._protocol = protocol;
+        return this;
     }
 
     /**
@@ -87,15 +113,18 @@ class CLI {
         this._port = builder._port || 8078;
         this._username = builder._username;
         this._password = builder._password;
+        this._secure = builder._secure;
+        this._protocol = builder._protocol;
 
         if (this._username && !this._password || this._password && !this._username) throw new Error('Must specify both username and password to use RPC authentication');
 
         this._timeout = builder._timeout || 5000;
 
         this._axios = axios.create({
-            baseURL: 'http://' + this._host + ':' + this._port + '/v1',
+            baseURL: this._protocol + '://' + this._host + ':' + this._port + '/v1',
             timeout: this._timeout,
-            auth: (this._username && this._password) ? {username: this._username, password: this._password} : undefined
+            auth: (this._username && this._password) ? {username: this._username, password: this._password} : undefined,
+            httpsAgent: this._secure ? undefined : new https.Agent({rejectUnauthorized: false}) //if secure is true use default https agent with full security
         });
     }
 

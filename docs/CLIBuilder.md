@@ -10,6 +10,8 @@ Build a CLI object, defining the connection parameters to fatd and other network
     * [.host(host)](#CLIBuilder+host) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
     * [.port(port)](#CLIBuilder+port) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
     * [.timeout(timeout)](#CLIBuilder+timeout) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
+    * [.secure([secure])](#CLIBuilder+secure) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
+    * [.protocol([protocol])](#CLIBuilder+protocol) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
     * [.build()](#CLIBuilder+build) ⇒ [<code>CLI</code>](#CLI)
 
 <a name="CLIBuilder+host"></a>
@@ -44,6 +46,28 @@ Set the connection timeout during connection to fatd
 | Param | Type | Description |
 | --- | --- | --- |
 | timeout | <code>number</code> | The timeout in milliseconds before giving up |
+
+<a name="CLIBuilder+secure"></a>
+
+### cliBuilder.secure([secure]) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
+Enforce strict security on https connections to fatd (forbid self signed certs, etc)
+
+**Kind**: instance method of [<code>CLIBuilder</code>](#CLIBuilder)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [secure] | <code>boolean</code> | <code>true</code> | True if secure connection is desired, false if not |
+
+<a name="CLIBuilder+protocol"></a>
+
+### cliBuilder.protocol([protocol]) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
+Which transport protocol to use to contact fatd
+
+**Kind**: instance method of [<code>CLIBuilder</code>](#CLIBuilder)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [protocol] | <code>number</code> | <code>&quot;http&quot;</code> | The protocol to use. Either "http" or "https" |
 
 <a name="CLIBuilder+build"></a>
 

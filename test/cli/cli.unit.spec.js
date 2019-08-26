@@ -9,7 +9,11 @@ describe('CLI Unit', function () {
         let cli = new CLIBuilder()
             .host(process.env.fatd)
             .port(1234)
+            .secure(true)
+            .protocol('https')
             .build();
+
+        console.log(cli);
     });
 
     it('Instantiate CLI Sync', function () {
