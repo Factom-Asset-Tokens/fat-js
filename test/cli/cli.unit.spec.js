@@ -13,7 +13,6 @@ describe('CLI Unit', function () {
             .protocol('https')
             .build();
 
-        console.log(cli);
     });
 
     it('Instantiate CLI Sync', function () {
