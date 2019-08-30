@@ -182,6 +182,20 @@ describe('FAT-1 CLI Integration', function () {
             assert.isObject(result);
         });
 
+        it('send-transaction(burn)', async function () {
+            const tokenCLI = await cli.getTokenCLI(tokenChainId);
+
+            const randomId = getRandomInteger(12, 100000);
+
+            const tx = new TransactionBuilder(tokenChainId)
+                .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", [randomId])
+                .burnOutput([randomId])
+                .build();
+
+            const result = await tokenCLI.sendTransaction(tx);
+            assert.isObject(result);
+        });
+
         it('send-transaction(externally signed)', async function () {
             const tokenCLI = await cli.getTokenCLI(tokenChainId);
 
