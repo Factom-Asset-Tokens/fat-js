@@ -81,7 +81,7 @@ describe('Transaction Unit', function () {
         assert.isObject(tx.getMetadata());
         assert.strictEqual(JSON.stringify(tx.getMetadata()), JSON.stringify(meta));
 
-        //** Begin Test External Signing
+        //External signatures
 
         //test signing with private key externally, this will simulate an external signature such as from the Ledger
         let sk = fctAddrUtils.addressToKey("Fs1PkAEbmo1XNangSnxmKqi1PN5sVDbQ6zsnXCsMUejT66WaDgkm");
@@ -95,29 +95,29 @@ describe('Transaction Unit', function () {
         tx = new TransactionBuilder(testTokenChainId)
             .input(pubaddr, 150)
             .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
-            .build()
+            .build();
 
         //gives error for bad input address, in this case providing a key instead of address
         assert.throws(() =>  new TransactionBuilder(testTokenChainId)
             .input(key.publicKey, 150)
             .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 150)
-            .build())
+            .build());
 
         //this should throw error for adding input to transaction error, when expecting signatures only
         assert.throws(() => new TransactionBuilder(tx)
             .input(pubaddr, 150)
             .pkSignature(key.publicKey, "abcdef0123456789")
-            .build())
+            .build());
 
         //this should throw error for having a publicKey that doesn't match input
         assert.throws(() => new TransactionBuilder(tx)
             .pkSignature(key2.publicKey, "abcdef0123456789")
-            .build())
+            .build());
 
         //this should throw a bad signature size
         let txbadsig = new TransactionBuilder(tx)
             .pkSignature(key.publicKey, "abcdef0123456789")
-            .build()
+            .build();
         assert.throws(() => txbadsig.validateSignatures());
 
         let extsig = nacl.detached(fctUtil.sha512(tx.getMarshalDataSig(0)), key.secretKey);
@@ -125,7 +125,7 @@ describe('Transaction Unit', function () {
         //this is a good transaction
         let txgood = new TransactionBuilder(tx)
             .pkSignature(key.publicKey, extsig)
-            .build()
+            .build();
 
         //should have good signature
         assert.isTrue(txgood.validateSignatures());
@@ -135,23 +135,23 @@ describe('Transaction Unit', function () {
             .input(pubaddr, 150)
             .input("Fs2nnTh6MvL3NNRN9NtkLhN5tyb9mpEnqYKjhwrtHtgZ9Ramio61", 150)
             .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 300)
-            .build()
+            .build();
 
         //should throw for not enough external signatures provided
         assert.throws(() => new TransactionBuilder(tx)
-            .build())
+            .build());
 
         //now provide a signature    
         extsig = nacl.detached(fctUtil.sha512(tx.getMarshalDataSig(0)), key.secretKey);
         txgood = new TransactionBuilder(tx)
             .pkSignature(key.publicKey, extsig)
-            .build()
+            .build();
 
         assert.isTrue(txgood.validateSignatures());
 
 
         const idkey = nacl.keyPair.fromSeed(fctIdentityCrypto.extractSecretFromIdentityKey("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu"));
-        const idaddr = util.createPublicIdentityAddr('id1', idkey.publicKey)
+        const idaddr = util.createPublicIdentityAddr('id1', idkey.publicKey);
 
         //test coinbase transaction with external signature
         tx = new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
@@ -163,19 +163,19 @@ describe('Transaction Unit', function () {
         //should throw with attempt to pass a signature for a regular transaction
         assert.throws(() => new TransactionBuilder(tx)
             .pkSignature(key.publicKey, extsig)
-            .build())
+            .build());
 
         //should throw with attempt to set the identity address on a assembled transaction
         assert.throws(() => new TransactionBuilder(tx)
             .id1(idaddr)
-            .build())
+            .build());
 
         //make a signature and sign the data
         extsig = nacl.detached(fctUtil.sha512(tx.getMarshalDataSig(0)), idkey.secretKey);
 
         txgood = new TransactionBuilder(tx)
             .id1Signature(idkey.publicKey, extsig)
-            .build()
+            .build();
         assert.isTrue(txgood.validateSignatures());
 
         //** End Test External Signing

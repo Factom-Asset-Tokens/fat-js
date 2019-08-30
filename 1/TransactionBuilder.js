@@ -127,7 +127,7 @@ class TransactionBuilder {
             // at this point the fs is should be the fa if we get this far
             let fa = fs;
             if ( !fctAddressUtil.isValidPublicFctAddress(fa) ) { //check to see if user passed in a public fct address
-              throw new Error("Input address must be either a valid private Factoid address or a Factoid public address");
+                throw new Error("Input address must be either a valid private Factoid address or a Factoid public address");
             }
 
             //check that outputs does not contain this address
