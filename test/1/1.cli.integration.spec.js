@@ -1,3 +1,7 @@
+const fctUtil = require('factom/src/util');
+const fctAddrUtils = require('factom/src/addresses');
+const nacl = require('tweetnacl/nacl-fast').sign;
+
 const util = require('../../util');
 const constant = require('../../constant');
 const assert = require('chai').assert;
@@ -175,6 +179,30 @@ describe('FAT-1 CLI Integration', function () {
                 .build();
 
             const result = await tokenCLI.sendTransaction(tx);
+            assert.isObject(result);
+        });
+
+        it('send-transaction(externally signed)', async function () {
+            const tokenCLI = await cli.getTokenCLI(tokenChainId);
+
+            //test signing with private key externally, this will simulate an external signature such as from the Ledger
+            let keyPair = nacl.keyPair.fromSeed(fctAddrUtils.addressToKey("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ"));
+            let pubaddr = fctAddrUtils.keyToPublicFctAddress(keyPair.publicKey);
+
+            const randomId = getRandomInteger(12, 100000);
+
+            let unsignedTx = new TransactionBuilder(tokenChainId)
+                .input(pubaddr, [randomId])
+                .output("FA3umTvVhkcysBewF1sGAMeAeKDdG7kTQBbtf5nwuFUGwrNa5kAr", [randomId])
+                .build();
+
+            let extsig = nacl.detached(fctUtil.sha512(unsignedTx.getMarshalDataSig(0)), keyPair.secretKey);
+
+            let signedTx = new TransactionBuilder(unsignedTx)
+                .pkSignature(keyPair.publicKey, extsig)
+                .build();
+
+            const result = await tokenCLI.sendTransaction(signedTx);
             assert.isObject(result);
         });
     });
