@@ -80,11 +80,39 @@ class CLIBuilder {
     }
 
     /**
+     * Set the username to use for basic HTTP authentication with fatd
+     * @method
+     * @param {string} username - The username string to use
+     * @returns {CLIBuilder}
+     */
+    username(username) {
+        if (typeof username !== 'string') throw new Error('Username must be a string');
+        if (username.length === 0) throw new Error('Username must be at least one character long');
+        this._username = username;
+        return this;
+    }
+
+    /**
+     * Set the password to use for basic HTTP authentication with fatd
+     * @method
+     * @param {string} password - The password string to use
+     * @returns {CLIBuilder}
+     */
+    password(password) {
+        if (typeof password !== 'string') throw new Error('Password must be a string');
+        if (password.length === 0) throw new Error('Password must be at least one character long');
+        this._password = password;
+        return this;
+    }
+
+    /**
      * Build the CLI
      * @method
      * @returns {CLI}
      */
     build() {
+        if (this._username && !this._password || this._password && !this._username) throw new Error('You must specify both a username and password for basic authentication');
+
         return new CLI(this);
     }
 }
@@ -116,8 +144,6 @@ class CLI {
         this._secure = builder._secure;
         this._protocol = builder._protocol;
 
-        if (this._username && !this._password || this._password && !this._username) throw new Error('Must specify both username and password to use RPC authentication');
-
         this._timeout = builder._timeout || 5000;
 
         this._axios = axios.create({
@@ -138,13 +164,15 @@ class CLI {
      */
     async call(method, params) {
 
+        const id = Math.floor(Math.random() * 10000);
+
         const response = await this._axios.post(
             '/',
             {
                 jsonrpc: '2.0',
-                id: Math.floor(Math.random() * 10000),
-                method: method,
-                params: params
+                id,
+                method,
+                params
             },
             {
                 transformResponse: [data => JSONBig.parse(data)]
