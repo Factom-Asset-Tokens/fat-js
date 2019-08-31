@@ -16,10 +16,6 @@ Currently supports **FAT-0** and **FAT-1** token standards.
 
 
 
-**Note:** FAT is experimental software. This commit has been tested with [fatd](https://github.com/Factom-Asset-Tokens/fatd) version `v0.5.1` - commit `ba2857840683b004ebe2f18ac75d5539508c2abb`
-
-
-
 ## Installation
 
 NPM CLI:
@@ -41,6 +37,16 @@ npm run build
 ```
 
 A fresh `fatjs.js` will be built in the  `dist` directory.
+
+### Bundle Distribution
+
+You can also use the latest version fat-js in your webpage via JSDeliver!:
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/Factom-Asset-Tokens/fat-js/dist/fatjs.js"></script>
+```
+
+The fat-js library will be made available under the global object `fatjs`
 
 
 
