@@ -5,7 +5,6 @@ function checkVersionCompatibility(version) {
     //Check for very old versions of fatd, where version headers were not included yet. Outright reject
     if (!version) {
         throw new Error('Response was not from fatd or was a deprecated version');
-        return;
     }
 
     if (version.includes('!')) console.warn('WARNING: You are using a version of fatd with unofficial local code changes. Unexpected or inconsistent behavior may occur');

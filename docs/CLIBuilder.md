@@ -12,6 +12,8 @@ Build a CLI object, defining the connection parameters to fatd and other network
     * [.timeout(timeout)](#CLIBuilder+timeout) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
     * [.secure([secure])](#CLIBuilder+secure) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
     * [.protocol([protocol])](#CLIBuilder+protocol) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
+    * [.username(username)](#CLIBuilder+username) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
+    * [.password(password)](#CLIBuilder+password) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
     * [.build()](#CLIBuilder+build) ⇒ [<code>CLI</code>](#CLI)
 
 <a name="CLIBuilder+host"></a>
@@ -68,6 +70,28 @@ Which transport protocol to use to contact fatd
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | [protocol] | <code>number</code> | <code>&quot;http&quot;</code> | The protocol to use. Either "http" or "https" |
+
+<a name="CLIBuilder+username"></a>
+
+### cliBuilder.username(username) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
+Set the username to use for basic HTTP authentication with fatd
+
+**Kind**: instance method of [<code>CLIBuilder</code>](#CLIBuilder)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| username | <code>string</code> | The username string to use |
+
+<a name="CLIBuilder+password"></a>
+
+### cliBuilder.password(password) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
+Set the password to use for basic HTTP authentication with fatd
+
+**Kind**: instance method of [<code>CLIBuilder</code>](#CLIBuilder)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| password | <code>string</code> | The password string to use |
 
 <a name="CLIBuilder+build"></a>
 
