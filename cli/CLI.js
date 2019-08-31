@@ -164,18 +164,23 @@ class CLI {
      */
     async call(method, params) {
 
-        const id = Math.floor(Math.random() * 10000);
-
         const response = await this._axios.post(
             '/',
             {
                 jsonrpc: '2.0',
-                id,
+                id: Math.floor(Math.random() * 10000),
                 method,
                 params
             },
             {
-                transformResponse: [data => JSONBig.parse(data)]
+                transformResponse: [data => {
+                    try {
+                        return JSONBig.parse(data)
+                    } catch (e) {
+                        console.error('Invalid Non-JSON API Response: ', data);
+                        return {}
+                    }
+                }]
             }
         );
 
