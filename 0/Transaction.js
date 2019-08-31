@@ -69,7 +69,7 @@ class Transaction {
                     this._rcds = builder._keys.map(key => Buffer.concat([constant.RCD_TYPE_1, Buffer.from(key.publicKey)]));
                 }
 
-                if ( this._rcds.length != builder._signatures.length ) {
+                if (this._rcds.length !== builder._signatures.length) {
                     throw new Error("Missmatch between public keys and the number of signatures provided");
                 }
 
