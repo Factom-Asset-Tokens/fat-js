@@ -21,7 +21,7 @@ const fctIdentityUtil = require('factom-identity-lib/src/validation');
  * .build();
  *
  * //coinbase transaction
- * tx = new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
+ * tx = new TransactionBuilder(testTokenChainId)
  * .coinbaseInput([10])
  * .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [10])
  * .sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
@@ -51,6 +51,22 @@ const fctIdentityUtil = require('factom-identity-lib/src/validation');
  * }
  * ])
  * .sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
+ * .build();
+ *
+ * //You can also use external signatures (from hardware devices, etc):
+ *
+ * let keyPair = nacl.keyPair.fromSeed(fctAddrUtils.addressToKey("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ"));
+ * let pubaddr = fctAddrUtils.keyToPublicFctAddress(keyPair.publicKey);
+ *
+ * let unsignedTx = new TransactionBuilder(testTokenChainId)
+ * .input(pubaddr, [10])
+ * .output("FA3umTvVhkcysBewF1sGAMeAeKDdG7kTQBbtf5nwuFUGwrNa5kAr", [10])
+ * .build();
+ *
+ * let extsig = nacl.detached(fctUtil.sha512(unsignedTx.getMarshalDataSig(0)), keyPair.secretKey);
+ *
+ * let signedTx = new TransactionBuilder(unsignedTx)
+ * .pkSignature(keyPair.publicKey, extsig)
  * .build();
  */
 class TransactionBuilder {
@@ -98,7 +114,7 @@ class TransactionBuilder {
     /**
      * Set up a Factoid address input for the transaction
      * @method
-     * @param {string} fs - The private Factoid address to use as the input of the transaction
+     * @param {string} fs - The private Factoid address to use as the input of the transaction OR raw public key if supplying external signatures
      * @param {object[]} ids - The token ID ranges to send in the transaction
      * @returns {TransactionBuilder}
      */
@@ -198,6 +214,7 @@ class TransactionBuilder {
     }
 
     /**
+     * Set up the identity public key of the issuing identity in prep for an externally signed coinbase transaction
      * @method
      * @param {string} id1 - The ID1 public key string of the issuing identity, external signature will be required in second pass
      * @returns {TransactionBuilder}
@@ -212,6 +229,7 @@ class TransactionBuilder {
     }
 
     /**
+     * Set up the identity signature of the issuing identity in prep for an externally signed coinbase transaction
      * @method
      * @param {string} id1pubkey - The ID1 public key string of the issuing identity, external signature expected.
      * @param {Buffer} signature - signature - Optional signature provided on second pass
@@ -272,7 +290,7 @@ class TransactionBuilder {
     }
 
     /**
-     * Add a public key and signature to the transaction. This is used only in the case of unsigned transactions (usefull for hardware wallets).
+     * Add a public key and signature to the transaction. This is used only in the case of externally signed transactions (useful for hardware wallets).
      * Public Key's /signatures need to be added in the same order as their corresponding inputs.
      * @param {string|Array|Buffer} publicKey - FCT public key as hex string, uint8array, or buffer
      * @param {Buffer} signature - Signature 
@@ -280,7 +298,7 @@ class TransactionBuilder {
      */
     pkSignature(publicKey, signature) {
 
-        let pk = Buffer.from(publicKey,'hex')
+        let pk = Buffer.from(publicKey,'hex');
 
         let fa = fctAddressUtil.keyToPublicFctAddress(pk);
 
