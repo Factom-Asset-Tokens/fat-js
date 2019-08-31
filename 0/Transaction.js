@@ -152,6 +152,7 @@ class Transaction {
     }
 
     /**
+     * Get the inputs object for the transaction (Map of Address => Token IDs)
      * @method
      * @returns {object} - The transaction's inputs
      */
@@ -160,6 +161,7 @@ class Transaction {
     }
 
     /**
+     * Get the outputs object for the transaction (Map of Address => Token IDs)
      * @method
      * @returns {object} - The transaction's outputs
      */
@@ -168,6 +170,7 @@ class Transaction {
     }
 
     /**
+     * Get the metadata if present for the transaction if present
      * @method
      * @returns {*} - The transaction's metadata (if present, undefined if not)
      */
@@ -176,6 +179,7 @@ class Transaction {
     }
 
     /**
+     * Check whether this transaction is a coinbase (token minting) transaction
      * @method
      * @returns {boolean} - Whether the transaction is a coinbase transaction or not
      */
@@ -215,42 +219,47 @@ class Transaction {
     }
 
     /**
+     * Get the token chain ID for this transaction
      * @method
-     * @returns {string} - Get the Factom chain ID of the transaction's token. Returns undefined if the Transaction was constructed from an object
+     * @returns {string} - The chain ID string. Undefined if the transaction is constructed from an object or unsigned
      */
     getChainId() {
         return this._tokenChainId;
     }
 
     /**
+     * Get the Factom entryhash of the transaction.
      * @method
-     * @returns {string} - Get the Factom entryhash of the transaction. Only defined if the Transaction was constructed from an object
+     * @returns {string} - The entryhash of the transaction. Only defined if the Transaction was constructed from an object
      */
     getEntryhash() {
         return this._entryhash;
     }
 
     /**
+     * Get the unix timestamp of when the Transaction was signed (locally built transactions) or committed to Factom (from RPC response JSON)
      * @method
-     * @returns {number} - Get the unix timestamp of when the Transaction was signed (locally built transactions) or committed to Factom (from RPC response JSON)
+     * @returns {number} - The integer unix timestamp
      */
     getTimestamp() {
         return this._timestamp;
     }
 
     /**
-     * @method This method will provide the data that needs hashing and signing. Useful for external signing
-     * @param keyindex {number} - The input index to marshal to prep for hashing then signing
-     * @returns {Buffer} - Get the marshalled data that needs to be hashed then signed, this is the Buffer.concat([index,timestamp,chainId,content])
+     * Get the assembled ("marshalled") data that needs to be signed for the transaction for the given input address index
+     * @method
+     * @param inputIndex {number} - The input index to marshal to prep for hashing then signing
+     * @returns {Buffer} - Get the marshalled data that needs to be hashed then signed
      */
-    getMarshalDataSig(keyindex) {
-        return getMarshalDataSig(this, keyindex);
+    getMarshalDataSig(inputIndex) {
+        return getMarshalDataSig(this, inputIndex);
     }
-    
+
     /**
-     * @method - validate all the signatures agasint the inputs. useful for external signing.
-     * @returns {bool} returns true if signatures are valid, throws error otherwise.
-     */  
+     * Validate all the signatures in the transaction against the input addresses
+     * @method
+     * @returns {boolean} returns true if signatures are valid, throws error otherwise.
+     */
     validateSignatures() {
         if ( this._signatures.length !== this._rcds.length ) {
             throw new Error("Invalid number of signatures to inputs")
@@ -265,12 +274,14 @@ class Transaction {
 }
 
 /**
+ * Get the assembled ("marshalled") data that needs to be signed for the transaction for the given input address index
  * @method
- * @param keyindex {number} - The input index to marshal to prep for hashing then signing
+ * @param tx {Transaction} - The transaction to get the marshalled data to sign from
+ * @param inputIndex {number} - The input index to marshal to prep for hashing then signing
  * @returns {Buffer} - Get the marshalled data that needs to be hashed then signed
  */
-function getMarshalDataSig(tx,keyindex) {
-    const index = Buffer.from(keyindex.toString());
+function getMarshalDataSig(tx, inputIndex) {
+    const index = Buffer.from(inputIndex.toString());
     const timestamp = Buffer.from(tx._timestamp.toString());
     const chainId = Buffer.from(tx._tokenChainId, 'hex');
     const content = Buffer.from(tx._content);
