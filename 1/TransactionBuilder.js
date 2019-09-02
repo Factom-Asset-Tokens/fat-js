@@ -21,7 +21,7 @@ const fctIdentityUtil = require('factom-identity-lib/src/validation');
  * .build();
  *
  * //coinbase transaction
- * tx = new TransactionBuilder('013de826902b7d075f00101649ca4fa7b49b5157cba736b2ca90f67e2ad6e8ec')
+ * tx = new TransactionBuilder(testTokenChainId)
  * .coinbaseInput([10])
  * .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", [10])
  * .sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
@@ -52,6 +52,22 @@ const fctIdentityUtil = require('factom-identity-lib/src/validation');
  * ])
  * .sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
  * .build();
+ *
+ * //You can also use external signatures (from hardware devices, etc):
+ *
+ * let keyPair = nacl.keyPair.fromSeed(fctAddrUtils.addressToKey("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ"));
+ * let pubaddr = fctAddrUtils.keyToPublicFctAddress(keyPair.publicKey);
+ *
+ * let unsignedTx = new TransactionBuilder(testTokenChainId)
+ * .input(pubaddr, [10])
+ * .output("FA3umTvVhkcysBewF1sGAMeAeKDdG7kTQBbtf5nwuFUGwrNa5kAr", [10])
+ * .build();
+ *
+ * let extsig = nacl.detached(fctUtil.sha512(unsignedTx.getMarshalDataSig(0)), keyPair.secretKey);
+ *
+ * let signedTx = new TransactionBuilder(unsignedTx)
+ * .pkSignature(keyPair.publicKey, extsig)
+ * .build();
  */
 class TransactionBuilder {
 
@@ -59,35 +75,83 @@ class TransactionBuilder {
      * @constructor
      * @param {string} tokenChainId - 64 character Factom Chain ID of the token to build the transaction for
      */
-    constructor(tokenChainId) {
-        if (!tokenChainId || tokenChainId.length !== 64) throw new Error('Token chain ID must be a valid Factom chain ID');
-        this._tokenChainId = tokenChainId;
+    constructor(t) {
+        if ( t instanceof (require('./Transaction')) ) {
+            //support for external signatures
+            //check if a coinbase transaction
+            if ( Object.keys(t._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC) ) {
+                this._id1 = t._id1
+            } else {
+                this._keys = t._keys
+            }
 
-        this._keys = [];
-        this._inputs = {};
-        this._outputs = {};
+            this._signatures = t._signatures;
+
+            this._tokenChainId = t._tokenChainId;
+            this._inputs = t._inputs;
+            this._outputs = t._outputs;
+            this._timestamp = t._timestamp;
+            if ( t._metadata !== undefined ) {
+                this._metadata = t._metadata;
+            }
+            if ( t._tokenMetadata !== undefined ) {
+                this._tokenMetadata = t._tokenMetadata;
+            }
+        } else if (typeof t === 'string' || t instanceof String) {
+            let tokenChainId = t;
+            if (!tokenChainId || tokenChainId.length !== 64) throw new Error('Token chain ID must be a valid Factom chain ID');
+            this._tokenChainId = tokenChainId;
+
+            this._keys = [];
+            this._inputs = {};
+            this._outputs = {};
+        }
+        else{
+            throw new Error('Constructor expects either a previously assembled unsigned Transaction or a string containing the token chain id.');
+        }
     }
 
     /**
      * Set up a Factoid address input for the transaction
      * @method
-     * @param {string} fs - The private Factoid address to use as the input of the transaction
+     * @param {string} fs - The private Factoid address to use as the input of the transaction OR raw public key if supplying external signatures
      * @param {object[]} ids - The token ID ranges to send in the transaction
      * @returns {TransactionBuilder}
      */
     input(fs, ids) {
 
+        if ( this._signatures !== undefined ) {
+            throw new Error("Attempting to add new input, expecting signatures only")
+        }
+
         //if this is setup as coinbase, prevent additional inputs
         if (Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) throw new Error('Cannot add an additional input to a coinbase transaction');
 
-        if (!fctAddressUtil.isValidPrivateAddress(fs)) throw new Error("Input address must be a valid private Factoid address");
         if (!util.validateNFIds(ids)) throw new Error("Invalid ID range: " + JSON.stringify(ids));
 
-        //check that outputs does not contain this address
-        if (this._outputs[fctAddressUtil.getPublicAddress(fs)]) throw new Error("Input address already occurs in outputs");
+        //if it isn't a private address and instead a public address then, the fs should be a public key      
+        if (fctAddressUtil.isValidPrivateAddress(fs)) { //first check to see if valid private address
 
-        this._keys.push(nacl.keyPair.fromSeed(fctAddressUtil.addressToKey(fs)));
-        this._inputs[fctAddressUtil.getPublicAddress(fs)] = ids;
+            //check that outputs does not contain this address
+            if (this._outputs[fctAddressUtil.getPublicAddress(fs)]) throw new Error("Input address already occurs in outputs");
+
+            this._keys.push(nacl.keyPair.fromSeed(fctAddressUtil.addressToKey(fs)));
+            this._inputs[fctAddressUtil.getPublicAddress(fs)] = ids;
+
+        } else {
+
+            // at this point the fs is should be the fa if we get this far
+            let fa = fs;
+            if ( !fctAddressUtil.isValidPublicFctAddress(fa) ) { //check to see if user passed in a public fct address
+                throw new Error("Input address must be either a valid private Factoid address or a Factoid public address");
+            }
+
+            //check that outputs does not contain this address
+            if (this._outputs[fa]) throw new Error("Input address already occurs in outputs");
+
+            this._keys.push({pubaddr: fa, publicKey:undefined});
+            this._inputs[fa] = ids;
+        }
         return this;
     }
 
@@ -112,6 +176,9 @@ class TransactionBuilder {
      * @returns {TransactionBuilder}
      */
     output(fa, ids) {
+        if ( this._signatures !== undefined ) {
+            throw new Error("Attempting to add new output, expecting signatures only")
+        }
         if (!fctAddressUtil.isValidPublicFctAddress(fa)) throw new Error("Output address must be a valid public Factoid address");
         if (!util.validateNFIds(ids)) throw new Error("Invalid ID range: " + JSON.stringify(ids));
 
@@ -147,12 +214,49 @@ class TransactionBuilder {
     }
 
     /**
+     * Set up the identity public key of the issuing identity in prep for an externally signed coinbase transaction
+     * @method
+     * @param {string} id1 - The ID1 public key string of the issuing identity, external signature will be required in second pass
+     * @returns {TransactionBuilder}
+     */
+    id1(id1) {
+        if ( this._signatures !== undefined ) {
+            throw new Error("Attempting to add new ID1 key while expecting coinbase signature only.  Use id1Signature.")
+        }
+
+        this._id1 = util.extractIdentityPublicKey(id1);
+        return this;
+    }
+
+    /**
+     * Set up the identity signature of the issuing identity in prep for an externally signed coinbase transaction
+     * @method
+     * @param {string} id1pubkey - The ID1 public key string of the issuing identity, external signature expected.
+     * @param {Buffer} signature - signature - Optional signature provided on second pass
+     * @returns {TransactionBuilder}
+     */
+    id1Signature(id1pubkey, signature) {
+        if ( this._id1 === undefined ) {
+            throw new Error("Attempting to pass a signature for invalid coinbase transaction.")
+        }
+        if ( !this._id1.equals(Buffer.from(id1pubkey,'hex')) ) {
+            throw new Error("ID1 Key is not equal coinbase ID1 Key requiring a signature");
+        }
+
+        this._signatures = [signature];
+        return this;
+    }
+
+    /**
      * Set arbitrary metadata for the transaction
      * @method
      * @param {*} metadata - The metadata. Must be JSON stringifyable
      * @returns {TransactionBuilder}
      */
     metadata(metadata) {
+        if ( this._signatures !== undefined ) {
+            throw new Error("Attempting to add new metadata, expecting signatures only")
+        }
         try {
             JSON.stringify(metadata)
         } catch (e) {
@@ -169,7 +273,9 @@ class TransactionBuilder {
      * @returns {TransactionBuilder}
      */
     tokenMetadata(tokenMetadata) {
-
+        if ( this._signatures !== undefined ) {
+            throw new Error("Attempting to add new token metadata, expecting signatures only")
+        }
         if (!Array.isArray(tokenMetadata)) throw new Error('Token metadata must be an array');
         if (!tokenMetadata.every(meta => typeof meta === 'object' && Object.keys(meta).length === 2 && meta.ids !== undefined && meta.metadata !== undefined)) throw new Error('Every metadata range representation must have only keys ids(Array) and metadata(JSON stringifiable value)');
 
@@ -184,6 +290,30 @@ class TransactionBuilder {
     }
 
     /**
+     * Add a public key and signature to the transaction. This is used only in the case of externally signed transactions (useful for hardware wallets).
+     * Public Key's /signatures need to be added in the same order as their corresponding inputs.
+     * @param {string|Array|Buffer} publicKey - FCT public key as hex string, uint8array, or buffer
+     * @param {Buffer} signature - Signature 
+     * @returns {TransactionBuilder} - TransactionBuilder instance.
+     */
+    pkSignature(publicKey, signature) {
+
+        let pk = Buffer.from(publicKey,'hex');
+
+        let fa = fctAddressUtil.keyToPublicFctAddress(pk);
+
+        let index = Object.keys(this._inputs).findIndex( a => { return a === fa } );
+
+        if ( index !== undefined ) {
+            this._keys[index].publicKey = pk;
+            this._signatures[index] = signature
+        } else {
+            throw new Error("Public Key (" + pk.toString('hex') + ") for provided signature not found in input list." )
+        }
+        return this;
+    }
+
+    /**
      * Build the transaction
      * @method
      * @returns {Transaction}
@@ -192,7 +322,7 @@ class TransactionBuilder {
         if (Object.keys(this._inputs).length === 0 || Object.keys(this._outputs).length === 0) throw new Error("Must have at least one input and one output");
 
         if (Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) {
-            if (!this._sk1) throw new Error('You must include a valid issuer sk1 key to perform a coinbase transaction')
+            if (!this._sk1 && !this._id1) throw new Error('You must include a valid issuer sk1 key to perform a coinbase transaction')
         }
 
         //evaluate the token ids in inputs/outputs. Should be the same set
@@ -208,6 +338,14 @@ class TransactionBuilder {
 
         //restrict tokenmetadata to coinbase transactions
         if (this._tokenMetadata !== undefined && !Object.keys(this._inputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) throw new Error('You may only specify tokenmetadata for coinbase transactions');
+
+        if ( this._signatures !== undefined ) {
+            for (let i = 0; i < this._signatures.length; ++i) {
+                if ( this._signatures[i] === undefined ) {
+                    throw new Error('Missing signatures: All inputs must have an associated signature')
+                }
+            }
+        }
 
         return new (require('./Transaction'))(this);
     }

@@ -2,10 +2,9 @@ const semver = require('semver');
 
 function checkVersionCompatibility(version) {
 
-    //Check for very old versions of fatd, where version headers were not included yet
+    //Check for very old versions of fatd, where version headers were not included yet. Outright reject
     if (!version) {
-        console.warn('WARNING: You are using an old version of fatd that isn\'t fully compatible with this version of fat-js. Unexpected or inconsistent behavior may occur');
-        return;
+        throw new Error('Response was not from fatd or was a deprecated version');
     }
 
     if (version.includes('!')) console.warn('WARNING: You are using a version of fatd with unofficial local code changes. Unexpected or inconsistent behavior may occur');

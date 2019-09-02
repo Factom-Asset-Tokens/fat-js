@@ -37,7 +37,6 @@ describe('CLI Integration', function () {
             const balances = await cli.getBalances('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
             assert.isObject(balances);
             assert.isTrue(Object.values(balances).every(amount => amount instanceof BigNumber));
-            console.log(JSON.stringify(balances, undefined, 2))
         });
     });
 });

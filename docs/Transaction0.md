@@ -16,6 +16,8 @@ Model A signed or unsigned FAT-0 Transaction
     * [.getChainId()](#Transaction0+getChainId) ⇒ <code>string</code>
     * [.getEntryhash()](#Transaction0+getEntryhash) ⇒ <code>string</code>
     * [.getTimestamp()](#Transaction0+getTimestamp) ⇒ <code>number</code>
+    * [.getMarshalDataSig(inputIndex)](#Transaction0+getMarshalDataSig) ⇒ <code>Buffer</code>
+    * [.validateSignatures()](#Transaction0+validateSignatures) ⇒ <code>boolean</code>
 
 <a name="new_Transaction0_new"></a>
 
@@ -57,21 +59,29 @@ tx.getEntryHash(); // => "68f3ca3a8c9f7a0cb32dc9717347cb179b63096e051a60ce8be9c2
 <a name="Transaction0+getInputs"></a>
 
 ### transaction0.getInputs() ⇒ <code>object</code>
+Get the inputs object for the transaction (Map of Address => Token IDs)
+
 **Kind**: instance method of [<code>Transaction0</code>](#Transaction0)  
 **Returns**: <code>object</code> - - The transaction's inputs  
 <a name="Transaction0+getOutputs"></a>
 
 ### transaction0.getOutputs() ⇒ <code>object</code>
+Get the outputs object for the transaction (Map of Address => Token IDs)
+
 **Kind**: instance method of [<code>Transaction0</code>](#Transaction0)  
 **Returns**: <code>object</code> - - The transaction's outputs  
 <a name="Transaction0+getMetadata"></a>
 
 ### transaction0.getMetadata() ⇒ <code>\*</code>
+Get the metadata if present for the transaction if present
+
 **Kind**: instance method of [<code>Transaction0</code>](#Transaction0)  
 **Returns**: <code>\*</code> - - The transaction's metadata (if present, undefined if not)  
 <a name="Transaction0+isCoinbase"></a>
 
 ### transaction0.isCoinbase() ⇒ <code>boolean</code>
+Check whether this transaction is a coinbase (token minting) transaction
+
 **Kind**: instance method of [<code>Transaction0</code>](#Transaction0)  
 **Returns**: <code>boolean</code> - - Whether the transaction is a coinbase transaction or not  
 <a name="Transaction0+getEntry"></a>
@@ -102,15 +112,40 @@ const {FactomCli, Entry, Chain} = require('factom');
 <a name="Transaction0+getChainId"></a>
 
 ### transaction0.getChainId() ⇒ <code>string</code>
+Get the token chain ID for this transaction
+
 **Kind**: instance method of [<code>Transaction0</code>](#Transaction0)  
-**Returns**: <code>string</code> - - Get the Factom chain ID of the transaction's token. Returns undefined if the Transaction was constructed from an object  
+**Returns**: <code>string</code> - - The chain ID string. Undefined if the transaction is constructed from an object or unsigned  
 <a name="Transaction0+getEntryhash"></a>
 
 ### transaction0.getEntryhash() ⇒ <code>string</code>
+Get the Factom entryhash of the transaction.
+
 **Kind**: instance method of [<code>Transaction0</code>](#Transaction0)  
-**Returns**: <code>string</code> - - Get the Factom entryhash of the transaction. Only defined if the Transaction was constructed from an object  
+**Returns**: <code>string</code> - - The entryhash of the transaction. Only defined if the Transaction was constructed from an object  
 <a name="Transaction0+getTimestamp"></a>
 
 ### transaction0.getTimestamp() ⇒ <code>number</code>
+Get the unix timestamp of when the Transaction was signed (locally built transactions) or committed to Factom (from RPC response JSON)
+
 **Kind**: instance method of [<code>Transaction0</code>](#Transaction0)  
-**Returns**: <code>number</code> - - Get the unix timestamp of when the Transaction was signed (locally built transactions) or committed to Factom (from RPC response JSON)  
+**Returns**: <code>number</code> - - The integer unix timestamp  
+<a name="Transaction0+getMarshalDataSig"></a>
+
+### transaction0.getMarshalDataSig(inputIndex) ⇒ <code>Buffer</code>
+Get the assembled ("marshalled") data that needs to be signed for the transaction for the given input address index
+
+**Kind**: instance method of [<code>Transaction0</code>](#Transaction0)  
+**Returns**: <code>Buffer</code> - - Get the marshalled data that needs to be hashed then signed  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| inputIndex | <code>number</code> | The input index to marshal to prep for hashing then signing |
+
+<a name="Transaction0+validateSignatures"></a>
+
+### transaction0.validateSignatures() ⇒ <code>boolean</code>
+Validate all the signatures in the transaction against the input addresses
+
+**Kind**: instance method of [<code>Transaction0</code>](#Transaction0)  
+**Returns**: <code>boolean</code> - returns true if signatures are valid, throws error otherwise.  
