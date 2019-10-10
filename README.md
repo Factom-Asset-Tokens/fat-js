@@ -300,6 +300,8 @@ issuance.getTimestamp(); // => 1548276060
 
 # CLI
 
+#### [Complete CLI Builder Documentation](docs/CLIBuilder.md)
+
 #### [Complete CLI Documentation](docs/CLI.md)
 
 ## Instantiate FAT CLI

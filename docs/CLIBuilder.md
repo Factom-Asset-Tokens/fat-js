@@ -14,6 +14,7 @@ Build a CLI object, defining the connection parameters to fatd and other network
     * [.protocol([protocol])](#CLIBuilder+protocol) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
     * [.username(username)](#CLIBuilder+username) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
     * [.password(password)](#CLIBuilder+password) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
+    * [.pending([pending])](#CLIBuilder+pending) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
     * [.build()](#CLIBuilder+build) ⇒ [<code>CLI</code>](#CLI)
 
 <a name="CLIBuilder+host"></a>
@@ -92,6 +93,17 @@ Set the password to use for basic HTTP authentication with fatd
 | Param | Type | Description |
 | --- | --- | --- |
 | password | <code>string</code> | The password string to use |
+
+<a name="CLIBuilder+pending"></a>
+
+### cliBuilder.pending([pending]) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
+Enforce strict security on https connections to fatd (forbid self signed certs, etc)
+
+**Kind**: instance method of [<code>CLIBuilder</code>](#CLIBuilder)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [pending] | <code>boolean</code> | <code>true</code> | True if secure connection is desired, false if not |
 
 <a name="CLIBuilder+build"></a>
 

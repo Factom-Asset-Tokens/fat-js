@@ -7,6 +7,12 @@ const Joi = require('joi-browser').extend(require('joi-factom'));
 const fctAddressUtil = require('factom/src/addresses');
 const compatibility = require('./compatibility');
 
+const nonPendingMethods = [
+    'get-daemon-properties',
+    'get-daemon-tokens',
+    'get-sync-status'
+];
+
 /**
  * Build a CLI object, defining the connection parameters to fatd and other network dependencies
  * @class
@@ -106,6 +112,18 @@ class CLIBuilder {
     }
 
     /**
+     * Enforce strict security on https connections to fatd (forbid self signed certs, etc)
+     * @method
+     * @param {boolean} [pending=true] - True if secure connection is desired, false if not
+     * @returns {CLIBuilder}
+     */
+    pending(pending) {
+        if (typeof pending !== 'boolean') throw new Error('Argument pending must be a boolean');
+        this._pending = pending;
+        return this;
+    }
+
+    /**
      * Build the CLI
      * @method
      * @returns {CLI}
@@ -145,6 +163,7 @@ class CLI {
         this._protocol = builder._protocol;
 
         this._timeout = builder._timeout || 5000;
+        this._pending = builder._pending;
 
         this._axios = axios.create({
             baseURL: this._protocol + '://' + this._host + ':' + this._port + '/v1',
@@ -163,6 +182,9 @@ class CLI {
      * @returns {Promise}
      */
     async call(method, params) {
+
+        //If pending entries are enabled, splice in the param for methods that allow it
+        if (this._pending && !nonPendingMethods.includes(method)) params.includepending = true;
 
         const response = await this._axios.post(
             '/',
@@ -401,6 +423,7 @@ class BaseTokenCLI {
         stats.circulating = new BigNumber(stats.circulating);
         stats.burned = new BigNumber(stats.burned);
         stats.transactions = new BigNumber(stats.transactions);
+        stats.nonzerobalances = new BigNumber(stats.nonzerobalances);
         return stats;
     }
 

@@ -220,6 +220,93 @@ describe('FAT-1 CLI Integration', function () {
             assert.isObject(result);
         });
     });
+
+    describe('Pending Entries', function () {
+        this.timeout(60000);
+
+        const pendingCLI = new CLIBuilder()
+            .host(process.env.fatd)
+            .port(8078)
+            .pending(true) //test pending entry support
+            .build();
+
+        let pendingTokenCLI;
+
+        it('Verify balance change with pending transaction', async function () {
+
+            pendingTokenCLI = await pendingCLI.getTokenCLI(tokenChainId);
+
+            const randomAddress = fctAddrUtils.generateRandomFctAddress().public;
+
+            const randomId = getRandomInteger(12, 100000);
+
+            const tx = new TransactionBuilder(tokenChainId)
+                .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", [randomId])
+                .output(randomAddress, [randomId])
+                .build();
+
+            //check the token stats pre-tx
+            const preStats = await pendingTokenCLI.getStats();
+
+            //get all the token balances at the random output address before the tx
+            //check that the balance is zero for this chain
+            const preBalances = await pendingCLI.getBalances(randomAddress);
+            assert.isUndefined(preBalances[tokenChainId]);
+
+            //get the balance of the random output address before the tx
+            //check that the balance at the random address is zero to start
+            const preBalance = await pendingTokenCLI.getBalance(randomAddress);
+            assert.isTrue(preBalance.isEqualTo(0));
+
+            //check the random address owns no NF tokens yet
+            const preNFBalance = await pendingTokenCLI.getNFBalance({address: randomAddress});
+            assert.lengthOf(preNFBalance, 0);
+
+            //send the transaction
+            const result = await pendingTokenCLI.sendTransaction(tx);
+
+            //wait for the pending tx to get picked up
+            await util.sleep(30000); //wait the default pending tx interval & then a little bit
+
+            //get the tx we just sent
+            const transaction = await pendingTokenCLI.getTransaction(result.entryhash);
+            assert.isDefined(transaction);
+            assert.instanceOf(transaction, Transaction);
+            assert.strictEqual(transaction.getEntryhash(), result.entryhash);
+
+            //verify the tx we just sent is in the list recent transactions
+            const transactions = await pendingTokenCLI.getTransactions({entryhash: result.entryhash});
+            assert.isDefined(transactions.find(tx => tx.getEntryhash() === result.entryhash));
+
+            //check the token stats post-tx
+            const postStats = await pendingTokenCLI.getStats();
+            // console.log(JSONBig.stringify(postStats, undefined, 2));
+
+            //check the TX added to the tx count in stats
+            assert.isTrue(postStats.transactions.isGreaterThan(preStats.transactions));
+
+            //check the TX added one to the nonzero holder count in stats
+            assert.isTrue(postStats.nonzerobalances.isEqualTo(preStats.nonzerobalances.plus(1)));
+
+            //check the list of all assets on the random now has the proper balance for this token
+            const postBalances = await pendingCLI.getBalances(randomAddress);
+            assert.isDefined(postBalances[tokenChainId]);
+            assert.isTrue(postBalances[tokenChainId].isEqualTo(1));
+
+            //get the output address balance after the tx
+            const postBalance = await pendingTokenCLI.getBalance(randomAddress);
+            assert.isTrue(postBalance.isEqualTo(1));
+
+            //check the address contains the recently sent token by ID
+            const postNFBalance = await pendingTokenCLI.getNFBalance({address: randomAddress});
+            assert.include(postNFBalance, randomId);
+
+            //get the NF token and verify it's owner is the same as where we just sent it
+            const nfToken = await pendingTokenCLI.getNFToken(randomId);
+            assert.strictEqual(nfToken.owner, randomAddress);
+        });
+    });
+
 });
 
 function getRandomInteger(min, max) {
