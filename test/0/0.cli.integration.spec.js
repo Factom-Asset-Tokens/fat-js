@@ -2,6 +2,8 @@ const fctUtil = require('factom/src/util');
 const fctAddrUtils = require('factom/src/addresses');
 const nacl = require('tweetnacl/nacl-fast').sign;
 
+const util = require('../../util');
+
 const constant = require('../../constant');
 const assert = require('chai').assert;
 const BigNumber = require('bignumber.js');
@@ -46,6 +48,15 @@ describe('FAT-0 CLI Integration', function () {
             assert.strictEqual(issuance.getChainId(), tokenChainId);
             assert.strictEqual(issuance.getEntryhash(), 'fc0f57ea3a4dc5b8ffc1a9c051f4b6ae0cd7137f9110b98e3c3eb08f132a5e18');
             assert.strictEqual(issuance.getTimestamp(), 1550612940);
+        });
+
+        it('get-balance', async function () {
+            const tokenCLI = await cli.getTokenCLI(tokenChainId);
+
+            const balance = await tokenCLI.getBalance('FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM');
+            assert.isDefined(balance);
+            assert.instanceOf(balance, BigNumber);
+            assert.isTrue(balance.isGreaterThan(new BigNumber("9007199254743307"))); //test returned balance is over max int limit allowed by JS
         });
 
         it('get-transaction', async function () {
@@ -192,6 +203,77 @@ describe('FAT-0 CLI Integration', function () {
 
             const result = await tokenCLI.sendTransaction(signedTx);
             assert.isObject(result);
+        });
+    });
+
+    describe('Pending Entries', function () {
+        this.timeout(60000);
+
+        const pendingCLI = new CLIBuilder()
+            .host(process.env.fatd)
+            .port(8078)
+            .pending(true) //test pending entry support
+            .build();
+
+        let pendingTokenCLI;
+
+        it('Verify balance change with pending transaction', async function () {
+
+            pendingTokenCLI = await pendingCLI.getTokenCLI(tokenChainId);
+
+            const randomAddress = fctAddrUtils.generateRandomFctAddress().public;
+
+            const tx = new TransactionBuilder(tokenChainId)
+                .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 1)
+                .output(randomAddress, 1)
+                .build();
+
+            //check the token stats pre-tx
+            const preStats = await pendingTokenCLI.getStats();
+            console.log(JSONBig.stringify(preStats, undefined, 2));
+
+            //get all the token balances at the random output address before the tx
+            const preBalances = await pendingCLI.getBalances(randomAddress);
+            assert.isUndefined(preBalances[tokenChainId]);
+            console.log('Pre Balances', preBalances);
+
+            //get the balance of the random output address before the tx
+            const preBalance = await pendingTokenCLI.getBalance(randomAddress);
+            assert.isTrue(preBalance.isEqualTo(0));
+
+            //send the transaction
+            const result = await pendingTokenCLI.sendTransaction(tx);
+
+            await util.sleep(30000); //wait the default pending tx interval & then a little bit
+
+            //get the tx we just sent
+            const transaction = await pendingTokenCLI.getTransaction(result.entryhash);
+            assert.isDefined(transaction);
+            assert.instanceOf(transaction, Transaction);
+            assert.strictEqual(transaction.getEntryhash(), result.entryhash);
+
+            //verify the tx we just sent is in the list recent transactions
+            const transactions = await pendingTokenCLI.getTransactions({entryhash: result.entryhash});
+            assert.isDefined(transactions.find(tx => tx.getEntryhash() === result.entryhash));
+
+            //check the token stats post-tx
+            const postStats = await pendingTokenCLI.getStats();
+            console.log(JSONBig.stringify(postStats, undefined, 2));
+
+            //check the TX added to the tx count in stats
+            assert.isTrue(postStats.transactions.isGreaterThan(preStats.transactions));
+
+            //check the TX added one to the nonzero holder count in stats
+            // assert.isTrue(postStats.nonzerobalances.isEqualTo(preStats.nonzerobalances.plus(1)));
+
+            //check the list of all assets has the proper balance
+            const postBalances = await pendingCLI.getBalances(randomAddress);
+            assert.isDefined(postBalances[tokenChainId]);
+            assert.isTrue(postBalances[tokenChainId].isEqualTo(1));
+
+            //get the output address balance after the tx
+            const postBalance = await pendingTokenCLI.getBalance(randomAddress);
+            assert.isTrue(postBalance.isEqualTo(1));
         });
     });
 
