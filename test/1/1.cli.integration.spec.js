@@ -21,7 +21,7 @@ describe('FAT-1 CLI Integration', function () {
 
     const cli = new CLIBuilder()
         .host(process.env.fatd)
-        .port(8078)
+        .port(Number.parseInt(process.env.port))
         .build();
 
     describe('Token CLI Methods', function () {
@@ -226,7 +226,7 @@ describe('FAT-1 CLI Integration', function () {
 
         const pendingCLI = new CLIBuilder()
             .host(process.env.fatd)
-            .port(8078)
+            .port(Number.parseInt(process.env.port))
             .pending(true) //test pending entry support
             .build();
 

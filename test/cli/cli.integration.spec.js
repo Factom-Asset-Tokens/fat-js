@@ -7,7 +7,7 @@ describe('CLI Integration', function () {
 
     const cli = new CLIBuilder()
         .host(process.env.fatd)
-        .port(8078)
+        .port(Number.parseInt(process.env.port))
         .build();
 
     it('Detect Compatibility Issues', async function () {
