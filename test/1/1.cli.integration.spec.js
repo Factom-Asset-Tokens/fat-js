@@ -286,7 +286,7 @@ describe('FAT-1 CLI Integration', function () {
             assert.isTrue(postStats.transactions.isGreaterThan(preStats.transactions));
 
             //check the TX added one to the nonzero holder count in stats
-            // assert.isTrue(postStats.nonzerobalances.isEqualTo(preStats.nonzerobalances.plus(1)));
+            assert.isTrue(postStats.nonzerobalances.isEqualTo(preStats.nonzerobalances.plus(1)));
 
             //check the list of all assets on the random now has the proper balance for this token
             const postBalances = await pendingCLI.getBalances(randomAddress);

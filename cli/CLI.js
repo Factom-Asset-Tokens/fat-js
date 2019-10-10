@@ -423,6 +423,7 @@ class BaseTokenCLI {
         stats.circulating = new BigNumber(stats.circulating);
         stats.burned = new BigNumber(stats.burned);
         stats.transactions = new BigNumber(stats.transactions);
+        stats.nonzerobalances = new BigNumber(stats.nonzerobalances);
         return stats;
     }
 
