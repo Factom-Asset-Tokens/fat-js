@@ -10,6 +10,14 @@ describe('CLI Integration', function () {
         .port(8078)
         .build();
 
+    it('Detect Compatibility Issues', async function () {
+        const compatibilityIssues = await cli.getCompatibility();
+        console.log('FAT-JS TEST COMPAT', JSON.stringify(compatibilityIssues, undefined, 2));
+
+        //check that no fatal compat issues are found in the array
+        assert.isUndefined(compatibilityIssues.find(iss => iss.severity === 'FATAL'));
+    });
+
     describe('Daemon Methods', function () {
         it('get-daemon-properties', async function () {
             const properties = await cli.getDaemonProperties();

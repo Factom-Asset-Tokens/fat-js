@@ -230,12 +230,10 @@ describe('FAT-0 CLI Integration', function () {
 
             //check the token stats pre-tx
             const preStats = await pendingTokenCLI.getStats();
-            console.log(JSONBig.stringify(preStats, undefined, 2));
 
             //get all the token balances at the random output address before the tx
             const preBalances = await pendingCLI.getBalances(randomAddress);
             assert.isUndefined(preBalances[tokenChainId]);
-            console.log('Pre Balances', preBalances);
 
             //get the balance of the random output address before the tx
             const preBalance = await pendingTokenCLI.getBalance(randomAddress);
@@ -258,7 +256,6 @@ describe('FAT-0 CLI Integration', function () {
 
             //check the token stats post-tx
             const postStats = await pendingTokenCLI.getStats();
-            console.log(JSONBig.stringify(postStats, undefined, 2));
 
             //check the TX added to the tx count in stats
             assert.isTrue(postStats.transactions.isGreaterThan(preStats.transactions));

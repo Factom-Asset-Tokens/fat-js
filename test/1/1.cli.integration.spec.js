@@ -280,7 +280,6 @@ describe('FAT-1 CLI Integration', function () {
 
             //check the token stats post-tx
             const postStats = await pendingTokenCLI.getStats();
-            // console.log(JSONBig.stringify(postStats, undefined, 2));
 
             //check the TX added to the tx count in stats
             assert.isTrue(postStats.transactions.isGreaterThan(preStats.transactions));

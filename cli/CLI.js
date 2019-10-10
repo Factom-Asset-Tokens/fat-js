@@ -206,10 +206,10 @@ class CLI {
             }
         );
 
-        compatibility.checkVersion(response.headers['fatd-version']);
-
         const data = response.data;
         if (data.error !== undefined) throw new Error(JSON.stringify(data.error));
+
+        //check response conforms to expected fatd return
 
         return data.result;
     }
@@ -301,8 +301,31 @@ class CLI {
         const balances = await this.call('get-balances', {address});
 
         //force all values in the balance map to bignumber
-        Object.keys(balances).forEach((chainId) => balances[chainId] = new BigNumber(balances[chainId]))
+        Object.keys(balances).forEach((chainId) => balances[chainId] = new BigNumber(balances[chainId]));
         return balances;
+    }
+
+    /**
+     * Get an array of compatibility warnings for the connected fatd node. Zero elements returned means full compatibility
+     * @method
+     * @async
+     * @returns {Object}[] - The array of compatibility error objects
+     */
+    async getCompatibility() {
+
+        const response = await this._axios.post(
+            '/',
+            {
+                jsonrpc: '2.0',
+                id: Math.floor(Math.random() * 10000),
+                method: 'get-daemon-properties'
+            }
+        );
+
+        const data = response.data;
+        if (data.error !== undefined) throw new Error(JSON.stringify(data.error));
+
+        return compatibility.getVersionCompatibility(response.headers['fatd-version'])
     }
 }
 
