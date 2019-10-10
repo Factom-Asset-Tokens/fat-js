@@ -15,6 +15,7 @@ Base CLI object. Provides an interfaces to access fatd daemon calls & get token 
     * [.getDaemonProperties()](#CLI+getDaemonProperties) ⇒ <code>Promise</code>
     * [.getSyncStatus()](#CLI+getSyncStatus) ⇒ <code>Promise</code>
     * [.getBalances(address)](#CLI+getBalances) ⇒ <code>Promise</code>
+    * [.getCompatibility()](#CLI+getCompatibility) ⇒ <code>Object</code>
 
 <a name="new_CLI_new"></a>
 
@@ -98,3 +99,10 @@ Get the numeric token balance counts for all tracked tokens for a public Factoid
 | --- | --- | --- |
 | address | <code>string</code> | The public Factoid address to get all token balances for |
 
+<a name="CLI+getCompatibility"></a>
+
+### clI.getCompatibility() ⇒ <code>Object</code>
+Get an array of compatibility warnings for the connected fatd node. Zero elements returned means full compatibility
+
+**Kind**: instance method of [<code>CLI</code>](#CLI)  
+**Returns**: <code>Object</code> - [] - The array of compatibility error objects  

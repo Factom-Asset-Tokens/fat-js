@@ -20,13 +20,13 @@ Build a CLI object, defining the connection parameters to fatd and other network
 <a name="CLIBuilder+host"></a>
 
 ### cliBuilder.host(host) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
-Set the host information for connection to fatd
+Set the host information for connection to fatd. Defaults to localhost if host() is not called.
 
 **Kind**: instance method of [<code>CLIBuilder</code>](#CLIBuilder)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| host | <code>string</code> | The host string of where the fatd RPC host can be found |
+| host | <code>string</code> | The host string of where the fatd RPC host can be found. For example 'node.fatd.org', `88.21.0.1` |
 
 <a name="CLIBuilder+port"></a>
 
