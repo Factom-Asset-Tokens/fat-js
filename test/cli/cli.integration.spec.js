@@ -6,8 +6,8 @@ const CLIBuilder = require('../../cli/CLI').CLIBuilder;
 describe('CLI Integration', function () {
 
     const cli = new CLIBuilder()
-        .host(process.env.fatd)
-        .port(Number.parseInt(process.env.port))
+        .host(process.env.fatd || 'localhost')
+        .port(Number.parseInt(process.env.port || 8078))
         .build();
 
     it('Detect Compatibility Issues', async function () {

@@ -22,8 +22,8 @@ describe('FAT-0 CLI Integration', function () {
     const CLIBuilder = require('../../cli/CLI').CLIBuilder;
 
     const cli = new CLIBuilder()
-        .host(process.env.fatd)
-        .port(Number.parseInt(process.env.port))
+        .host(process.env.fatd || 'localhost')
+        .port(Number.parseInt(process.env.port || 8078))
         .build();
 
     describe('CLI Methods', function () {
@@ -210,8 +210,8 @@ describe('FAT-0 CLI Integration', function () {
         this.timeout(60000);
 
         const pendingCLI = new CLIBuilder()
-            .host(process.env.fatd)
-            .port(Number.parseInt(process.env.port))
+            .host(process.env.fatd || 'localhost')
+            .port(Number.parseInt(process.env.port || 8078))
             .pending(true) //test pending entry support
             .build();
 
