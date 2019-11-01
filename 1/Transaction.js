@@ -115,6 +115,7 @@ class Transaction {
 
             this._entryhash = builder.entryhash;
             this._timestamp = builder.timestamp;
+            this._pending = builder.pending
         }
 
         Object.freeze(this);
@@ -221,6 +222,15 @@ class Transaction {
      */
     getTimestamp() {
         return this._timestamp;
+    }
+
+    /**
+     * Get the pending status of the transaction at the time of request.
+     * @method
+     * @returns {boolean} - The pending status of the entry in the daemon
+     */
+    getPending() {
+        return this._pending || false;
     }
 
     /**

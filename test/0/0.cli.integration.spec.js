@@ -273,6 +273,7 @@ describe('FAT-0 CLI Integration', function () {
             assert.isDefined(transaction);
             assert.instanceOf(transaction, Transaction);
             assert.strictEqual(transaction.getEntryhash(), result.entryhash);
+            assert.isTrue(transaction.getPending());
 
             //verify the tx we just sent is in the list recent transactions
             const transactions = await pendingTokenCLI.getTransactions({entryhash: result.entryhash});

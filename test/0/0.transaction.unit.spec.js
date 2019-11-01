@@ -36,6 +36,9 @@ describe('Transaction Unit', function () {
         //check coinbase
         assert.isFalse(tx.isCoinbase());
 
+        //check pending
+        assert.isFalse(tx.getPending());
+
         //check factomjs entry
         assert.instanceOf(tx.getEntry(), Entry);
 
