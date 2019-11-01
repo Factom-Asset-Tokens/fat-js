@@ -27,12 +27,14 @@ class Issuance {
             this._type = builder._type;
             this._symbol = builder._symbol;
             this._supply = builder._supply;
+            this._precision = builder._precision;
             this._metadata = builder._metadata;
 
             this._content = JSONBig.stringify({
                 type: this._type,
                 symbol: this._symbol,
                 supply: this._supply,
+                precision: this._precision,
                 metadata: this._metadata
             });
 
@@ -63,6 +65,7 @@ class Issuance {
             this._type = builder.issuance.type;
             this._symbol = builder.issuance.symbol;
             this._supply = new BigNumber(builder.issuance.supply);
+            this._precision = builder.issuance.precision;
             this._metadata = builder.issuance.metadata;
 
             this._tokenId = builder.tokenid;
@@ -145,6 +148,15 @@ class Issuance {
      */
     getSupply() {
         return this._supply;
+    }
+
+    /**
+     * Get the decimal precision for this FAT token issuance
+     * @method
+     * @returns {BigNumber} [precision=undefined] - The decimal precision of the tokens base units in relation to display units
+     */
+    getPrecision() {
+        return this._precision;
     }
 
     /**
