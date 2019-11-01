@@ -10,6 +10,7 @@ Build & Model A FAT-0 Issuance
     * [new IssuanceBuilder(tokenId, identityChainId, sk1)](#new_IssuanceBuilder0_new)
     * [.symbol(symbol)](#IssuanceBuilder0+symbol) ⇒ <code>IssuanceBuilder</code>
     * [.supply(supply)](#IssuanceBuilder0+supply) ⇒ <code>IssuanceBuilder</code>
+    * [.precision(precision)](#IssuanceBuilder0+precision) ⇒ <code>IssuanceBuilder</code>
     * [.metadata(metadata)](#IssuanceBuilder0+metadata) ⇒ <code>IssuanceBuilder</code>
     * [.build()](#IssuanceBuilder0+build) ⇒ <code>Issuance</code>
 
@@ -44,6 +45,17 @@ Set a maximum circulating supply for the token
 | Param | Type | Description |
 | --- | --- | --- |
 | supply | <code>number</code> | An integer maximum circulating supply to allow for the token. May be -1 for infinite, otherwise must be greater than 0 |
+
+<a name="IssuanceBuilder0+precision"></a>
+
+### issuanceBuilder0.precision(precision) ⇒ <code>IssuanceBuilder</code>
+Set a decimal precision for the token.
+
+**Kind**: instance method of [<code>IssuanceBuilder0</code>](#IssuanceBuilder0)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| precision | <code>number</code> | Must be an integer between 0 and 18 inclusive |
 
 <a name="IssuanceBuilder0+metadata"></a>
 

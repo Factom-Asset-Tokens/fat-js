@@ -77,7 +77,7 @@ class CLIBuilder {
     }
 
     /**
-     * Which transport protocol to use to contact fatd
+     * Which transport protocol to use to contact fatd. Default "http"
      * @method
      * @param {number} [protocol="http"] - The protocol to use. Either "http" or "https"
      * @returns {CLIBuilder}
@@ -115,9 +115,9 @@ class CLIBuilder {
     }
 
     /**
-     * Enforce strict security on https connections to fatd (forbid self signed certs, etc)
+     * Request a pending view of data & statistics from fatd based on transaction entries that have not made it to a dblock yet. Default false
      * @method
-     * @param {boolean} [pending=true] - True if secure connection is desired, false if not
+     * @param {boolean} [pending=false] - True if secure connection is desired, false if not
      * @returns {CLIBuilder}
      */
     pending(pending) {
