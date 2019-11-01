@@ -20,7 +20,7 @@ Build a CLI object, defining the connection parameters to fatd and other network
 <a name="CLIBuilder+host"></a>
 
 ### cliBuilder.host(host) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
-Set the host information for connection to fatd. Defaults to localhost if host() is not called.
+Set the host information for connection to fatd. Defaults to localhost if host is not set.
 
 **Kind**: instance method of [<code>CLIBuilder</code>](#CLIBuilder)  
 
