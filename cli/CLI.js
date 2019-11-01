@@ -29,14 +29,13 @@ class CLIBuilder {
     }
 
     /**
-     * Set the host information for connection to fatd. Defaults to localhost if host() is not called.
+     * Set the host information for connection to fatd. Defaults to localhost if host is not set.
      * @method
      * @param {string} host - The host string of where the fatd RPC host can be found. For example 'node.fatd.org', `88.21.0.1`
      * @returns {CLIBuilder}
      */
     host(host) {
         if (typeof host !== 'string' || host.length === 0) throw new Error('Host must be a string with length >=1 and contain no special characters');
-        if (/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/g.test(host)) throw new Error('Host string must not contain special characters');
         this._host = host;
         return this;
     }
