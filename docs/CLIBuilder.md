@@ -14,18 +14,19 @@ Build a CLI object, defining the connection parameters to fatd and other network
     * [.protocol([protocol])](#CLIBuilder+protocol) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
     * [.username(username)](#CLIBuilder+username) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
     * [.password(password)](#CLIBuilder+password) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
+    * [.pending([pending])](#CLIBuilder+pending) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
     * [.build()](#CLIBuilder+build) ⇒ [<code>CLI</code>](#CLI)
 
 <a name="CLIBuilder+host"></a>
 
 ### cliBuilder.host(host) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
-Set the host information for connection to fatd
+Set the host information for connection to fatd. Defaults to localhost if host is not set.
 
 **Kind**: instance method of [<code>CLIBuilder</code>](#CLIBuilder)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| host | <code>string</code> | The host string of where the fatd RPC host can be found |
+| host | <code>string</code> | The host string of where the fatd RPC host can be found. For example 'node.fatd.org', `88.21.0.1` |
 
 <a name="CLIBuilder+port"></a>
 
@@ -52,7 +53,7 @@ Set the connection timeout during connection to fatd
 <a name="CLIBuilder+secure"></a>
 
 ### cliBuilder.secure([secure]) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
-Enforce strict security on https connections to fatd (forbid self signed certs, etc)
+Enforce strict security on https connections to fatd (forbid self signed certs, etc). Default false
 
 **Kind**: instance method of [<code>CLIBuilder</code>](#CLIBuilder)  
 
@@ -63,7 +64,7 @@ Enforce strict security on https connections to fatd (forbid self signed certs, 
 <a name="CLIBuilder+protocol"></a>
 
 ### cliBuilder.protocol([protocol]) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
-Which transport protocol to use to contact fatd
+Which transport protocol to use to contact fatd. Default "http"
 
 **Kind**: instance method of [<code>CLIBuilder</code>](#CLIBuilder)  
 
@@ -92,6 +93,17 @@ Set the password to use for basic HTTP authentication with fatd
 | Param | Type | Description |
 | --- | --- | --- |
 | password | <code>string</code> | The password string to use |
+
+<a name="CLIBuilder+pending"></a>
+
+### cliBuilder.pending([pending]) ⇒ [<code>CLIBuilder</code>](#CLIBuilder)
+Request a pending view of data & statistics from fatd based on transaction entries that have not made it to a dblock yet. Default false
+
+**Kind**: instance method of [<code>CLIBuilder</code>](#CLIBuilder)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [pending] | <code>boolean</code> | <code>false</code> | True if secure connection is desired, false if not |
 
 <a name="CLIBuilder+build"></a>
 

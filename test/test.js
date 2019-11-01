@@ -5,6 +5,7 @@ describe('Constant', () => {
 describe('Util', () => {
     require('./util/util.unit.spec');
 });
+
 describe('CLI', () => {
     require('./cli/cli.unit.spec');
     require('./cli/cli.integration.spec');

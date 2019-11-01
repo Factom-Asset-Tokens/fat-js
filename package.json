@@ -1,6 +1,6 @@
 {
   "name": "@fat-token/fat-js",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Factom Asset Token (FAT) library in JS",
   "repository": "https://github.com/Factom-Asset-Tokens/fat-js.git",
   "main": "index.js",
@@ -18,7 +18,7 @@
   "dependencies": {
     "axios": "0.19.0",
     "bignumber.js": "9.0.0",
-    "factom": "1.2.5",
+    "factom": "1.2.7",
     "factom-identity-lib": "0.1.11",
     "joi-browser": "13.4.0",
     "joi-factom": "1.1.2",
@@ -27,24 +27,24 @@
     "tweetnacl": "1.0.1"
   },
   "devDependencies": {
-    "@babel/core": "7.1.2",
-    "@babel/plugin-transform-async-to-generator": "7.1.0",
-    "@babel/plugin-transform-modules-commonjs": "7.1.0",
-    "@babel/plugin-transform-runtime": "7.1.0",
-    "@babel/preset-env": "7.1.0",
-    "@babel/runtime": "7.1.2",
-    "babel-loader": "8.0.4",
-    "chai": "4.1.2",
-    "coveralls": "3.0.2",
-    "eslint": "5.16.0",
+    "@babel/core": "7.6.4",
+    "@babel/plugin-transform-async-to-generator": "7.5.0",
+    "@babel/plugin-transform-modules-commonjs": "7.6.0",
+    "@babel/plugin-transform-runtime": "7.6.2",
+    "@babel/preset-env": "7.6.3",
+    "@babel/runtime": "7.6.3",
+    "babel-loader": "8.0.6",
+    "chai": "4.2.0",
+    "coveralls": "3.0.6",
+    "eslint": "6.5.1",
     "istanbul": "0.4.5",
     "jsdoc-to-markdown": "4.0.1",
-    "mocha": "5.2.0",
+    "mocha": "6.2.1",
     "mocha-lcov-reporter": "1.3.0",
-    "nyc": "14.0.0",
-    "sinon": "6.1.5",
-    "webpack": "4.20.2",
-    "webpack-cli": "3.1.2"
+    "nyc": "14.1.1",
+    "sinon": "7.5.0",
+    "webpack": "4.41.0",
+    "webpack-cli": "3.3.9"
   },
   "publishConfig": {
     "access": "public"

@@ -300,6 +300,8 @@ issuance.getTimestamp(); // => 1548276060
 
 # CLI
 
+#### [Complete CLI Builder Documentation](docs/CLIBuilder.md)
+
 #### [Complete CLI Documentation](docs/CLI.md)
 
 ## Instantiate FAT CLI
@@ -331,6 +333,27 @@ const properties = await cli.getDaemonProperties();
 }
 */
 ```
+
+
+
+### Get Daemon Library Compatibility
+
+Get a an array of compatibility warning objects for the combination of the current fat-js and fatd versions. Zero elements returned means full compatibility.
+
+```javascript
+const issues = await cli.getCompatibility();
+
+/*
+[
+  {
+    "severity": "WARN",
+    "message": "You are using a version of fatd with unofficial local code changes. Unexpected or inconsistent behavior may occur"
+  }
+]
+*/
+```
+
+
 
 ### Get Daemon Sync Status
 

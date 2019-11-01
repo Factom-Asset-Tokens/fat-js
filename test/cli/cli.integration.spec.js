@@ -6,9 +6,17 @@ const CLIBuilder = require('../../cli/CLI').CLIBuilder;
 describe('CLI Integration', function () {
 
     const cli = new CLIBuilder()
-        .host(process.env.fatd)
-        .port(8078)
+        .host(process.env.fatd || 'localhost')
+        .port(Number.parseInt(process.env.port || 8078))
         .build();
+
+    it('Detect Compatibility Issues', async function () {
+        const compatibilityIssues = await cli.getCompatibility();
+        console.log('FAT-JS TEST COMPAT', JSON.stringify(compatibilityIssues, undefined, 2));
+
+        //check that no fatal compat issues are found in the array
+        assert.isUndefined(compatibilityIssues.find(iss => iss.severity === 'FATAL'));
+    });
 
     describe('Daemon Methods', function () {
         it('get-daemon-properties', async function () {

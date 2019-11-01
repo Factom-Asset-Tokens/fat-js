@@ -235,3 +235,7 @@ function hasNoDuplicatedNFId(ids) {
     const expanded = module.exports.expandNFIds(ids);
     return new Set(expanded).size === expanded.length;
 }
+
+module.exports.sleep = function (ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}

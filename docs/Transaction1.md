@@ -17,6 +17,7 @@ Model A signed or unsigned FAT-1 Transaction
     * [.getChainId()](#Transaction1+getChainId) ⇒ <code>string</code>
     * [.getEntryhash()](#Transaction1+getEntryhash) ⇒ <code>string</code>
     * [.getTimestamp()](#Transaction1+getTimestamp) ⇒ <code>number</code>
+    * [.getPending()](#Transaction1+getPending) ⇒ <code>boolean</code>
     * [.getMarshalDataSig(inputIndex)](#Transaction1+getMarshalDataSig) ⇒ <code>Buffer</code>
     * [.validateSignatures()](#Transaction1+validateSignatures) ⇒ <code>boolean</code>
 
@@ -109,6 +110,13 @@ Get the unix timestamp of when the Transaction was signed (locally built transac
 
 **Kind**: instance method of [<code>Transaction1</code>](#Transaction1)  
 **Returns**: <code>number</code> - - The integer unix timestamp  
+<a name="Transaction1+getPending"></a>
+
+### transaction1.getPending() ⇒ <code>boolean</code>
+Get the pending status of the transaction at the time of request.
+
+**Kind**: instance method of [<code>Transaction1</code>](#Transaction1)  
+**Returns**: <code>boolean</code> - - The pending status of the entry in the daemon  
 <a name="Transaction1+getMarshalDataSig"></a>
 
 ### transaction1.getMarshalDataSig(inputIndex) ⇒ <code>Buffer</code>

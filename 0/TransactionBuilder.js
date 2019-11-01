@@ -119,10 +119,7 @@ class TransactionBuilder {
         if (fctAddressUtil.isValidPrivateAddress(fs)) { //first check to see if valid private address
 
             amount = new BigNumber(amount);
-            if (!amount.isInteger() || amount.isLessThan(1)) throw new Error("Input amount must be a positive nonzero integer");
-
-            //check that outputs does not contain this address
-            if (this._outputs[fctAddressUtil.getPublicAddress(fs)]) throw new Error("Input address already occurs in outputs");
+            if (!amount.isInteger() || amount.isLessThan(0)) throw new Error("Input amount must be a positive nonzero integer");
 
             this._keys.push(nacl.keyPair.fromSeed(fctAddressUtil.addressToKey(fs)));
             this._inputs[fctAddressUtil.getPublicAddress(fs)] = amount;
@@ -136,10 +133,7 @@ class TransactionBuilder {
             }
 
             amount = new BigNumber(amount);
-            if (!amount.isInteger() || amount.isLessThan(1)) throw new Error("Input amount must be a positive nonzero integer");
-
-            //check that outputs does not contain this address
-            if (this._outputs[fa]) throw new Error("Input address already occurs in outputs");
+            if (!amount.isInteger() || amount.isLessThan(0)) throw new Error("Input amount must be a positive nonzero integer");
 
             this._keys.push({pubaddr: fa, publicKey:undefined});
             this._inputs[fa] = amount;
@@ -175,10 +169,7 @@ class TransactionBuilder {
         if (!fctAddressUtil.isValidPublicFctAddress(fa)) throw new Error("Output address must be a valid public Factoid address");
 
         amount = new BigNumber(amount);
-        if (!amount.isInteger() || amount.isLessThan(1)) throw new Error("Input amount must be a positive nonzero integer");
-
-        //check that inputs does not contain this address
-        if (this._inputs[fa]) throw new Error("Output address already occurs in inputs");
+        if (!amount.isInteger() || amount.isLessThan(0)) throw new Error("Input amount must be a positive nonzero integer");
 
         this._outputs[fa] = amount;
         return this;
@@ -191,7 +182,6 @@ class TransactionBuilder {
      * @returns {TransactionBuilder}
      */
     burnOutput(amount) {
-        if (Object.keys(this._outputs).find(address => address === constant.COINBASE_ADDRESS_PUBLIC)) throw new Error('Cannot add a duplicate burn output to a burn transaction');
         this.output(constant.COINBASE_ADDRESS_PUBLIC, amount);
         return this;
     }

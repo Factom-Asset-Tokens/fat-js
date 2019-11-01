@@ -7,6 +7,12 @@ const Joi = require('joi-browser').extend(require('joi-factom'));
 const fctAddressUtil = require('factom/src/addresses');
 const compatibility = require('./compatibility');
 
+const nonPendingMethods = [
+    'get-daemon-properties',
+    'get-daemon-tokens',
+    'get-sync-status'
+];
+
 /**
  * Build a CLI object, defining the connection parameters to fatd and other network dependencies
  * @class
@@ -18,16 +24,18 @@ class CLIBuilder {
      * @constructor
      */
     constructor() {
+        //set defaults
+        this._protocol = 'http';
     }
 
     /**
-     * Set the host information for connection to fatd
+     * Set the host information for connection to fatd. Defaults to localhost if host is not set.
      * @method
-     * @param {string} host - The host string of where the fatd RPC host can be found
+     * @param {string} host - The host string of where the fatd RPC host can be found. For example 'node.fatd.org', `88.21.0.1`
      * @returns {CLIBuilder}
      */
     host(host) {
-        //TODO: Host string validation
+        if (typeof host !== 'string' || host.length === 0) throw new Error('Host must be a string with length >=1 and contain no special characters');
         this._host = host;
         return this;
     }
@@ -56,7 +64,7 @@ class CLIBuilder {
     }
 
     /**
-     * Enforce strict security on https connections to fatd (forbid self signed certs, etc)
+     * Enforce strict security on https connections to fatd (forbid self signed certs, etc). Default false
      * @method
      * @param {boolean} [secure=true] - True if secure connection is desired, false if not
      * @returns {CLIBuilder}
@@ -68,7 +76,7 @@ class CLIBuilder {
     }
 
     /**
-     * Which transport protocol to use to contact fatd
+     * Which transport protocol to use to contact fatd. Default "http"
      * @method
      * @param {number} [protocol="http"] - The protocol to use. Either "http" or "https"
      * @returns {CLIBuilder}
@@ -102,6 +110,18 @@ class CLIBuilder {
         if (typeof password !== 'string') throw new Error('Password must be a string');
         if (password.length === 0) throw new Error('Password must be at least one character long');
         this._password = password;
+        return this;
+    }
+
+    /**
+     * Request a pending view of data & statistics from fatd based on transaction entries that have not made it to a dblock yet. Default false
+     * @method
+     * @param {boolean} [pending=false] - True if secure connection is desired, false if not
+     * @returns {CLIBuilder}
+     */
+    pending(pending) {
+        if (typeof pending !== 'boolean') throw new Error('Argument pending must be a boolean');
+        this._pending = pending;
         return this;
     }
 
@@ -145,6 +165,7 @@ class CLI {
         this._protocol = builder._protocol;
 
         this._timeout = builder._timeout || 5000;
+        this._pending = builder._pending;
 
         this._axios = axios.create({
             baseURL: this._protocol + '://' + this._host + ':' + this._port + '/v1',
@@ -163,6 +184,9 @@ class CLI {
      * @returns {Promise}
      */
     async call(method, params) {
+
+        //If pending entries are enabled, splice in the param for methods that allow it
+        if (this._pending && !nonPendingMethods.includes(method)) params.includepending = true;
 
         const response = await this._axios.post(
             '/',
@@ -184,10 +208,10 @@ class CLI {
             }
         );
 
-        compatibility.checkVersion(response.headers['fatd-version']);
-
         const data = response.data;
         if (data.error !== undefined) throw new Error(JSON.stringify(data.error));
+
+        //check response conforms to expected fatd return
 
         return data.result;
     }
@@ -279,8 +303,31 @@ class CLI {
         const balances = await this.call('get-balances', {address});
 
         //force all values in the balance map to bignumber
-        Object.keys(balances).forEach((chainId) => balances[chainId] = new BigNumber(balances[chainId]))
+        Object.keys(balances).forEach((chainId) => balances[chainId] = new BigNumber(balances[chainId]));
         return balances;
+    }
+
+    /**
+     * Get an array of compatibility warnings for the connected fatd node. Zero elements returned means full compatibility
+     * @method
+     * @async
+     * @returns {Object}[] - The array of compatibility error objects
+     */
+    async getCompatibility() {
+
+        const response = await this._axios.post(
+            '/',
+            {
+                jsonrpc: '2.0',
+                id: Math.floor(Math.random() * 10000),
+                method: 'get-daemon-properties'
+            }
+        );
+
+        const data = response.data;
+        if (data.error !== undefined) throw new Error(JSON.stringify(data.error));
+
+        return compatibility.getVersionCompatibility(response.headers['fatd-version'])
     }
 }
 
@@ -401,6 +448,7 @@ class BaseTokenCLI {
         stats.circulating = new BigNumber(stats.circulating);
         stats.burned = new BigNumber(stats.burned);
         stats.transactions = new BigNumber(stats.transactions);
+        stats.nonzerobalances = new BigNumber(stats.nonzerobalances);
         return stats;
     }
 

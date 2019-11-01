@@ -58,6 +58,18 @@ class IssuanceBuilder {
     }
 
     /**
+     * Set a decimal precision for the token.
+     * @method
+     * @param {number} precision - Must be an integer between 0 and 18 inclusive
+     * @returns {IssuanceBuilder}
+     */
+    precision(precision) {
+        if (isNaN(precision) || !Number.isInteger(precision) || precision < 0 || precision > 18) throw new Error("Precision must be an integer between 0 and 18");
+        this._precision = precision;
+        return this;
+    }
+
+    /**
      * Set arbitrary metadata for the token issuance
      * @method
      * @param {*} metadata - The metadata. Must be JSON stringifyable

@@ -16,6 +16,7 @@ Build & Model A FAT-0 Issuance
     * [.getType()](#Issuance0+getType) ⇒ <code>string</code>
     * [.getSymbol()](#Issuance0+getSymbol) ⇒ <code>string</code>
     * [.getSupply()](#Issuance0+getSupply) ⇒ <code>BigNumber</code>
+    * [.getPrecision()](#Issuance0+getPrecision) ⇒ <code>BigNumber</code>
     * [.getMetadata()](#Issuance0+getMetadata) ⇒ <code>\*</code>
     * [.getChain()](#Issuance0+getChain) ⇒ <code>Chain</code>
     * [.getEntry()](#Issuance0+getEntry) ⇒ <code>Entry</code>
@@ -84,6 +85,13 @@ Get the maximum circulating supply for this FAT token issuance
 
 **Kind**: instance method of [<code>Issuance0</code>](#Issuance0)  
 **Returns**: <code>BigNumber</code> - [supply=-1] - The maximum number of circulating tokens allowed  
+<a name="Issuance0+getPrecision"></a>
+
+### issuance0.getPrecision() ⇒ <code>BigNumber</code>
+Get the decimal precision for this FAT token issuance
+
+**Kind**: instance method of [<code>Issuance0</code>](#Issuance0)  
+**Returns**: <code>BigNumber</code> - [precision=undefined] - The decimal precision of the tokens base units in relation to display units  
 <a name="Issuance0+getMetadata"></a>
 
 ### issuance0.getMetadata() ⇒ <code>\*</code>
