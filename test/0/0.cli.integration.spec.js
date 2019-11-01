@@ -162,8 +162,8 @@ describe('FAT-0 CLI Integration', function () {
             const tokenCLI = await cli.getTokenCLI(tokenChainId);
 
             let tx = new TransactionBuilder(tokenChainId)
-                .coinbaseInput(10)
-                .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 10)
+                .coinbaseInput(100)
+                .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 100)
                 .sk1("sk13Rp3LVmVvWqo8mff82aDJN2yNCzjUs2Zuq3MNQSA5oC5ZwFAuu")
                 .build();
 
@@ -177,6 +177,30 @@ describe('FAT-0 CLI Integration', function () {
             let tx = new TransactionBuilder(tokenChainId)
                 .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 1)
                 .burnOutput(1)
+                .build();
+
+            const result = await tokenCLI.sendTransaction(tx);
+            assert.isObject(result);
+        });
+
+        it('send-transaction(zero input/output)', async function () {
+            const tokenCLI = await cli.getTokenCLI(tokenChainId);
+
+            let tx = new TransactionBuilder(tokenChainId)
+                .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 0)
+                .output("FA3umTvVhkcysBewF1sGAMeAeKDdG7kTQBbtf5nwuFUGwrNa5kAr", 0)
+                .build();
+
+            const result = await tokenCLI.sendTransaction(tx);
+            assert.isObject(result);
+        });
+
+        it('send-transaction(send to self)', async function () {
+            const tokenCLI = await cli.getTokenCLI(tokenChainId);
+
+            let tx = new TransactionBuilder(tokenChainId)
+                .input("Fs1q7FHcW4Ti9tngdGAbA3CxMjhyXtNyB1BSdc8uR46jVUVCWtbJ", 1)
+                .output("FA3aECpw3gEZ7CMQvRNxEtKBGKAos3922oqYLcHQ9NqXHudC6YBM", 1)
                 .build();
 
             const result = await tokenCLI.sendTransaction(tx);
