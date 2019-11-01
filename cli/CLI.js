@@ -24,6 +24,8 @@ class CLIBuilder {
      * @constructor
      */
     constructor() {
+        //set defaults
+        this._protocol = 'http';
     }
 
     /**
@@ -63,7 +65,7 @@ class CLIBuilder {
     }
 
     /**
-     * Enforce strict security on https connections to fatd (forbid self signed certs, etc)
+     * Enforce strict security on https connections to fatd (forbid self signed certs, etc). Default false
      * @method
      * @param {boolean} [secure=true] - True if secure connection is desired, false if not
      * @returns {CLIBuilder}
