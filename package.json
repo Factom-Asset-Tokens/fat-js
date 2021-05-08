@@ -22,7 +22,7 @@
     "factom-identity-lib": "0.1.11",
     "joi-browser": "13.4.0",
     "joi-factom": "1.1.2",
-    "json-bigint": "0.3.0",
+    "json-bigint": "1.0.0",
     "semver": "6.3.0",
     "tweetnacl": "1.0.1"
   },
